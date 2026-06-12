@@ -1,0 +1,21 @@
+# Go build artifacts
+bin/
+dist/
+*.test
+*.out
+coverage.out
+
+# Local environment
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+
+# Temporary files
+tmp/
