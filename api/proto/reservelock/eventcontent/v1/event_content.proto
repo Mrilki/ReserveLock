@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package reservelock.eventcontent.v1;
+
+option go_package = "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/eventcontent/v1;eventcontentv1";
+
+service VenueService {
+  rpc CreateVenue(CreateVenueRequest) returns (CreateVenueResponse);
+  rpc GetVenue(GetVenueRequest) returns (GetVenueResponse);
+}
+
+message CreateVenueRequest {
+  string name = 1;
+  string city = 2;
+  string address = 3;
+  string created_by = 4;
+}
+
+message CreateVenueResponse {
+  Venue venue = 1;
+}
+
+message GetVenueRequest {
+  string venue_id = 1;
+}
+
+message GetVenueResponse {
+  Venue venue = 1;
+}
+
+message Venue {
+  string id = 1;
+  string name = 2;
+  string city = 3;
+  string address = 4;
+  string created_by = 5;
+}
+
+
+
+
