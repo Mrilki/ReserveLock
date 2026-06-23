@@ -20,18 +20,35 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Set up Buf
+        uses: bufbuild/buf-action@v1
+        with:
+          setup_only: true
+
       - name: Download dependencies
         run: go mod download
 
+      - name: Lint protobuf
+        run: buf lint
+
+      - name: Build protobuf
+        run: buf build
+
+      - name: Generate protobuf
+        run: buf generate
+
+      - name: Check generated code is up to date
+        run: git diff --exit-code
+
       - name: Check formatting
-        run: | 
+        run: |
           test -z "$(gofmt -l .)"
-          
+
       - name: Run go vet
         run: go vet ./...
 
-      - name: Run go tests
+      - name: Run tests
         run: go test ./...
 
       - name: Build
-        run: go build ./... 
+        run: go build ./...
