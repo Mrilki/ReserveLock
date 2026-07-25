@@ -9,12 +9,15 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Mrilki/ReserveLock/internal/eventcontent/application"
 	eventcontentconfig "github.com/Mrilki/ReserveLock/internal/eventcontent/config"
+	"github.com/Mrilki/ReserveLock/internal/eventcontent/repository/memory"
 	eventcontentgrpc "github.com/Mrilki/ReserveLock/internal/eventcontent/transport/grpc"
 	eventcontentv1 "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/eventcontent/v1"
 	"github.com/Mrilki/ReserveLock/internal/platform/logger"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 const shutdownTimeout = 10 * time.Second
@@ -36,12 +39,19 @@ func main() {
 		logg.Error("failed to listen", zap.String("addr", cfg.GRPCAddr), zap.Error(err))
 	}
 
+	venueRepository := memory.NewVenueRepository()
+	eventContentService := application.NewService(venueRepository)
+
 	grpcServer := grpc.NewServer()
 
 	eventcontentv1.RegisterVenueServiceServer(
 		grpcServer,
-		eventcontentgrpc.NewServer(),
+		eventcontentgrpc.NewServer(eventContentService),
 	)
+	if cfg.Base.AppEnv == "local" {
+		reflection.Register(grpcServer)
+		logg.Info("grpc reflection enable")
+	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
