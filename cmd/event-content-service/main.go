@@ -37,6 +37,7 @@ func main() {
 	listener, err := net.Listen("tcp", cfg.GRPCAddr)
 	if err != nil {
 		logg.Error("failed to listen", zap.String("addr", cfg.GRPCAddr), zap.Error(err))
+		return
 	}
 
 	venueRepository := memory.NewVenueRepository()
