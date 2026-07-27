@@ -45,7 +45,7 @@ func (s *server) GetVenue(ctx context.Context, request *eventcontentv1.GetVenueR
 
 func (s *server) CreateHall(ctx context.Context, request *eventcontentv1.CreateHallRequest) (*eventcontentv1.CreateHallResponse, error) {
 	hall, err := s.service.CreateHall(ctx, application.CreateHallInput{
-		VenueId:   request.VenueId,
+		VenueID:   request.VenueId,
 		Name:      request.Name,
 		CreatedBy: request.CreatedBy,
 	})

@@ -30,7 +30,7 @@ type CreateVenueInput struct {
 }
 
 type CreateHallInput struct {
-	VenueId   string
+	VenueID   string
 	Name      string
 	CreatedBy string
 }
@@ -72,18 +72,18 @@ func (s *Service) GetVenue(ctx context.Context, venueID string) (domain.Venue, e
 }
 
 func (s *Service) CreateHall(ctx context.Context, input CreateHallInput) (domain.Hall, error) {
-	if input.VenueId == "" {
-		return domain.Hall{}, ErrInvalidHallID
+	if input.VenueID == "" {
+		return domain.Hall{}, ErrInvalidVenueID
 	}
 	if input.Name == "" {
 		return domain.Hall{}, ErrInvalidHallName
 	}
-	if _, err := s.venueRepository.GetByID(ctx, input.VenueId); err != nil {
+	if _, err := s.venueRepository.GetByID(ctx, input.VenueID); err != nil {
 		return domain.Hall{}, err
 	}
 	hall := domain.Hall{
 		ID:        uuid.NewString(),
-		VenueID:   input.VenueId,
+		VenueID:   input.VenueID,
 		Name:      input.Name,
 		CreatedBy: input.CreatedBy,
 	}
