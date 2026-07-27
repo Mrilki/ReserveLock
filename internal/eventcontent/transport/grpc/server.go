@@ -8,11 +8,11 @@ import (
 )
 
 type server struct {
-	eventcontentv1.UnimplementedVenueServiceServer
+	eventcontentv1.UnimplementedEventContentServiceServer
 	service *application.Service
 }
 
-func NewServer(service *application.Service) eventcontentv1.VenueServiceServer {
+func NewServer(service *application.Service) eventcontentv1.EventContentServiceServer {
 	return &server{
 		service: service,
 	}
@@ -40,5 +40,30 @@ func (s *server) GetVenue(ctx context.Context, request *eventcontentv1.GetVenueR
 	}
 	return &eventcontentv1.GetVenueResponse{
 		Venue: toProtoVenue(venue),
+	}, nil
+}
+
+func (s *server) CreateHall(ctx context.Context, request *eventcontentv1.CreateHallRequest) (*eventcontentv1.CreateHallResponse, error) {
+	hall, err := s.service.CreateHall(ctx, application.CreateHallInput{
+		VenueId:   request.VenueId,
+		Name:      request.Name,
+		CreatedBy: request.CreatedBy,
+	})
+	if err != nil {
+		return nil, toGRPCError(err)
+	}
+	return &eventcontentv1.CreateHallResponse{
+		Hall: toProtoHall(hall),
+	}, nil
+
+}
+
+func (s *server) GetHall(ctx context.Context, request *eventcontentv1.GetHallRequest) (*eventcontentv1.GetHallResponse, error) {
+	hall, err := s.service.GetHall(ctx, request.HallId)
+	if err != nil {
+		return nil, toGRPCError(err)
+	}
+	return &eventcontentv1.GetHallResponse{
+		Hall: toProtoHall(hall),
 	}, nil
 }

@@ -221,6 +221,198 @@ func (x *GetVenueResponse) GetVenue() *Venue {
 	return nil
 }
 
+type CreateHallRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	VenueId       string                 `protobuf:"bytes,1,opt,name=venue_id,json=venueId,proto3" json:"venue_id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	CreatedBy     string                 `protobuf:"bytes,3,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateHallRequest) Reset() {
+	*x = CreateHallRequest{}
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateHallRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateHallRequest) ProtoMessage() {}
+
+func (x *CreateHallRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateHallRequest.ProtoReflect.Descriptor instead.
+func (*CreateHallRequest) Descriptor() ([]byte, []int) {
+	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *CreateHallRequest) GetVenueId() string {
+	if x != nil {
+		return x.VenueId
+	}
+	return ""
+}
+
+func (x *CreateHallRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CreateHallRequest) GetCreatedBy() string {
+	if x != nil {
+		return x.CreatedBy
+	}
+	return ""
+}
+
+type CreateHallResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Hall          *Hall                  `protobuf:"bytes,1,opt,name=hall,proto3" json:"hall,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateHallResponse) Reset() {
+	*x = CreateHallResponse{}
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateHallResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateHallResponse) ProtoMessage() {}
+
+func (x *CreateHallResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateHallResponse.ProtoReflect.Descriptor instead.
+func (*CreateHallResponse) Descriptor() ([]byte, []int) {
+	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *CreateHallResponse) GetHall() *Hall {
+	if x != nil {
+		return x.Hall
+	}
+	return nil
+}
+
+type GetHallRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	HallId        string                 `protobuf:"bytes,1,opt,name=hall_id,json=hallId,proto3" json:"hall_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetHallRequest) Reset() {
+	*x = GetHallRequest{}
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetHallRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetHallRequest) ProtoMessage() {}
+
+func (x *GetHallRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetHallRequest.ProtoReflect.Descriptor instead.
+func (*GetHallRequest) Descriptor() ([]byte, []int) {
+	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *GetHallRequest) GetHallId() string {
+	if x != nil {
+		return x.HallId
+	}
+	return ""
+}
+
+type GetHallResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Hall          *Hall                  `protobuf:"bytes,1,opt,name=hall,proto3" json:"hall,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetHallResponse) Reset() {
+	*x = GetHallResponse{}
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetHallResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetHallResponse) ProtoMessage() {}
+
+func (x *GetHallResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetHallResponse.ProtoReflect.Descriptor instead.
+func (*GetHallResponse) Descriptor() ([]byte, []int) {
+	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *GetHallResponse) GetHall() *Hall {
+	if x != nil {
+		return x.Hall
+	}
+	return nil
+}
+
 type Venue struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -234,7 +426,7 @@ type Venue struct {
 
 func (x *Venue) Reset() {
 	*x = Venue{}
-	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[4]
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -246,7 +438,7 @@ func (x *Venue) String() string {
 func (*Venue) ProtoMessage() {}
 
 func (x *Venue) ProtoReflect() protoreflect.Message {
-	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[4]
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -259,7 +451,7 @@ func (x *Venue) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Venue.ProtoReflect.Descriptor instead.
 func (*Venue) Descriptor() ([]byte, []int) {
-	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{4}
+	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *Venue) GetId() string {
@@ -297,6 +489,74 @@ func (x *Venue) GetCreatedBy() string {
 	return ""
 }
 
+type Hall struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	VenueId       string                 `protobuf:"bytes,2,opt,name=venue_id,json=venueId,proto3" json:"venue_id,omitempty"`
+	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	CreatedBy     string                 `protobuf:"bytes,4,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Hall) Reset() {
+	*x = Hall{}
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Hall) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Hall) ProtoMessage() {}
+
+func (x *Hall) ProtoReflect() protoreflect.Message {
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Hall.ProtoReflect.Descriptor instead.
+func (*Hall) Descriptor() ([]byte, []int) {
+	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *Hall) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Hall) GetVenueId() string {
+	if x != nil {
+		return x.VenueId
+	}
+	return ""
+}
+
+func (x *Hall) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *Hall) GetCreatedBy() string {
+	if x != nil {
+		return x.CreatedBy
+	}
+	return ""
+}
+
 var File_reservelock_eventcontent_v1_event_content_proto protoreflect.FileDescriptor
 
 const file_reservelock_eventcontent_v1_event_content_proto_rawDesc = "" +
@@ -313,17 +573,37 @@ const file_reservelock_eventcontent_v1_event_content_proto_rawDesc = "" +
 	"\x0fGetVenueRequest\x12\x19\n" +
 	"\bvenue_id\x18\x01 \x01(\tR\avenueId\"L\n" +
 	"\x10GetVenueResponse\x128\n" +
-	"\x05venue\x18\x01 \x01(\v2\".reservelock.eventcontent.v1.VenueR\x05venue\"x\n" +
+	"\x05venue\x18\x01 \x01(\v2\".reservelock.eventcontent.v1.VenueR\x05venue\"a\n" +
+	"\x11CreateHallRequest\x12\x19\n" +
+	"\bvenue_id\x18\x01 \x01(\tR\avenueId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1d\n" +
+	"\n" +
+	"created_by\x18\x03 \x01(\tR\tcreatedBy\"K\n" +
+	"\x12CreateHallResponse\x125\n" +
+	"\x04hall\x18\x01 \x01(\v2!.reservelock.eventcontent.v1.HallR\x04hall\")\n" +
+	"\x0eGetHallRequest\x12\x17\n" +
+	"\ahall_id\x18\x01 \x01(\tR\x06hallId\"H\n" +
+	"\x0fGetHallResponse\x125\n" +
+	"\x04hall\x18\x01 \x01(\v2!.reservelock.eventcontent.v1.HallR\x04hall\"x\n" +
 	"\x05Venue\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
 	"\x04city\x18\x03 \x01(\tR\x04city\x12\x18\n" +
 	"\aaddress\x18\x04 \x01(\tR\aaddress\x12\x1d\n" +
 	"\n" +
-	"created_by\x18\x05 \x01(\tR\tcreatedBy2\xe9\x01\n" +
-	"\fVenueService\x12p\n" +
+	"created_by\x18\x05 \x01(\tR\tcreatedBy\"d\n" +
+	"\x04Hall\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x19\n" +
+	"\bvenue_id\x18\x02 \x01(\tR\avenueId\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12\x1d\n" +
+	"\n" +
+	"created_by\x18\x04 \x01(\tR\tcreatedBy2\xc5\x03\n" +
+	"\x13EventContentService\x12p\n" +
 	"\vCreateVenue\x12/.reservelock.eventcontent.v1.CreateVenueRequest\x1a0.reservelock.eventcontent.v1.CreateVenueResponse\x12g\n" +
-	"\bGetVenue\x12,.reservelock.eventcontent.v1.GetVenueRequest\x1a-.reservelock.eventcontent.v1.GetVenueResponseB]Z[github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/eventcontent/v1;eventcontentv1b\x06proto3"
+	"\bGetVenue\x12,.reservelock.eventcontent.v1.GetVenueRequest\x1a-.reservelock.eventcontent.v1.GetVenueResponse\x12m\n" +
+	"\n" +
+	"CreateHall\x12..reservelock.eventcontent.v1.CreateHallRequest\x1a/.reservelock.eventcontent.v1.CreateHallResponse\x12d\n" +
+	"\aGetHall\x12+.reservelock.eventcontent.v1.GetHallRequest\x1a,.reservelock.eventcontent.v1.GetHallResponseB]Z[github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/eventcontent/v1;eventcontentv1b\x06proto3"
 
 var (
 	file_reservelock_eventcontent_v1_event_content_proto_rawDescOnce sync.Once
@@ -337,26 +617,37 @@ func file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP() []byte {
 	return file_reservelock_eventcontent_v1_event_content_proto_rawDescData
 }
 
-var file_reservelock_eventcontent_v1_event_content_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_reservelock_eventcontent_v1_event_content_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_reservelock_eventcontent_v1_event_content_proto_goTypes = []any{
 	(*CreateVenueRequest)(nil),  // 0: reservelock.eventcontent.v1.CreateVenueRequest
 	(*CreateVenueResponse)(nil), // 1: reservelock.eventcontent.v1.CreateVenueResponse
 	(*GetVenueRequest)(nil),     // 2: reservelock.eventcontent.v1.GetVenueRequest
 	(*GetVenueResponse)(nil),    // 3: reservelock.eventcontent.v1.GetVenueResponse
-	(*Venue)(nil),               // 4: reservelock.eventcontent.v1.Venue
+	(*CreateHallRequest)(nil),   // 4: reservelock.eventcontent.v1.CreateHallRequest
+	(*CreateHallResponse)(nil),  // 5: reservelock.eventcontent.v1.CreateHallResponse
+	(*GetHallRequest)(nil),      // 6: reservelock.eventcontent.v1.GetHallRequest
+	(*GetHallResponse)(nil),     // 7: reservelock.eventcontent.v1.GetHallResponse
+	(*Venue)(nil),               // 8: reservelock.eventcontent.v1.Venue
+	(*Hall)(nil),                // 9: reservelock.eventcontent.v1.Hall
 }
 var file_reservelock_eventcontent_v1_event_content_proto_depIdxs = []int32{
-	4, // 0: reservelock.eventcontent.v1.CreateVenueResponse.venue:type_name -> reservelock.eventcontent.v1.Venue
-	4, // 1: reservelock.eventcontent.v1.GetVenueResponse.venue:type_name -> reservelock.eventcontent.v1.Venue
-	0, // 2: reservelock.eventcontent.v1.VenueService.CreateVenue:input_type -> reservelock.eventcontent.v1.CreateVenueRequest
-	2, // 3: reservelock.eventcontent.v1.VenueService.GetVenue:input_type -> reservelock.eventcontent.v1.GetVenueRequest
-	1, // 4: reservelock.eventcontent.v1.VenueService.CreateVenue:output_type -> reservelock.eventcontent.v1.CreateVenueResponse
-	3, // 5: reservelock.eventcontent.v1.VenueService.GetVenue:output_type -> reservelock.eventcontent.v1.GetVenueResponse
-	4, // [4:6] is the sub-list for method output_type
-	2, // [2:4] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	8, // 0: reservelock.eventcontent.v1.CreateVenueResponse.venue:type_name -> reservelock.eventcontent.v1.Venue
+	8, // 1: reservelock.eventcontent.v1.GetVenueResponse.venue:type_name -> reservelock.eventcontent.v1.Venue
+	9, // 2: reservelock.eventcontent.v1.CreateHallResponse.hall:type_name -> reservelock.eventcontent.v1.Hall
+	9, // 3: reservelock.eventcontent.v1.GetHallResponse.hall:type_name -> reservelock.eventcontent.v1.Hall
+	0, // 4: reservelock.eventcontent.v1.EventContentService.CreateVenue:input_type -> reservelock.eventcontent.v1.CreateVenueRequest
+	2, // 5: reservelock.eventcontent.v1.EventContentService.GetVenue:input_type -> reservelock.eventcontent.v1.GetVenueRequest
+	4, // 6: reservelock.eventcontent.v1.EventContentService.CreateHall:input_type -> reservelock.eventcontent.v1.CreateHallRequest
+	6, // 7: reservelock.eventcontent.v1.EventContentService.GetHall:input_type -> reservelock.eventcontent.v1.GetHallRequest
+	1, // 8: reservelock.eventcontent.v1.EventContentService.CreateVenue:output_type -> reservelock.eventcontent.v1.CreateVenueResponse
+	3, // 9: reservelock.eventcontent.v1.EventContentService.GetVenue:output_type -> reservelock.eventcontent.v1.GetVenueResponse
+	5, // 10: reservelock.eventcontent.v1.EventContentService.CreateHall:output_type -> reservelock.eventcontent.v1.CreateHallResponse
+	7, // 11: reservelock.eventcontent.v1.EventContentService.GetHall:output_type -> reservelock.eventcontent.v1.GetHallResponse
+	8, // [8:12] is the sub-list for method output_type
+	4, // [4:8] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_reservelock_eventcontent_v1_event_content_proto_init() }
@@ -370,7 +661,7 @@ func file_reservelock_eventcontent_v1_event_content_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_reservelock_eventcontent_v1_event_content_proto_rawDesc), len(file_reservelock_eventcontent_v1_event_content_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

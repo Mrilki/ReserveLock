@@ -15,6 +15,12 @@ func toGRPCError(err error) error {
 		return status.Error(codes.InvalidArgument, err.Error())
 	case errors.Is(err, application.ErrInvalidVenueID):
 		return status.Error(codes.InvalidArgument, err.Error())
+	case errors.Is(err, domain.ErrHallNotFound):
+		return status.Error(codes.NotFound, err.Error())
+	case errors.Is(err, application.ErrInvalidHallID):
+		return status.Error(codes.InvalidArgument, err.Error())
+	case errors.Is(err, application.ErrInvalidHallName):
+		return status.Error(codes.InvalidArgument, err.Error())
 	case errors.Is(err, domain.ErrVenueNotFound):
 		return status.Error(codes.NotFound, err.Error())
 	default:

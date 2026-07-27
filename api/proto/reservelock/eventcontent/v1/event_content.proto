@@ -4,10 +4,14 @@ package reservelock.eventcontent.v1;
 
 option go_package = "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/eventcontent/v1;eventcontentv1";
 
-service VenueService {
+service EventContentService {
   rpc CreateVenue(CreateVenueRequest) returns (CreateVenueResponse);
   rpc GetVenue(GetVenueRequest) returns (GetVenueResponse);
+  rpc CreateHall(CreateHallRequest) returns (CreateHallResponse);
+  rpc GetHall(GetHallRequest) returns (GetHallResponse);
 }
+
+
 
 message CreateVenueRequest {
   string name = 1;
@@ -28,12 +32,37 @@ message GetVenueResponse {
   Venue venue = 1;
 }
 
+message CreateHallRequest {
+  string venue_id = 1;
+  string name = 2;
+  string created_by = 3;
+}
+
+message CreateHallResponse {
+  Hall hall = 1;
+}
+
+message GetHallRequest {
+  string hall_id = 1;
+}
+
+message GetHallResponse {
+  Hall hall = 1;
+}
+
 message Venue {
   string id = 1;
   string name = 2;
   string city = 3;
   string address = 4;
   string created_by = 5;
+}
+
+message Hall {
+  string id = 1;
+  string venue_id = 2;
+  string name = 3;
+  string created_by = 4;
 }
 
 

@@ -19,139 +19,215 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	VenueService_CreateVenue_FullMethodName = "/reservelock.eventcontent.v1.VenueService/CreateVenue"
-	VenueService_GetVenue_FullMethodName    = "/reservelock.eventcontent.v1.VenueService/GetVenue"
+	EventContentService_CreateVenue_FullMethodName = "/reservelock.eventcontent.v1.EventContentService/CreateVenue"
+	EventContentService_GetVenue_FullMethodName    = "/reservelock.eventcontent.v1.EventContentService/GetVenue"
+	EventContentService_CreateHall_FullMethodName  = "/reservelock.eventcontent.v1.EventContentService/CreateHall"
+	EventContentService_GetHall_FullMethodName     = "/reservelock.eventcontent.v1.EventContentService/GetHall"
 )
 
-// VenueServiceClient is the client API for VenueService service.
+// EventContentServiceClient is the client API for EventContentService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type VenueServiceClient interface {
+type EventContentServiceClient interface {
 	CreateVenue(ctx context.Context, in *CreateVenueRequest, opts ...grpc.CallOption) (*CreateVenueResponse, error)
 	GetVenue(ctx context.Context, in *GetVenueRequest, opts ...grpc.CallOption) (*GetVenueResponse, error)
+	CreateHall(ctx context.Context, in *CreateHallRequest, opts ...grpc.CallOption) (*CreateHallResponse, error)
+	GetHall(ctx context.Context, in *GetHallRequest, opts ...grpc.CallOption) (*GetHallResponse, error)
 }
 
-type venueServiceClient struct {
+type eventContentServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewVenueServiceClient(cc grpc.ClientConnInterface) VenueServiceClient {
-	return &venueServiceClient{cc}
+func NewEventContentServiceClient(cc grpc.ClientConnInterface) EventContentServiceClient {
+	return &eventContentServiceClient{cc}
 }
 
-func (c *venueServiceClient) CreateVenue(ctx context.Context, in *CreateVenueRequest, opts ...grpc.CallOption) (*CreateVenueResponse, error) {
+func (c *eventContentServiceClient) CreateVenue(ctx context.Context, in *CreateVenueRequest, opts ...grpc.CallOption) (*CreateVenueResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CreateVenueResponse)
-	err := c.cc.Invoke(ctx, VenueService_CreateVenue_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, EventContentService_CreateVenue_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *venueServiceClient) GetVenue(ctx context.Context, in *GetVenueRequest, opts ...grpc.CallOption) (*GetVenueResponse, error) {
+func (c *eventContentServiceClient) GetVenue(ctx context.Context, in *GetVenueRequest, opts ...grpc.CallOption) (*GetVenueResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetVenueResponse)
-	err := c.cc.Invoke(ctx, VenueService_GetVenue_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, EventContentService_GetVenue_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// VenueServiceServer is the server API for VenueService service.
-// All implementations must embed UnimplementedVenueServiceServer
-// for forward compatibility.
-type VenueServiceServer interface {
-	CreateVenue(context.Context, *CreateVenueRequest) (*CreateVenueResponse, error)
-	GetVenue(context.Context, *GetVenueRequest) (*GetVenueResponse, error)
-	mustEmbedUnimplementedVenueServiceServer()
+func (c *eventContentServiceClient) CreateHall(ctx context.Context, in *CreateHallRequest, opts ...grpc.CallOption) (*CreateHallResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateHallResponse)
+	err := c.cc.Invoke(ctx, EventContentService_CreateHall_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
-// UnimplementedVenueServiceServer must be embedded to have
+func (c *eventContentServiceClient) GetHall(ctx context.Context, in *GetHallRequest, opts ...grpc.CallOption) (*GetHallResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetHallResponse)
+	err := c.cc.Invoke(ctx, EventContentService_GetHall_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// EventContentServiceServer is the server API for EventContentService service.
+// All implementations must embed UnimplementedEventContentServiceServer
+// for forward compatibility.
+type EventContentServiceServer interface {
+	CreateVenue(context.Context, *CreateVenueRequest) (*CreateVenueResponse, error)
+	GetVenue(context.Context, *GetVenueRequest) (*GetVenueResponse, error)
+	CreateHall(context.Context, *CreateHallRequest) (*CreateHallResponse, error)
+	GetHall(context.Context, *GetHallRequest) (*GetHallResponse, error)
+	mustEmbedUnimplementedEventContentServiceServer()
+}
+
+// UnimplementedEventContentServiceServer must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedVenueServiceServer struct{}
+type UnimplementedEventContentServiceServer struct{}
 
-func (UnimplementedVenueServiceServer) CreateVenue(context.Context, *CreateVenueRequest) (*CreateVenueResponse, error) {
+func (UnimplementedEventContentServiceServer) CreateVenue(context.Context, *CreateVenueRequest) (*CreateVenueResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateVenue not implemented")
 }
-func (UnimplementedVenueServiceServer) GetVenue(context.Context, *GetVenueRequest) (*GetVenueResponse, error) {
+func (UnimplementedEventContentServiceServer) GetVenue(context.Context, *GetVenueRequest) (*GetVenueResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetVenue not implemented")
 }
-func (UnimplementedVenueServiceServer) mustEmbedUnimplementedVenueServiceServer() {}
-func (UnimplementedVenueServiceServer) testEmbeddedByValue()                      {}
+func (UnimplementedEventContentServiceServer) CreateHall(context.Context, *CreateHallRequest) (*CreateHallResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateHall not implemented")
+}
+func (UnimplementedEventContentServiceServer) GetHall(context.Context, *GetHallRequest) (*GetHallResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetHall not implemented")
+}
+func (UnimplementedEventContentServiceServer) mustEmbedUnimplementedEventContentServiceServer() {}
+func (UnimplementedEventContentServiceServer) testEmbeddedByValue()                             {}
 
-// UnsafeVenueServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to VenueServiceServer will
+// UnsafeEventContentServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to EventContentServiceServer will
 // result in compilation errors.
-type UnsafeVenueServiceServer interface {
-	mustEmbedUnimplementedVenueServiceServer()
+type UnsafeEventContentServiceServer interface {
+	mustEmbedUnimplementedEventContentServiceServer()
 }
 
-func RegisterVenueServiceServer(s grpc.ServiceRegistrar, srv VenueServiceServer) {
-	// If the following call panics, it indicates UnimplementedVenueServiceServer was
+func RegisterEventContentServiceServer(s grpc.ServiceRegistrar, srv EventContentServiceServer) {
+	// If the following call panics, it indicates UnimplementedEventContentServiceServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&VenueService_ServiceDesc, srv)
+	s.RegisterService(&EventContentService_ServiceDesc, srv)
 }
 
-func _VenueService_CreateVenue_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _EventContentService_CreateVenue_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateVenueRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(VenueServiceServer).CreateVenue(ctx, in)
+		return srv.(EventContentServiceServer).CreateVenue(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: VenueService_CreateVenue_FullMethodName,
+		FullMethod: EventContentService_CreateVenue_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(VenueServiceServer).CreateVenue(ctx, req.(*CreateVenueRequest))
+		return srv.(EventContentServiceServer).CreateVenue(ctx, req.(*CreateVenueRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _VenueService_GetVenue_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _EventContentService_GetVenue_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetVenueRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(VenueServiceServer).GetVenue(ctx, in)
+		return srv.(EventContentServiceServer).GetVenue(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: VenueService_GetVenue_FullMethodName,
+		FullMethod: EventContentService_GetVenue_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(VenueServiceServer).GetVenue(ctx, req.(*GetVenueRequest))
+		return srv.(EventContentServiceServer).GetVenue(ctx, req.(*GetVenueRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// VenueService_ServiceDesc is the grpc.ServiceDesc for VenueService service.
+func _EventContentService_CreateHall_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateHallRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EventContentServiceServer).CreateHall(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: EventContentService_CreateHall_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EventContentServiceServer).CreateHall(ctx, req.(*CreateHallRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _EventContentService_GetHall_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetHallRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EventContentServiceServer).GetHall(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: EventContentService_GetHall_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EventContentServiceServer).GetHall(ctx, req.(*GetHallRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// EventContentService_ServiceDesc is the grpc.ServiceDesc for EventContentService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var VenueService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "reservelock.eventcontent.v1.VenueService",
-	HandlerType: (*VenueServiceServer)(nil),
+var EventContentService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "reservelock.eventcontent.v1.EventContentService",
+	HandlerType: (*EventContentServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "CreateVenue",
-			Handler:    _VenueService_CreateVenue_Handler,
+			Handler:    _EventContentService_CreateVenue_Handler,
 		},
 		{
 			MethodName: "GetVenue",
-			Handler:    _VenueService_GetVenue_Handler,
+			Handler:    _EventContentService_GetVenue_Handler,
+		},
+		{
+			MethodName: "CreateHall",
+			Handler:    _EventContentService_CreateHall_Handler,
+		},
+		{
+			MethodName: "GetHall",
+			Handler:    _EventContentService_GetHall_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

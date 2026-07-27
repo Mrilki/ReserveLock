@@ -14,3 +14,12 @@ func toProtoVenue(venue domain.Venue) *eventcontentv1.Venue {
 		CreatedBy: venue.CreatedBy,
 	}
 }
+
+func toProtoHall(hall domain.Hall) *eventcontentv1.Hall {
+	return &eventcontentv1.Hall{
+		Id:        hall.ID,
+		VenueId:   hall.VenueID,
+		Name:      hall.Name,
+		CreatedBy: hall.CreatedBy,
+	}
+}
