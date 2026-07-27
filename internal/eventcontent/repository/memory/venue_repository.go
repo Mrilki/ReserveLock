@@ -28,6 +28,7 @@ func (r *VenueRepository) Save(ctx context.Context, venue domain.Venue) error {
 
 func (r *VenueRepository) GetByID(ctx context.Context, id string) (domain.Venue, error) {
 	r.mu.RLock()
+	defer r.mu.Unlock()
 
 	if venue, inMap := r.venues[id]; inMap {
 		return venue, nil

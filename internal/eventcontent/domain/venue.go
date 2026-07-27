@@ -1,9 +1,9 @@
 package domain
 
 type Venue struct {
-	ID       string
-	Name     string
-	City     string
-	Address  string
-	CreateBy string
+	ID        string
+	Name      string
+	City      string
+	Address   string
+	CreatedBy string
 }

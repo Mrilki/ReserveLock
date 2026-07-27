@@ -11,6 +11,6 @@ func toProtoVenue(venue domain.Venue) *eventcontentv1.Venue {
 		Name:      venue.Name,
 		City:      venue.City,
 		Address:   venue.Address,
-		CreatedBy: venue.CreateBy,
+		CreatedBy: venue.CreatedBy,
 	}
 }

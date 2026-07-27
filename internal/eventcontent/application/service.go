@@ -17,10 +17,10 @@ type Service struct {
 }
 
 type CreateVenueInput struct {
-	Name     string
-	City     string
-	Address  string
-	CreateBy string
+	Name      string
+	City      string
+	Address   string
+	CreatedBy string
 }
 
 func NewService(venueRepository VenueRepository) *Service {
@@ -29,17 +29,17 @@ func NewService(venueRepository VenueRepository) *Service {
 	}
 }
 
-func (s Service) CreateVenue(ctx context.Context, input CreateVenueInput) (domain.Venue, error) {
+func (s *Service) CreateVenue(ctx context.Context, input CreateVenueInput) (domain.Venue, error) {
 	if input.Name == "" {
 		return domain.Venue{}, ErrInvalidVenueName
 	}
 
 	venue := domain.Venue{
-		ID:       uuid.NewString(),
-		Name:     input.Name,
-		City:     input.City,
-		Address:  input.Address,
-		CreateBy: input.CreateBy,
+		ID:        uuid.NewString(),
+		Name:      input.Name,
+		City:      input.City,
+		Address:   input.Address,
+		CreatedBy: input.CreatedBy,
 	}
 
 	if err := s.venueRepository.Save(ctx, venue); err != nil {
@@ -49,7 +49,7 @@ func (s Service) CreateVenue(ctx context.Context, input CreateVenueInput) (domai
 
 }
 
-func (s Service) GetVenue(ctx context.Context, venueID string) (domain.Venue, error) {
+func (s *Service) GetVenue(ctx context.Context, venueID string) (domain.Venue, error) {
 	if venueID == "" {
 		return domain.Venue{}, ErrInvalidVenueID
 	}
