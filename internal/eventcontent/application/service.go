@@ -140,7 +140,7 @@ func (s *Service) CreateSeatMap(ctx context.Context, input CreateSeatMapInput) (
 		return domain.SeatMap{}, err
 	}
 
-	SeatMap := domain.SeatMap{
+	seatMap := domain.SeatMap{
 		ID:        uuid.NewString(),
 		HallID:    input.HallID,
 		Name:      input.Name,
@@ -148,10 +148,10 @@ func (s *Service) CreateSeatMap(ctx context.Context, input CreateSeatMapInput) (
 		CreatedBy: input.CreatedBy,
 	}
 
-	if err := s.seatMapRepository.Save(ctx, SeatMap); err != nil {
+	if err := s.seatMapRepository.Save(ctx, seatMap); err != nil {
 		return domain.SeatMap{}, err
 	}
-	return SeatMap, nil
+	return seatMap, nil
 }
 
 func (s *Service) GetSeatMap(ctx context.Context, seatMapID string) (domain.SeatMap, error) {
