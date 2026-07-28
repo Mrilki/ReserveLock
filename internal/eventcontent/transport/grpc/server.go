@@ -67,3 +67,39 @@ func (s *server) GetHall(ctx context.Context, request *eventcontentv1.GetHallReq
 		Hall: toProtoHall(hall),
 	}, nil
 }
+
+func (s *server) CreateSeatMap(ctx context.Context, request *eventcontentv1.CreateSeatMapRequest) (*eventcontentv1.CreateSeatMapResponse, error) {
+	seats := make([]application.CreateSeatInput, 0, len(request.Seats))
+
+	for _, seat := range request.Seats {
+		seats = append(seats, application.CreateSeatInput{
+			Section: seat.Section,
+			Row:     seat.Row,
+			Number:  seat.Number,
+		})
+	}
+
+	seatMap, err := s.service.CreateSeatMap(ctx, application.CreateSeatMapInput{
+		HallID:    request.HallId,
+		Name:      request.Name,
+		Seats:     seats,
+		CreatedBy: request.CreatedBy,
+	})
+	if err != nil {
+		return nil, toGRPCError(err)
+	}
+	return &eventcontentv1.CreateSeatMapResponse{
+		SeatMap: toProtoSeatMap(seatMap),
+	}, nil
+
+}
+
+func (s *server) GetSeatMap(ctx context.Context, request *eventcontentv1.GetSeatMapRequest) (*eventcontentv1.GetSeatMapResponse, error) {
+	seatMap, err := s.service.GetSeatMap(ctx, request.SeatMapId)
+	if err != nil {
+		return nil, toGRPCError(err)
+	}
+	return &eventcontentv1.GetSeatMapResponse{
+		SeatMap: toProtoSeatMap(seatMap),
+	}, nil
+}

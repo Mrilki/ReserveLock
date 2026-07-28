@@ -413,6 +413,206 @@ func (x *GetHallResponse) GetHall() *Hall {
 	return nil
 }
 
+type CreateSeatMapRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	HallId        string                 `protobuf:"bytes,1,opt,name=hall_id,json=hallId,proto3" json:"hall_id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Seats         []*SeatInput           `protobuf:"bytes,3,rep,name=seats,proto3" json:"seats,omitempty"`
+	CreatedBy     string                 `protobuf:"bytes,4,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateSeatMapRequest) Reset() {
+	*x = CreateSeatMapRequest{}
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateSeatMapRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateSeatMapRequest) ProtoMessage() {}
+
+func (x *CreateSeatMapRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateSeatMapRequest.ProtoReflect.Descriptor instead.
+func (*CreateSeatMapRequest) Descriptor() ([]byte, []int) {
+	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *CreateSeatMapRequest) GetHallId() string {
+	if x != nil {
+		return x.HallId
+	}
+	return ""
+}
+
+func (x *CreateSeatMapRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CreateSeatMapRequest) GetSeats() []*SeatInput {
+	if x != nil {
+		return x.Seats
+	}
+	return nil
+}
+
+func (x *CreateSeatMapRequest) GetCreatedBy() string {
+	if x != nil {
+		return x.CreatedBy
+	}
+	return ""
+}
+
+type CreateSeatMapResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SeatMap       *SeatMap               `protobuf:"bytes,1,opt,name=seat_map,json=seatMap,proto3" json:"seat_map,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateSeatMapResponse) Reset() {
+	*x = CreateSeatMapResponse{}
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateSeatMapResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateSeatMapResponse) ProtoMessage() {}
+
+func (x *CreateSeatMapResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateSeatMapResponse.ProtoReflect.Descriptor instead.
+func (*CreateSeatMapResponse) Descriptor() ([]byte, []int) {
+	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *CreateSeatMapResponse) GetSeatMap() *SeatMap {
+	if x != nil {
+		return x.SeatMap
+	}
+	return nil
+}
+
+type GetSeatMapRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SeatMapId     string                 `protobuf:"bytes,1,opt,name=seat_map_id,json=seatMapId,proto3" json:"seat_map_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetSeatMapRequest) Reset() {
+	*x = GetSeatMapRequest{}
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSeatMapRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSeatMapRequest) ProtoMessage() {}
+
+func (x *GetSeatMapRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetSeatMapRequest.ProtoReflect.Descriptor instead.
+func (*GetSeatMapRequest) Descriptor() ([]byte, []int) {
+	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *GetSeatMapRequest) GetSeatMapId() string {
+	if x != nil {
+		return x.SeatMapId
+	}
+	return ""
+}
+
+type GetSeatMapResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SeatMap       *SeatMap               `protobuf:"bytes,1,opt,name=seat_map,json=seatMap,proto3" json:"seat_map,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetSeatMapResponse) Reset() {
+	*x = GetSeatMapResponse{}
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSeatMapResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSeatMapResponse) ProtoMessage() {}
+
+func (x *GetSeatMapResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetSeatMapResponse.ProtoReflect.Descriptor instead.
+func (*GetSeatMapResponse) Descriptor() ([]byte, []int) {
+	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *GetSeatMapResponse) GetSeatMap() *SeatMap {
+	if x != nil {
+		return x.SeatMap
+	}
+	return nil
+}
+
 type Venue struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -426,7 +626,7 @@ type Venue struct {
 
 func (x *Venue) Reset() {
 	*x = Venue{}
-	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[8]
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -438,7 +638,7 @@ func (x *Venue) String() string {
 func (*Venue) ProtoMessage() {}
 
 func (x *Venue) ProtoReflect() protoreflect.Message {
-	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[8]
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -451,7 +651,7 @@ func (x *Venue) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Venue.ProtoReflect.Descriptor instead.
 func (*Venue) Descriptor() ([]byte, []int) {
-	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{8}
+	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *Venue) GetId() string {
@@ -501,7 +701,7 @@ type Hall struct {
 
 func (x *Hall) Reset() {
 	*x = Hall{}
-	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[9]
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -513,7 +713,7 @@ func (x *Hall) String() string {
 func (*Hall) ProtoMessage() {}
 
 func (x *Hall) ProtoReflect() protoreflect.Message {
-	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[9]
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -526,7 +726,7 @@ func (x *Hall) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Hall.ProtoReflect.Descriptor instead.
 func (*Hall) Descriptor() ([]byte, []int) {
-	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{9}
+	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *Hall) GetId() string {
@@ -553,6 +753,210 @@ func (x *Hall) GetName() string {
 func (x *Hall) GetCreatedBy() string {
 	if x != nil {
 		return x.CreatedBy
+	}
+	return ""
+}
+
+type SeatMap struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	HallId        string                 `protobuf:"bytes,2,opt,name=hall_id,json=hallId,proto3" json:"hall_id,omitempty"`
+	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Seats         []*Seat                `protobuf:"bytes,4,rep,name=seats,proto3" json:"seats,omitempty"`
+	CreatedBy     string                 `protobuf:"bytes,5,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SeatMap) Reset() {
+	*x = SeatMap{}
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SeatMap) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SeatMap) ProtoMessage() {}
+
+func (x *SeatMap) ProtoReflect() protoreflect.Message {
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SeatMap.ProtoReflect.Descriptor instead.
+func (*SeatMap) Descriptor() ([]byte, []int) {
+	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *SeatMap) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *SeatMap) GetHallId() string {
+	if x != nil {
+		return x.HallId
+	}
+	return ""
+}
+
+func (x *SeatMap) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *SeatMap) GetSeats() []*Seat {
+	if x != nil {
+		return x.Seats
+	}
+	return nil
+}
+
+func (x *SeatMap) GetCreatedBy() string {
+	if x != nil {
+		return x.CreatedBy
+	}
+	return ""
+}
+
+type Seat struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Section       string                 `protobuf:"bytes,2,opt,name=section,proto3" json:"section,omitempty"`
+	Row           string                 `protobuf:"bytes,3,opt,name=row,proto3" json:"row,omitempty"`
+	Number        string                 `protobuf:"bytes,4,opt,name=number,proto3" json:"number,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Seat) Reset() {
+	*x = Seat{}
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Seat) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Seat) ProtoMessage() {}
+
+func (x *Seat) ProtoReflect() protoreflect.Message {
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Seat.ProtoReflect.Descriptor instead.
+func (*Seat) Descriptor() ([]byte, []int) {
+	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *Seat) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Seat) GetSection() string {
+	if x != nil {
+		return x.Section
+	}
+	return ""
+}
+
+func (x *Seat) GetRow() string {
+	if x != nil {
+		return x.Row
+	}
+	return ""
+}
+
+func (x *Seat) GetNumber() string {
+	if x != nil {
+		return x.Number
+	}
+	return ""
+}
+
+type SeatInput struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Section       string                 `protobuf:"bytes,1,opt,name=section,proto3" json:"section,omitempty"`
+	Row           string                 `protobuf:"bytes,2,opt,name=row,proto3" json:"row,omitempty"`
+	Number        string                 `protobuf:"bytes,3,opt,name=number,proto3" json:"number,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SeatInput) Reset() {
+	*x = SeatInput{}
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SeatInput) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SeatInput) ProtoMessage() {}
+
+func (x *SeatInput) ProtoReflect() protoreflect.Message {
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SeatInput.ProtoReflect.Descriptor instead.
+func (*SeatInput) Descriptor() ([]byte, []int) {
+	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *SeatInput) GetSection() string {
+	if x != nil {
+		return x.Section
+	}
+	return ""
+}
+
+func (x *SeatInput) GetRow() string {
+	if x != nil {
+		return x.Row
+	}
+	return ""
+}
+
+func (x *SeatInput) GetNumber() string {
+	if x != nil {
+		return x.Number
 	}
 	return ""
 }
@@ -584,7 +988,19 @@ const file_reservelock_eventcontent_v1_event_content_proto_rawDesc = "" +
 	"\x0eGetHallRequest\x12\x17\n" +
 	"\ahall_id\x18\x01 \x01(\tR\x06hallId\"H\n" +
 	"\x0fGetHallResponse\x125\n" +
-	"\x04hall\x18\x01 \x01(\v2!.reservelock.eventcontent.v1.HallR\x04hall\"x\n" +
+	"\x04hall\x18\x01 \x01(\v2!.reservelock.eventcontent.v1.HallR\x04hall\"\xa0\x01\n" +
+	"\x14CreateSeatMapRequest\x12\x17\n" +
+	"\ahall_id\x18\x01 \x01(\tR\x06hallId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12<\n" +
+	"\x05seats\x18\x03 \x03(\v2&.reservelock.eventcontent.v1.SeatInputR\x05seats\x12\x1d\n" +
+	"\n" +
+	"created_by\x18\x04 \x01(\tR\tcreatedBy\"X\n" +
+	"\x15CreateSeatMapResponse\x12?\n" +
+	"\bseat_map\x18\x01 \x01(\v2$.reservelock.eventcontent.v1.SeatMapR\aseatMap\"3\n" +
+	"\x11GetSeatMapRequest\x12\x1e\n" +
+	"\vseat_map_id\x18\x01 \x01(\tR\tseatMapId\"U\n" +
+	"\x12GetSeatMapResponse\x12?\n" +
+	"\bseat_map\x18\x01 \x01(\v2$.reservelock.eventcontent.v1.SeatMapR\aseatMap\"x\n" +
 	"\x05Venue\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
@@ -597,13 +1013,32 @@ const file_reservelock_eventcontent_v1_event_content_proto_rawDesc = "" +
 	"\bvenue_id\x18\x02 \x01(\tR\avenueId\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12\x1d\n" +
 	"\n" +
-	"created_by\x18\x04 \x01(\tR\tcreatedBy2\xc5\x03\n" +
+	"created_by\x18\x04 \x01(\tR\tcreatedBy\"\x9e\x01\n" +
+	"\aSeatMap\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
+	"\ahall_id\x18\x02 \x01(\tR\x06hallId\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x127\n" +
+	"\x05seats\x18\x04 \x03(\v2!.reservelock.eventcontent.v1.SeatR\x05seats\x12\x1d\n" +
+	"\n" +
+	"created_by\x18\x05 \x01(\tR\tcreatedBy\"Z\n" +
+	"\x04Seat\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
+	"\asection\x18\x02 \x01(\tR\asection\x12\x10\n" +
+	"\x03row\x18\x03 \x01(\tR\x03row\x12\x16\n" +
+	"\x06number\x18\x04 \x01(\tR\x06number\"O\n" +
+	"\tSeatInput\x12\x18\n" +
+	"\asection\x18\x01 \x01(\tR\asection\x12\x10\n" +
+	"\x03row\x18\x02 \x01(\tR\x03row\x12\x16\n" +
+	"\x06number\x18\x03 \x01(\tR\x06number2\xac\x05\n" +
 	"\x13EventContentService\x12p\n" +
 	"\vCreateVenue\x12/.reservelock.eventcontent.v1.CreateVenueRequest\x1a0.reservelock.eventcontent.v1.CreateVenueResponse\x12g\n" +
 	"\bGetVenue\x12,.reservelock.eventcontent.v1.GetVenueRequest\x1a-.reservelock.eventcontent.v1.GetVenueResponse\x12m\n" +
 	"\n" +
 	"CreateHall\x12..reservelock.eventcontent.v1.CreateHallRequest\x1a/.reservelock.eventcontent.v1.CreateHallResponse\x12d\n" +
-	"\aGetHall\x12+.reservelock.eventcontent.v1.GetHallRequest\x1a,.reservelock.eventcontent.v1.GetHallResponseB]Z[github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/eventcontent/v1;eventcontentv1b\x06proto3"
+	"\aGetHall\x12+.reservelock.eventcontent.v1.GetHallRequest\x1a,.reservelock.eventcontent.v1.GetHallResponse\x12v\n" +
+	"\rCreateSeatMap\x121.reservelock.eventcontent.v1.CreateSeatMapRequest\x1a2.reservelock.eventcontent.v1.CreateSeatMapResponse\x12m\n" +
+	"\n" +
+	"GetSeatMap\x12..reservelock.eventcontent.v1.GetSeatMapRequest\x1a/.reservelock.eventcontent.v1.GetSeatMapResponseB]Z[github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/eventcontent/v1;eventcontentv1b\x06proto3"
 
 var (
 	file_reservelock_eventcontent_v1_event_content_proto_rawDescOnce sync.Once
@@ -617,37 +1052,52 @@ func file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP() []byte {
 	return file_reservelock_eventcontent_v1_event_content_proto_rawDescData
 }
 
-var file_reservelock_eventcontent_v1_event_content_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_reservelock_eventcontent_v1_event_content_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
 var file_reservelock_eventcontent_v1_event_content_proto_goTypes = []any{
-	(*CreateVenueRequest)(nil),  // 0: reservelock.eventcontent.v1.CreateVenueRequest
-	(*CreateVenueResponse)(nil), // 1: reservelock.eventcontent.v1.CreateVenueResponse
-	(*GetVenueRequest)(nil),     // 2: reservelock.eventcontent.v1.GetVenueRequest
-	(*GetVenueResponse)(nil),    // 3: reservelock.eventcontent.v1.GetVenueResponse
-	(*CreateHallRequest)(nil),   // 4: reservelock.eventcontent.v1.CreateHallRequest
-	(*CreateHallResponse)(nil),  // 5: reservelock.eventcontent.v1.CreateHallResponse
-	(*GetHallRequest)(nil),      // 6: reservelock.eventcontent.v1.GetHallRequest
-	(*GetHallResponse)(nil),     // 7: reservelock.eventcontent.v1.GetHallResponse
-	(*Venue)(nil),               // 8: reservelock.eventcontent.v1.Venue
-	(*Hall)(nil),                // 9: reservelock.eventcontent.v1.Hall
+	(*CreateVenueRequest)(nil),    // 0: reservelock.eventcontent.v1.CreateVenueRequest
+	(*CreateVenueResponse)(nil),   // 1: reservelock.eventcontent.v1.CreateVenueResponse
+	(*GetVenueRequest)(nil),       // 2: reservelock.eventcontent.v1.GetVenueRequest
+	(*GetVenueResponse)(nil),      // 3: reservelock.eventcontent.v1.GetVenueResponse
+	(*CreateHallRequest)(nil),     // 4: reservelock.eventcontent.v1.CreateHallRequest
+	(*CreateHallResponse)(nil),    // 5: reservelock.eventcontent.v1.CreateHallResponse
+	(*GetHallRequest)(nil),        // 6: reservelock.eventcontent.v1.GetHallRequest
+	(*GetHallResponse)(nil),       // 7: reservelock.eventcontent.v1.GetHallResponse
+	(*CreateSeatMapRequest)(nil),  // 8: reservelock.eventcontent.v1.CreateSeatMapRequest
+	(*CreateSeatMapResponse)(nil), // 9: reservelock.eventcontent.v1.CreateSeatMapResponse
+	(*GetSeatMapRequest)(nil),     // 10: reservelock.eventcontent.v1.GetSeatMapRequest
+	(*GetSeatMapResponse)(nil),    // 11: reservelock.eventcontent.v1.GetSeatMapResponse
+	(*Venue)(nil),                 // 12: reservelock.eventcontent.v1.Venue
+	(*Hall)(nil),                  // 13: reservelock.eventcontent.v1.Hall
+	(*SeatMap)(nil),               // 14: reservelock.eventcontent.v1.SeatMap
+	(*Seat)(nil),                  // 15: reservelock.eventcontent.v1.Seat
+	(*SeatInput)(nil),             // 16: reservelock.eventcontent.v1.SeatInput
 }
 var file_reservelock_eventcontent_v1_event_content_proto_depIdxs = []int32{
-	8, // 0: reservelock.eventcontent.v1.CreateVenueResponse.venue:type_name -> reservelock.eventcontent.v1.Venue
-	8, // 1: reservelock.eventcontent.v1.GetVenueResponse.venue:type_name -> reservelock.eventcontent.v1.Venue
-	9, // 2: reservelock.eventcontent.v1.CreateHallResponse.hall:type_name -> reservelock.eventcontent.v1.Hall
-	9, // 3: reservelock.eventcontent.v1.GetHallResponse.hall:type_name -> reservelock.eventcontent.v1.Hall
-	0, // 4: reservelock.eventcontent.v1.EventContentService.CreateVenue:input_type -> reservelock.eventcontent.v1.CreateVenueRequest
-	2, // 5: reservelock.eventcontent.v1.EventContentService.GetVenue:input_type -> reservelock.eventcontent.v1.GetVenueRequest
-	4, // 6: reservelock.eventcontent.v1.EventContentService.CreateHall:input_type -> reservelock.eventcontent.v1.CreateHallRequest
-	6, // 7: reservelock.eventcontent.v1.EventContentService.GetHall:input_type -> reservelock.eventcontent.v1.GetHallRequest
-	1, // 8: reservelock.eventcontent.v1.EventContentService.CreateVenue:output_type -> reservelock.eventcontent.v1.CreateVenueResponse
-	3, // 9: reservelock.eventcontent.v1.EventContentService.GetVenue:output_type -> reservelock.eventcontent.v1.GetVenueResponse
-	5, // 10: reservelock.eventcontent.v1.EventContentService.CreateHall:output_type -> reservelock.eventcontent.v1.CreateHallResponse
-	7, // 11: reservelock.eventcontent.v1.EventContentService.GetHall:output_type -> reservelock.eventcontent.v1.GetHallResponse
-	8, // [8:12] is the sub-list for method output_type
-	4, // [4:8] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	12, // 0: reservelock.eventcontent.v1.CreateVenueResponse.venue:type_name -> reservelock.eventcontent.v1.Venue
+	12, // 1: reservelock.eventcontent.v1.GetVenueResponse.venue:type_name -> reservelock.eventcontent.v1.Venue
+	13, // 2: reservelock.eventcontent.v1.CreateHallResponse.hall:type_name -> reservelock.eventcontent.v1.Hall
+	13, // 3: reservelock.eventcontent.v1.GetHallResponse.hall:type_name -> reservelock.eventcontent.v1.Hall
+	16, // 4: reservelock.eventcontent.v1.CreateSeatMapRequest.seats:type_name -> reservelock.eventcontent.v1.SeatInput
+	14, // 5: reservelock.eventcontent.v1.CreateSeatMapResponse.seat_map:type_name -> reservelock.eventcontent.v1.SeatMap
+	14, // 6: reservelock.eventcontent.v1.GetSeatMapResponse.seat_map:type_name -> reservelock.eventcontent.v1.SeatMap
+	15, // 7: reservelock.eventcontent.v1.SeatMap.seats:type_name -> reservelock.eventcontent.v1.Seat
+	0,  // 8: reservelock.eventcontent.v1.EventContentService.CreateVenue:input_type -> reservelock.eventcontent.v1.CreateVenueRequest
+	2,  // 9: reservelock.eventcontent.v1.EventContentService.GetVenue:input_type -> reservelock.eventcontent.v1.GetVenueRequest
+	4,  // 10: reservelock.eventcontent.v1.EventContentService.CreateHall:input_type -> reservelock.eventcontent.v1.CreateHallRequest
+	6,  // 11: reservelock.eventcontent.v1.EventContentService.GetHall:input_type -> reservelock.eventcontent.v1.GetHallRequest
+	8,  // 12: reservelock.eventcontent.v1.EventContentService.CreateSeatMap:input_type -> reservelock.eventcontent.v1.CreateSeatMapRequest
+	10, // 13: reservelock.eventcontent.v1.EventContentService.GetSeatMap:input_type -> reservelock.eventcontent.v1.GetSeatMapRequest
+	1,  // 14: reservelock.eventcontent.v1.EventContentService.CreateVenue:output_type -> reservelock.eventcontent.v1.CreateVenueResponse
+	3,  // 15: reservelock.eventcontent.v1.EventContentService.GetVenue:output_type -> reservelock.eventcontent.v1.GetVenueResponse
+	5,  // 16: reservelock.eventcontent.v1.EventContentService.CreateHall:output_type -> reservelock.eventcontent.v1.CreateHallResponse
+	7,  // 17: reservelock.eventcontent.v1.EventContentService.GetHall:output_type -> reservelock.eventcontent.v1.GetHallResponse
+	9,  // 18: reservelock.eventcontent.v1.EventContentService.CreateSeatMap:output_type -> reservelock.eventcontent.v1.CreateSeatMapResponse
+	11, // 19: reservelock.eventcontent.v1.EventContentService.GetSeatMap:output_type -> reservelock.eventcontent.v1.GetSeatMapResponse
+	14, // [14:20] is the sub-list for method output_type
+	8,  // [8:14] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_reservelock_eventcontent_v1_event_content_proto_init() }
@@ -661,7 +1111,7 @@ func file_reservelock_eventcontent_v1_event_content_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_reservelock_eventcontent_v1_event_content_proto_rawDesc), len(file_reservelock_eventcontent_v1_event_content_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   17,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

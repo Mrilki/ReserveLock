@@ -17,9 +17,15 @@ type HallRepository interface {
 	GetByID(ctx context.Context, id string) (domain.Hall, error)
 }
 
+type SeatMapRepository interface {
+	Save(ctx context.Context, seatMap domain.SeatMap) error
+	GetByID(ctx context.Context, id string) (domain.SeatMap, error)
+}
+
 type Service struct {
-	venueRepository VenueRepository
-	hallRepository  HallRepository
+	venueRepository   VenueRepository
+	hallRepository    HallRepository
+	seatMapRepository SeatMapRepository
 }
 
 type CreateVenueInput struct {
@@ -35,10 +41,24 @@ type CreateHallInput struct {
 	CreatedBy string
 }
 
-func NewService(venueRepository VenueRepository, hallRepository HallRepository) *Service {
+type CreateSeatMapInput struct {
+	HallID    string
+	Name      string
+	Seats     []CreateSeatInput
+	CreatedBy string
+}
+
+type CreateSeatInput struct {
+	Section string
+	Row     string
+	Number  string
+}
+
+func NewService(venueRepository VenueRepository, hallRepository HallRepository, seatMapRepository SeatMapRepository) *Service {
 	return &Service{
-		venueRepository: venueRepository,
-		hallRepository:  hallRepository,
+		venueRepository:   venueRepository,
+		hallRepository:    hallRepository,
+		seatMapRepository: seatMapRepository,
 	}
 }
 
@@ -99,4 +119,83 @@ func (s *Service) GetHall(ctx context.Context, hallID string) (domain.Hall, erro
 		return domain.Hall{}, ErrInvalidHallID
 	}
 	return s.hallRepository.GetByID(ctx, hallID)
+}
+
+func (s *Service) CreateSeatMap(ctx context.Context, input CreateSeatMapInput) (domain.SeatMap, error) {
+	if input.Name == "" {
+		return domain.SeatMap{}, ErrInvalidSeatMapName
+	}
+	if input.HallID == "" {
+		return domain.SeatMap{}, ErrInvalidHallID
+	}
+	if len(input.Seats) == 0 {
+		return domain.SeatMap{}, ErrSeatMapSeatsRequired
+	}
+	if _, err := s.hallRepository.GetByID(ctx, input.HallID); err != nil {
+		return domain.SeatMap{}, err
+	}
+
+	seats, err := buildSeats(input.Seats)
+	if err != nil {
+		return domain.SeatMap{}, err
+	}
+
+	SeatMap := domain.SeatMap{
+		ID:        uuid.NewString(),
+		HallID:    input.HallID,
+		Name:      input.Name,
+		Seats:     seats,
+		CreatedBy: input.CreatedBy,
+	}
+
+	if err := s.seatMapRepository.Save(ctx, SeatMap); err != nil {
+		return domain.SeatMap{}, err
+	}
+	return SeatMap, nil
+}
+
+func (s *Service) GetSeatMap(ctx context.Context, seatMapID string) (domain.SeatMap, error) {
+	if seatMapID == "" {
+		return domain.SeatMap{}, ErrInvalidSeatMapID
+	}
+	return s.seatMapRepository.GetByID(ctx, seatMapID)
+}
+
+func buildSeats(inputs []CreateSeatInput) ([]domain.Seat, error) {
+	type seatKey struct {
+		section string
+		row     string
+		number  string
+	}
+
+	seats := make([]domain.Seat, 0, len(inputs))
+	seen := make(map[seatKey]struct{}, len(inputs))
+
+	for _, inputSeat := range inputs {
+		if inputSeat.Row == "" {
+			return nil, ErrInvalidSeatRow
+		}
+		if inputSeat.Number == "" {
+			return nil, ErrInvalidSeatNumber
+		}
+
+		key := seatKey{
+			section: inputSeat.Section,
+			row:     inputSeat.Row,
+			number:  inputSeat.Number,
+		}
+
+		if _, exists := seen[key]; exists {
+			return nil, ErrDuplicateSeat
+		}
+		seen[key] = struct{}{}
+
+		seats = append(seats, domain.Seat{
+			ID:      uuid.NewString(),
+			Section: inputSeat.Section,
+			Row:     inputSeat.Row,
+			Number:  inputSeat.Number,
+		})
+	}
+	return seats, nil
 }

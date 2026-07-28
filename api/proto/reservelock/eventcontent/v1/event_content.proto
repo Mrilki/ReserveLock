@@ -9,8 +9,9 @@ service EventContentService {
   rpc GetVenue(GetVenueRequest) returns (GetVenueResponse);
   rpc CreateHall(CreateHallRequest) returns (CreateHallResponse);
   rpc GetHall(GetHallRequest) returns (GetHallResponse);
+  rpc CreateSeatMap(CreateSeatMapRequest) returns (CreateSeatMapResponse);
+  rpc GetSeatMap(GetSeatMapRequest) returns (GetSeatMapResponse);
 }
-
 
 
 message CreateVenueRequest {
@@ -50,6 +51,25 @@ message GetHallResponse {
   Hall hall = 1;
 }
 
+message CreateSeatMapRequest {
+  string hall_id = 1;
+  string name = 2;
+  repeated SeatInput seats = 3;
+  string created_by = 4;
+}
+
+message CreateSeatMapResponse {
+  SeatMap seat_map = 1;
+}
+
+message GetSeatMapRequest {
+  string seat_map_id = 1;
+}
+
+message GetSeatMapResponse {
+  SeatMap seat_map = 1;
+}
+
 message Venue {
   string id = 1;
   string name = 2;
@@ -63,6 +83,27 @@ message Hall {
   string venue_id = 2;
   string name = 3;
   string created_by = 4;
+}
+
+message SeatMap {
+  string id = 1;
+  string hall_id = 2;
+  string name = 3;
+  repeated Seat seats = 4;
+  string created_by = 5;
+}
+
+message Seat {
+  string id = 1;
+  string section = 2;
+  string row = 3;
+  string number = 4;
+}
+
+message SeatInput {
+  string section = 1;
+  string row = 2;
+  string number = 3;
 }
 
 
