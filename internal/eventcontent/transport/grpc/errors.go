@@ -20,13 +20,19 @@ func toGRPCError(err error) error {
 		errors.Is(err, application.ErrSeatMapSeatsRequired),
 		errors.Is(err, application.ErrInvalidSeatRow),
 		errors.Is(err, application.ErrInvalidSeatNumber),
-		errors.Is(err, application.ErrDuplicateSeat):
+		errors.Is(err, application.ErrDuplicateSeat),
+		errors.Is(err, application.ErrInvalidEventID),
+		errors.Is(err, application.ErrInvalidEventName),
+		errors.Is(err, application.ErrInvalidEventStartsAt),
+		errors.Is(err, application.ErrHallVenueMismatch),
+		errors.Is(err, application.ErrSeatMapHallMismatch):
 
 		return status.Error(codes.InvalidArgument, err.Error())
 
 	case errors.Is(err, domain.ErrVenueNotFound),
 		errors.Is(err, domain.ErrHallNotFound),
-		errors.Is(err, domain.ErrSeatMapNotFound):
+		errors.Is(err, domain.ErrSeatMapNotFound),
+		errors.Is(err, domain.ErrEventNotFound):
 
 		return status.Error(codes.NotFound, err.Error())
 

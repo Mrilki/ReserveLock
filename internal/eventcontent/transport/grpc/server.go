@@ -2,6 +2,7 @@ package eventcontentgrpc
 
 import (
 	"context"
+	"time"
 
 	"github.com/Mrilki/ReserveLock/internal/eventcontent/application"
 	eventcontentv1 "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/eventcontent/v1"
@@ -101,5 +102,38 @@ func (s *server) GetSeatMap(ctx context.Context, request *eventcontentv1.GetSeat
 	}
 	return &eventcontentv1.GetSeatMapResponse{
 		SeatMap: toProtoSeatMap(seatMap),
+	}, nil
+}
+
+func (s *server) CreateEvent(ctx context.Context, request *eventcontentv1.CreateEventRequest) (*eventcontentv1.CreateEventResponse, error) {
+	var startsAt time.Time
+	if request.StartsAt != nil {
+		startsAt = request.StartsAt.AsTime()
+	}
+
+	event, err := s.service.CreateEvent(ctx, application.CreateEventInput{
+		VenueID:   request.VenueId,
+		HallID:    request.HallId,
+		SeatMapID: request.SeatMapId,
+		Name:      request.Name,
+		StartsAt:  startsAt,
+		CreatedBy: request.CreatedBy,
+	})
+
+	if err != nil {
+		return nil, toGRPCError(err)
+	}
+	return &eventcontentv1.CreateEventResponse{
+		Event: toProtoEvent(event),
+	}, nil
+}
+
+func (s *server) GetEvent(ctx context.Context, request *eventcontentv1.GetEventRequest) (*eventcontentv1.GetEventResponse, error) {
+	event, err := s.service.GetEvent(ctx, request.EventId)
+	if err != nil {
+		return nil, toGRPCError(err)
+	}
+	return &eventcontentv1.GetEventResponse{
+		Event: toProtoEvent(event),
 	}, nil
 }

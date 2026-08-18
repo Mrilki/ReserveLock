@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package reservelock.eventcontent.v1;
 
+import "google/protobuf/timestamp.proto";
+
 option go_package = "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/eventcontent/v1;eventcontentv1";
 
 service EventContentService {
@@ -11,6 +13,8 @@ service EventContentService {
   rpc GetHall(GetHallRequest) returns (GetHallResponse);
   rpc CreateSeatMap(CreateSeatMapRequest) returns (CreateSeatMapResponse);
   rpc GetSeatMap(GetSeatMapRequest) returns (GetSeatMapResponse);
+  rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse);
+  rpc GetEvent(GetEventRequest) returns (GetEventResponse);
 }
 
 
@@ -70,6 +74,27 @@ message GetSeatMapResponse {
   SeatMap seat_map = 1;
 }
 
+message CreateEventRequest {
+  string venue_id = 1;
+  string hall_id = 2;
+  string seat_map_id = 3;
+  string name = 4;
+  google.protobuf.Timestamp starts_at = 5;
+  string created_by = 6;
+}
+
+message CreateEventResponse {
+  Event event = 1;
+}
+
+message GetEventRequest {
+  string event_id = 1;
+}
+
+message GetEventResponse {
+  Event event = 1;
+}
+
 message Venue {
   string id = 1;
   string name = 2;
@@ -105,6 +130,25 @@ message SeatInput {
   string row = 2;
   string number = 3;
 }
+
+message Event {
+  string id = 1;
+  string venue_id = 2;
+  string hall_id = 3;
+  string seat_map_id = 4;
+  string name = 5;
+  google.protobuf.Timestamp starts_at = 6;
+  EventStatus status = 7;
+  string created_by = 8;
+}
+
+enum EventStatus {
+  EVENT_STATUS_UNSPECIFIED = 0;
+  EVENT_STATUS_DRAFT = 1;
+  EVENT_STATUS_PUBLISHED = 2;
+}
+
+
 
 
 

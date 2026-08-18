@@ -43,7 +43,8 @@ func main() {
 	venueRepository := memory.NewVenueRepository()
 	hallRepository := memory.NewHallRepository()
 	seatMapRepository := memory.NewSeatMapRepository()
-	eventContentService := application.NewService(venueRepository, hallRepository, seatMapRepository)
+	eventRepository := memory.NewEventRepository()
+	eventContentService := application.NewService(venueRepository, hallRepository, seatMapRepository, eventRepository)
 
 	grpcServer := grpc.NewServer()
 

@@ -25,6 +25,8 @@ const (
 	EventContentService_GetHall_FullMethodName       = "/reservelock.eventcontent.v1.EventContentService/GetHall"
 	EventContentService_CreateSeatMap_FullMethodName = "/reservelock.eventcontent.v1.EventContentService/CreateSeatMap"
 	EventContentService_GetSeatMap_FullMethodName    = "/reservelock.eventcontent.v1.EventContentService/GetSeatMap"
+	EventContentService_CreateEvent_FullMethodName   = "/reservelock.eventcontent.v1.EventContentService/CreateEvent"
+	EventContentService_GetEvent_FullMethodName      = "/reservelock.eventcontent.v1.EventContentService/GetEvent"
 )
 
 // EventContentServiceClient is the client API for EventContentService service.
@@ -37,6 +39,8 @@ type EventContentServiceClient interface {
 	GetHall(ctx context.Context, in *GetHallRequest, opts ...grpc.CallOption) (*GetHallResponse, error)
 	CreateSeatMap(ctx context.Context, in *CreateSeatMapRequest, opts ...grpc.CallOption) (*CreateSeatMapResponse, error)
 	GetSeatMap(ctx context.Context, in *GetSeatMapRequest, opts ...grpc.CallOption) (*GetSeatMapResponse, error)
+	CreateEvent(ctx context.Context, in *CreateEventRequest, opts ...grpc.CallOption) (*CreateEventResponse, error)
+	GetEvent(ctx context.Context, in *GetEventRequest, opts ...grpc.CallOption) (*GetEventResponse, error)
 }
 
 type eventContentServiceClient struct {
@@ -107,6 +111,26 @@ func (c *eventContentServiceClient) GetSeatMap(ctx context.Context, in *GetSeatM
 	return out, nil
 }
 
+func (c *eventContentServiceClient) CreateEvent(ctx context.Context, in *CreateEventRequest, opts ...grpc.CallOption) (*CreateEventResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateEventResponse)
+	err := c.cc.Invoke(ctx, EventContentService_CreateEvent_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *eventContentServiceClient) GetEvent(ctx context.Context, in *GetEventRequest, opts ...grpc.CallOption) (*GetEventResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetEventResponse)
+	err := c.cc.Invoke(ctx, EventContentService_GetEvent_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // EventContentServiceServer is the server API for EventContentService service.
 // All implementations must embed UnimplementedEventContentServiceServer
 // for forward compatibility.
@@ -117,6 +141,8 @@ type EventContentServiceServer interface {
 	GetHall(context.Context, *GetHallRequest) (*GetHallResponse, error)
 	CreateSeatMap(context.Context, *CreateSeatMapRequest) (*CreateSeatMapResponse, error)
 	GetSeatMap(context.Context, *GetSeatMapRequest) (*GetSeatMapResponse, error)
+	CreateEvent(context.Context, *CreateEventRequest) (*CreateEventResponse, error)
+	GetEvent(context.Context, *GetEventRequest) (*GetEventResponse, error)
 	mustEmbedUnimplementedEventContentServiceServer()
 }
 
@@ -144,6 +170,12 @@ func (UnimplementedEventContentServiceServer) CreateSeatMap(context.Context, *Cr
 }
 func (UnimplementedEventContentServiceServer) GetSeatMap(context.Context, *GetSeatMapRequest) (*GetSeatMapResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetSeatMap not implemented")
+}
+func (UnimplementedEventContentServiceServer) CreateEvent(context.Context, *CreateEventRequest) (*CreateEventResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateEvent not implemented")
+}
+func (UnimplementedEventContentServiceServer) GetEvent(context.Context, *GetEventRequest) (*GetEventResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetEvent not implemented")
 }
 func (UnimplementedEventContentServiceServer) mustEmbedUnimplementedEventContentServiceServer() {}
 func (UnimplementedEventContentServiceServer) testEmbeddedByValue()                             {}
@@ -274,6 +306,42 @@ func _EventContentService_GetSeatMap_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _EventContentService_CreateEvent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateEventRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EventContentServiceServer).CreateEvent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: EventContentService_CreateEvent_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EventContentServiceServer).CreateEvent(ctx, req.(*CreateEventRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _EventContentService_GetEvent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetEventRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EventContentServiceServer).GetEvent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: EventContentService_GetEvent_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EventContentServiceServer).GetEvent(ctx, req.(*GetEventRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // EventContentService_ServiceDesc is the grpc.ServiceDesc for EventContentService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -304,6 +372,14 @@ var EventContentService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetSeatMap",
 			Handler:    _EventContentService_GetSeatMap_Handler,
+		},
+		{
+			MethodName: "CreateEvent",
+			Handler:    _EventContentService_CreateEvent_Handler,
+		},
+		{
+			MethodName: "GetEvent",
+			Handler:    _EventContentService_GetEvent_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

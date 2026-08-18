@@ -13,4 +13,10 @@ var (
 	ErrInvalidSeatRow       = errors.New("seat row is required")
 	ErrInvalidSeatNumber    = errors.New("seat number is required")
 	ErrDuplicateSeat        = errors.New("duplicate seat")
+
+	ErrInvalidEventID       = errors.New("event id is required")
+	ErrInvalidEventName     = errors.New("event name is required")
+	ErrInvalidEventStartsAt = errors.New("event starts at is required")
+	ErrHallVenueMismatch    = errors.New("hall does not belong to venue")
+	ErrSeatMapHallMismatch  = errors.New("seat map does not belong to hall")
 )

@@ -22,10 +22,16 @@ type SeatMapRepository interface {
 	GetByID(ctx context.Context, id string) (domain.SeatMap, error)
 }
 
+type EventRepository interface {
+	Save(ctx context.Context, event domain.Event) error
+	GetByID(ctx context.Context, id string) (domain.Event, error)
+}
+
 type Service struct {
 	venueRepository   VenueRepository
 	hallRepository    HallRepository
 	seatMapRepository SeatMapRepository
+	eventRepository   EventRepository
 }
 
 type CreateVenueInput struct {
@@ -54,11 +60,12 @@ type CreateSeatInput struct {
 	Number  string
 }
 
-func NewService(venueRepository VenueRepository, hallRepository HallRepository, seatMapRepository SeatMapRepository) *Service {
+func NewService(venueRepository VenueRepository, hallRepository HallRepository, seatMapRepository SeatMapRepository, eventRepository EventRepository) *Service {
 	return &Service{
 		venueRepository:   venueRepository,
 		hallRepository:    hallRepository,
 		seatMapRepository: seatMapRepository,
+		eventRepository:   eventRepository,
 	}
 }
 
