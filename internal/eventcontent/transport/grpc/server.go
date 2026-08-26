@@ -137,3 +137,13 @@ func (s *server) GetEvent(ctx context.Context, request *eventcontentv1.GetEventR
 		Event: toProtoEvent(event),
 	}, nil
 }
+
+func (s *server) PublishEvent(ctx context.Context, request *eventcontentv1.PublishEventRequest) (*eventcontentv1.PublishEventResponse, error) {
+	event, err := s.service.PublishEvent(ctx, request.EventId)
+	if err != nil {
+		return nil, toGRPCError(err)
+	}
+	return &eventcontentv1.PublishEventResponse{
+		Event: toProtoEvent(event),
+	}, nil
+}

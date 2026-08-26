@@ -79,3 +79,22 @@ func (s *Service) GetEvent(ctx context.Context, eventID string) (domain.Event, e
 	}
 	return s.eventRepository.GetByID(ctx, eventID)
 }
+
+func (s *Service) PublishEvent(ctx context.Context, eventID string) (domain.Event, error) {
+	if eventID == "" {
+		return domain.Event{}, ErrInvalidEventID
+	}
+
+	event, err := s.eventRepository.GetByID(ctx, eventID)
+	if err != nil {
+		return domain.Event{}, err
+	}
+
+	if err := event.Publish(); err != nil {
+		return domain.Event{}, err
+	}
+	if err := s.eventRepository.Save(ctx, event); err != nil {
+		return domain.Event{}, err
+	}
+	return event, nil
+}

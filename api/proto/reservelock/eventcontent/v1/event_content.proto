@@ -15,6 +15,7 @@ service EventContentService {
   rpc GetSeatMap(GetSeatMapRequest) returns (GetSeatMapResponse);
   rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse);
   rpc GetEvent(GetEventRequest) returns (GetEventResponse);
+  rpc PublishEvent(PublishEventRequest) returns (PublishEventResponse);
 }
 
 
@@ -95,6 +96,14 @@ message GetEventResponse {
   Event event = 1;
 }
 
+message PublishEventRequest {
+  string event_id = 1;
+}
+
+message PublishEventResponse {
+  Event event = 1;
+}
+
 message Venue {
   string id = 1;
   string name = 2;
@@ -141,6 +150,7 @@ message Event {
   EventStatus status = 7;
   string created_by = 8;
 }
+
 
 enum EventStatus {
   EVENT_STATUS_UNSPECIFIED = 0;
