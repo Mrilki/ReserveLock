@@ -66,6 +66,7 @@ func main() {
 	admin := router.Group("/admin")
 	{
 		admin.POST("/venues", handler.CreateVenue)
+		admin.POST("/halls", handler.CreateHall)
 	}
 
 	server := &http.Server{
