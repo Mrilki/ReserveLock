@@ -9,7 +9,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	admincomfig "github.com/Mrilki/ReserveLock/internal/admin/config"
+	adminconfig "github.com/Mrilki/ReserveLock/internal/admin/config"
 	adminhttp "github.com/Mrilki/ReserveLock/internal/admin/transport/http"
 	eventcontentv1 "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/eventcontent/v1"
 	"github.com/Mrilki/ReserveLock/internal/platform/httpx"
@@ -25,7 +25,7 @@ import (
 const shutdownTimeout = 10 * time.Second
 
 func main() {
-	cfg := admincomfig.Load()
+	cfg := adminconfig.Load()
 
 	logg, err := logger.New(cfg.Base.AppName, cfg.Base.AppEnv)
 	if err != nil {
@@ -77,7 +77,11 @@ func main() {
 		IdleTimeout:       60 * time.Second,
 	}
 
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	ctx, stop := signal.NotifyContext(
+		context.Background(),
+		os.Interrupt,
+		syscall.SIGTERM,
+	)
 	defer stop()
 
 	serverErr := make(chan error, 1)
@@ -96,14 +100,17 @@ func main() {
 
 	select {
 	case <-ctx.Done():
-		logg.Info("event_content_grpc_addr")
-	case <-serverErr:
+		logg.Info("shutdown signal received")
+	case err := <-serverErr:
 		logg.Error("http server failed", zap.Error(err))
 		return
 	}
 
-	shutdownCtx, cannel := context.WithTimeout(context.Background(), shutdownTimeout)
-	defer cannel()
+	shutdownCtx, cancel := context.WithTimeout(
+		context.Background(),
+		shutdownTimeout,
+	)
+	defer cancel()
 
 	if err := server.Shutdown(shutdownCtx); err != nil {
 		logg.Error("http server shutdown failed", zap.Error(err))

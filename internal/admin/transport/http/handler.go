@@ -1,11 +1,15 @@
 package adminhttp
 
 import (
+	"context"
 	"net/http"
+	"time"
 
 	eventcontentv1 "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/eventcontent/v1"
 	"github.com/gin-gonic/gin"
 )
+
+const eventContentTimeout = 5 * time.Second
 
 type Handler struct {
 	eventContentClient eventcontentv1.EventContentServiceClient
@@ -42,20 +46,33 @@ func (h *Handler) CreateVenue(c *gin.Context) {
 		return
 	}
 
-	response, err := h.eventContentClient.CreateVenue(
+	ctx, cancel := context.WithTimeout(
 		c.Request.Context(),
+		eventContentTimeout,
+	)
+	defer cancel()
+
+	response, err := h.eventContentClient.CreateVenue(
+		ctx,
 		&eventcontentv1.CreateVenueRequest{
 			Name:      request.Name,
 			Address:   request.Address,
 			City:      request.City,
 			CreatedBy: request.CreatedBy,
-		})
+		},
+	)
 	if err != nil {
 		writeGRPCError(c, err)
 		return
 	}
 
 	venue := response.GetVenue()
+	if venue == nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "internal error",
+		})
+		return
+	}
 
 	c.JSON(http.StatusCreated, CreateVenueResponse{
 		ID:        venue.Id,
