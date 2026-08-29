@@ -68,6 +68,8 @@ func main() {
 		admin.POST("/venues", handler.CreateVenue)
 		admin.POST("/halls", handler.CreateHall)
 		admin.POST("/seat-maps", handler.CreateSeatMap)
+		admin.POST("/events", handler.CreateEvent)
+		admin.POST("/events/:id/publish", handler.PublishEvent)
 	}
 
 	server := &http.Server{
