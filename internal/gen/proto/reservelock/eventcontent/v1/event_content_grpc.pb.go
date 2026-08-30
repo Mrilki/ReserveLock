@@ -28,6 +28,7 @@ const (
 	EventContentService_CreateEvent_FullMethodName   = "/reservelock.eventcontent.v1.EventContentService/CreateEvent"
 	EventContentService_GetEvent_FullMethodName      = "/reservelock.eventcontent.v1.EventContentService/GetEvent"
 	EventContentService_PublishEvent_FullMethodName  = "/reservelock.eventcontent.v1.EventContentService/PublishEvent"
+	EventContentService_ListEvents_FullMethodName    = "/reservelock.eventcontent.v1.EventContentService/ListEvents"
 )
 
 // EventContentServiceClient is the client API for EventContentService service.
@@ -43,6 +44,7 @@ type EventContentServiceClient interface {
 	CreateEvent(ctx context.Context, in *CreateEventRequest, opts ...grpc.CallOption) (*CreateEventResponse, error)
 	GetEvent(ctx context.Context, in *GetEventRequest, opts ...grpc.CallOption) (*GetEventResponse, error)
 	PublishEvent(ctx context.Context, in *PublishEventRequest, opts ...grpc.CallOption) (*PublishEventResponse, error)
+	ListEvents(ctx context.Context, in *ListEventsRequest, opts ...grpc.CallOption) (*ListEventsResponse, error)
 }
 
 type eventContentServiceClient struct {
@@ -143,6 +145,16 @@ func (c *eventContentServiceClient) PublishEvent(ctx context.Context, in *Publis
 	return out, nil
 }
 
+func (c *eventContentServiceClient) ListEvents(ctx context.Context, in *ListEventsRequest, opts ...grpc.CallOption) (*ListEventsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListEventsResponse)
+	err := c.cc.Invoke(ctx, EventContentService_ListEvents_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // EventContentServiceServer is the server API for EventContentService service.
 // All implementations must embed UnimplementedEventContentServiceServer
 // for forward compatibility.
@@ -156,6 +168,7 @@ type EventContentServiceServer interface {
 	CreateEvent(context.Context, *CreateEventRequest) (*CreateEventResponse, error)
 	GetEvent(context.Context, *GetEventRequest) (*GetEventResponse, error)
 	PublishEvent(context.Context, *PublishEventRequest) (*PublishEventResponse, error)
+	ListEvents(context.Context, *ListEventsRequest) (*ListEventsResponse, error)
 	mustEmbedUnimplementedEventContentServiceServer()
 }
 
@@ -192,6 +205,9 @@ func (UnimplementedEventContentServiceServer) GetEvent(context.Context, *GetEven
 }
 func (UnimplementedEventContentServiceServer) PublishEvent(context.Context, *PublishEventRequest) (*PublishEventResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method PublishEvent not implemented")
+}
+func (UnimplementedEventContentServiceServer) ListEvents(context.Context, *ListEventsRequest) (*ListEventsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListEvents not implemented")
 }
 func (UnimplementedEventContentServiceServer) mustEmbedUnimplementedEventContentServiceServer() {}
 func (UnimplementedEventContentServiceServer) testEmbeddedByValue()                             {}
@@ -376,6 +392,24 @@ func _EventContentService_PublishEvent_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _EventContentService_ListEvents_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListEventsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EventContentServiceServer).ListEvents(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: EventContentService_ListEvents_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EventContentServiceServer).ListEvents(ctx, req.(*ListEventsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // EventContentService_ServiceDesc is the grpc.ServiceDesc for EventContentService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -418,6 +452,10 @@ var EventContentService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "PublishEvent",
 			Handler:    _EventContentService_PublishEvent_Handler,
+		},
+		{
+			MethodName: "ListEvents",
+			Handler:    _EventContentService_ListEvents_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

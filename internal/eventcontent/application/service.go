@@ -25,6 +25,7 @@ type SeatMapRepository interface {
 type EventRepository interface {
 	Save(ctx context.Context, event domain.Event) error
 	GetByID(ctx context.Context, id string) (domain.Event, error)
+	List(ctx context.Context) ([]domain.Event, error)
 }
 
 type Service struct {

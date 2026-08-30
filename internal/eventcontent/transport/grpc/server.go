@@ -147,3 +147,18 @@ func (s *server) PublishEvent(ctx context.Context, request *eventcontentv1.Publi
 		Event: toProtoEvent(event),
 	}, nil
 }
+
+func (s *server) ListEvents(ctx context.Context, request *eventcontentv1.ListEventsRequest) (*eventcontentv1.ListEventsResponse, error) {
+	events, err := s.service.ListEvents(ctx)
+	if err != nil {
+		return nil, toGRPCError(err)
+	}
+
+	protoEvents := make([]*eventcontentv1.Event, 0, len(events))
+	for _, event := range events {
+		protoEvents = append(protoEvents, toProtoEvent(event))
+	}
+	return &eventcontentv1.ListEventsResponse{
+		Events: protoEvents,
+	}, nil
+}

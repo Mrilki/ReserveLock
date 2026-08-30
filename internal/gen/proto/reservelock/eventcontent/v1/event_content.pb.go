@@ -967,6 +967,86 @@ func (x *PublishEventResponse) GetEvent() *Event {
 	return nil
 }
 
+type ListEventsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListEventsRequest) Reset() {
+	*x = ListEventsRequest{}
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListEventsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListEventsRequest) ProtoMessage() {}
+
+func (x *ListEventsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListEventsRequest.ProtoReflect.Descriptor instead.
+func (*ListEventsRequest) Descriptor() ([]byte, []int) {
+	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{18}
+}
+
+type ListEventsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Events        []*Event               `protobuf:"bytes,1,rep,name=events,proto3" json:"events,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListEventsResponse) Reset() {
+	*x = ListEventsResponse{}
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListEventsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListEventsResponse) ProtoMessage() {}
+
+func (x *ListEventsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListEventsResponse.ProtoReflect.Descriptor instead.
+func (*ListEventsResponse) Descriptor() ([]byte, []int) {
+	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *ListEventsResponse) GetEvents() []*Event {
+	if x != nil {
+		return x.Events
+	}
+	return nil
+}
+
 type Venue struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -980,7 +1060,7 @@ type Venue struct {
 
 func (x *Venue) Reset() {
 	*x = Venue{}
-	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[18]
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -992,7 +1072,7 @@ func (x *Venue) String() string {
 func (*Venue) ProtoMessage() {}
 
 func (x *Venue) ProtoReflect() protoreflect.Message {
-	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[18]
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1005,7 +1085,7 @@ func (x *Venue) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Venue.ProtoReflect.Descriptor instead.
 func (*Venue) Descriptor() ([]byte, []int) {
-	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{18}
+	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *Venue) GetId() string {
@@ -1055,7 +1135,7 @@ type Hall struct {
 
 func (x *Hall) Reset() {
 	*x = Hall{}
-	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[19]
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1067,7 +1147,7 @@ func (x *Hall) String() string {
 func (*Hall) ProtoMessage() {}
 
 func (x *Hall) ProtoReflect() protoreflect.Message {
-	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[19]
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1080,7 +1160,7 @@ func (x *Hall) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Hall.ProtoReflect.Descriptor instead.
 func (*Hall) Descriptor() ([]byte, []int) {
-	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{19}
+	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *Hall) GetId() string {
@@ -1124,7 +1204,7 @@ type SeatMap struct {
 
 func (x *SeatMap) Reset() {
 	*x = SeatMap{}
-	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[20]
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1136,7 +1216,7 @@ func (x *SeatMap) String() string {
 func (*SeatMap) ProtoMessage() {}
 
 func (x *SeatMap) ProtoReflect() protoreflect.Message {
-	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[20]
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1149,7 +1229,7 @@ func (x *SeatMap) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SeatMap.ProtoReflect.Descriptor instead.
 func (*SeatMap) Descriptor() ([]byte, []int) {
-	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{20}
+	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *SeatMap) GetId() string {
@@ -1199,7 +1279,7 @@ type Seat struct {
 
 func (x *Seat) Reset() {
 	*x = Seat{}
-	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[21]
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1211,7 +1291,7 @@ func (x *Seat) String() string {
 func (*Seat) ProtoMessage() {}
 
 func (x *Seat) ProtoReflect() protoreflect.Message {
-	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[21]
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1224,7 +1304,7 @@ func (x *Seat) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Seat.ProtoReflect.Descriptor instead.
 func (*Seat) Descriptor() ([]byte, []int) {
-	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{21}
+	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *Seat) GetId() string {
@@ -1266,7 +1346,7 @@ type SeatInput struct {
 
 func (x *SeatInput) Reset() {
 	*x = SeatInput{}
-	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[22]
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1278,7 +1358,7 @@ func (x *SeatInput) String() string {
 func (*SeatInput) ProtoMessage() {}
 
 func (x *SeatInput) ProtoReflect() protoreflect.Message {
-	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[22]
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1291,7 +1371,7 @@ func (x *SeatInput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SeatInput.ProtoReflect.Descriptor instead.
 func (*SeatInput) Descriptor() ([]byte, []int) {
-	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{22}
+	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *SeatInput) GetSection() string {
@@ -1331,7 +1411,7 @@ type Event struct {
 
 func (x *Event) Reset() {
 	*x = Event{}
-	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[23]
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1343,7 +1423,7 @@ func (x *Event) String() string {
 func (*Event) ProtoMessage() {}
 
 func (x *Event) ProtoReflect() protoreflect.Message {
-	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[23]
+	mi := &file_reservelock_eventcontent_v1_event_content_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1356,7 +1436,7 @@ func (x *Event) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Event.ProtoReflect.Descriptor instead.
 func (*Event) Descriptor() ([]byte, []int) {
-	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{23}
+	return file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *Event) GetId() string {
@@ -1472,7 +1552,10 @@ const file_reservelock_eventcontent_v1_event_content_proto_rawDesc = "" +
 	"\x13PublishEventRequest\x12\x19\n" +
 	"\bevent_id\x18\x01 \x01(\tR\aeventId\"P\n" +
 	"\x14PublishEventResponse\x128\n" +
-	"\x05event\x18\x01 \x01(\v2\".reservelock.eventcontent.v1.EventR\x05event\"x\n" +
+	"\x05event\x18\x01 \x01(\v2\".reservelock.eventcontent.v1.EventR\x05event\"\x13\n" +
+	"\x11ListEventsRequest\"P\n" +
+	"\x12ListEventsResponse\x12:\n" +
+	"\x06events\x18\x01 \x03(\v2\".reservelock.eventcontent.v1.EventR\x06events\"x\n" +
 	"\x05Venue\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
@@ -1515,7 +1598,7 @@ const file_reservelock_eventcontent_v1_event_content_proto_rawDesc = "" +
 	"\vEventStatus\x12\x1c\n" +
 	"\x18EVENT_STATUS_UNSPECIFIED\x10\x00\x12\x16\n" +
 	"\x12EVENT_STATUS_DRAFT\x10\x01\x12\x1a\n" +
-	"\x16EVENT_STATUS_PUBLISHED\x10\x022\xfc\a\n" +
+	"\x16EVENT_STATUS_PUBLISHED\x10\x022\xeb\b\n" +
 	"\x13EventContentService\x12p\n" +
 	"\vCreateVenue\x12/.reservelock.eventcontent.v1.CreateVenueRequest\x1a0.reservelock.eventcontent.v1.CreateVenueResponse\x12g\n" +
 	"\bGetVenue\x12,.reservelock.eventcontent.v1.GetVenueRequest\x1a-.reservelock.eventcontent.v1.GetVenueResponse\x12m\n" +
@@ -1527,7 +1610,9 @@ const file_reservelock_eventcontent_v1_event_content_proto_rawDesc = "" +
 	"GetSeatMap\x12..reservelock.eventcontent.v1.GetSeatMapRequest\x1a/.reservelock.eventcontent.v1.GetSeatMapResponse\x12p\n" +
 	"\vCreateEvent\x12/.reservelock.eventcontent.v1.CreateEventRequest\x1a0.reservelock.eventcontent.v1.CreateEventResponse\x12g\n" +
 	"\bGetEvent\x12,.reservelock.eventcontent.v1.GetEventRequest\x1a-.reservelock.eventcontent.v1.GetEventResponse\x12s\n" +
-	"\fPublishEvent\x120.reservelock.eventcontent.v1.PublishEventRequest\x1a1.reservelock.eventcontent.v1.PublishEventResponseB]Z[github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/eventcontent/v1;eventcontentv1b\x06proto3"
+	"\fPublishEvent\x120.reservelock.eventcontent.v1.PublishEventRequest\x1a1.reservelock.eventcontent.v1.PublishEventResponse\x12m\n" +
+	"\n" +
+	"ListEvents\x12..reservelock.eventcontent.v1.ListEventsRequest\x1a/.reservelock.eventcontent.v1.ListEventsResponseB]Z[github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/eventcontent/v1;eventcontentv1b\x06proto3"
 
 var (
 	file_reservelock_eventcontent_v1_event_content_proto_rawDescOnce sync.Once
@@ -1542,7 +1627,7 @@ func file_reservelock_eventcontent_v1_event_content_proto_rawDescGZIP() []byte {
 }
 
 var file_reservelock_eventcontent_v1_event_content_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_reservelock_eventcontent_v1_event_content_proto_msgTypes = make([]protoimpl.MessageInfo, 24)
+var file_reservelock_eventcontent_v1_event_content_proto_msgTypes = make([]protoimpl.MessageInfo, 26)
 var file_reservelock_eventcontent_v1_event_content_proto_goTypes = []any{
 	(EventStatus)(0),              // 0: reservelock.eventcontent.v1.EventStatus
 	(*CreateVenueRequest)(nil),    // 1: reservelock.eventcontent.v1.CreateVenueRequest
@@ -1563,52 +1648,57 @@ var file_reservelock_eventcontent_v1_event_content_proto_goTypes = []any{
 	(*GetEventResponse)(nil),      // 16: reservelock.eventcontent.v1.GetEventResponse
 	(*PublishEventRequest)(nil),   // 17: reservelock.eventcontent.v1.PublishEventRequest
 	(*PublishEventResponse)(nil),  // 18: reservelock.eventcontent.v1.PublishEventResponse
-	(*Venue)(nil),                 // 19: reservelock.eventcontent.v1.Venue
-	(*Hall)(nil),                  // 20: reservelock.eventcontent.v1.Hall
-	(*SeatMap)(nil),               // 21: reservelock.eventcontent.v1.SeatMap
-	(*Seat)(nil),                  // 22: reservelock.eventcontent.v1.Seat
-	(*SeatInput)(nil),             // 23: reservelock.eventcontent.v1.SeatInput
-	(*Event)(nil),                 // 24: reservelock.eventcontent.v1.Event
-	(*timestamppb.Timestamp)(nil), // 25: google.protobuf.Timestamp
+	(*ListEventsRequest)(nil),     // 19: reservelock.eventcontent.v1.ListEventsRequest
+	(*ListEventsResponse)(nil),    // 20: reservelock.eventcontent.v1.ListEventsResponse
+	(*Venue)(nil),                 // 21: reservelock.eventcontent.v1.Venue
+	(*Hall)(nil),                  // 22: reservelock.eventcontent.v1.Hall
+	(*SeatMap)(nil),               // 23: reservelock.eventcontent.v1.SeatMap
+	(*Seat)(nil),                  // 24: reservelock.eventcontent.v1.Seat
+	(*SeatInput)(nil),             // 25: reservelock.eventcontent.v1.SeatInput
+	(*Event)(nil),                 // 26: reservelock.eventcontent.v1.Event
+	(*timestamppb.Timestamp)(nil), // 27: google.protobuf.Timestamp
 }
 var file_reservelock_eventcontent_v1_event_content_proto_depIdxs = []int32{
-	19, // 0: reservelock.eventcontent.v1.CreateVenueResponse.venue:type_name -> reservelock.eventcontent.v1.Venue
-	19, // 1: reservelock.eventcontent.v1.GetVenueResponse.venue:type_name -> reservelock.eventcontent.v1.Venue
-	20, // 2: reservelock.eventcontent.v1.CreateHallResponse.hall:type_name -> reservelock.eventcontent.v1.Hall
-	20, // 3: reservelock.eventcontent.v1.GetHallResponse.hall:type_name -> reservelock.eventcontent.v1.Hall
-	23, // 4: reservelock.eventcontent.v1.CreateSeatMapRequest.seats:type_name -> reservelock.eventcontent.v1.SeatInput
-	21, // 5: reservelock.eventcontent.v1.CreateSeatMapResponse.seat_map:type_name -> reservelock.eventcontent.v1.SeatMap
-	21, // 6: reservelock.eventcontent.v1.GetSeatMapResponse.seat_map:type_name -> reservelock.eventcontent.v1.SeatMap
-	25, // 7: reservelock.eventcontent.v1.CreateEventRequest.starts_at:type_name -> google.protobuf.Timestamp
-	24, // 8: reservelock.eventcontent.v1.CreateEventResponse.event:type_name -> reservelock.eventcontent.v1.Event
-	24, // 9: reservelock.eventcontent.v1.GetEventResponse.event:type_name -> reservelock.eventcontent.v1.Event
-	24, // 10: reservelock.eventcontent.v1.PublishEventResponse.event:type_name -> reservelock.eventcontent.v1.Event
-	22, // 11: reservelock.eventcontent.v1.SeatMap.seats:type_name -> reservelock.eventcontent.v1.Seat
-	25, // 12: reservelock.eventcontent.v1.Event.starts_at:type_name -> google.protobuf.Timestamp
-	0,  // 13: reservelock.eventcontent.v1.Event.status:type_name -> reservelock.eventcontent.v1.EventStatus
-	1,  // 14: reservelock.eventcontent.v1.EventContentService.CreateVenue:input_type -> reservelock.eventcontent.v1.CreateVenueRequest
-	3,  // 15: reservelock.eventcontent.v1.EventContentService.GetVenue:input_type -> reservelock.eventcontent.v1.GetVenueRequest
-	5,  // 16: reservelock.eventcontent.v1.EventContentService.CreateHall:input_type -> reservelock.eventcontent.v1.CreateHallRequest
-	7,  // 17: reservelock.eventcontent.v1.EventContentService.GetHall:input_type -> reservelock.eventcontent.v1.GetHallRequest
-	9,  // 18: reservelock.eventcontent.v1.EventContentService.CreateSeatMap:input_type -> reservelock.eventcontent.v1.CreateSeatMapRequest
-	11, // 19: reservelock.eventcontent.v1.EventContentService.GetSeatMap:input_type -> reservelock.eventcontent.v1.GetSeatMapRequest
-	13, // 20: reservelock.eventcontent.v1.EventContentService.CreateEvent:input_type -> reservelock.eventcontent.v1.CreateEventRequest
-	15, // 21: reservelock.eventcontent.v1.EventContentService.GetEvent:input_type -> reservelock.eventcontent.v1.GetEventRequest
-	17, // 22: reservelock.eventcontent.v1.EventContentService.PublishEvent:input_type -> reservelock.eventcontent.v1.PublishEventRequest
-	2,  // 23: reservelock.eventcontent.v1.EventContentService.CreateVenue:output_type -> reservelock.eventcontent.v1.CreateVenueResponse
-	4,  // 24: reservelock.eventcontent.v1.EventContentService.GetVenue:output_type -> reservelock.eventcontent.v1.GetVenueResponse
-	6,  // 25: reservelock.eventcontent.v1.EventContentService.CreateHall:output_type -> reservelock.eventcontent.v1.CreateHallResponse
-	8,  // 26: reservelock.eventcontent.v1.EventContentService.GetHall:output_type -> reservelock.eventcontent.v1.GetHallResponse
-	10, // 27: reservelock.eventcontent.v1.EventContentService.CreateSeatMap:output_type -> reservelock.eventcontent.v1.CreateSeatMapResponse
-	12, // 28: reservelock.eventcontent.v1.EventContentService.GetSeatMap:output_type -> reservelock.eventcontent.v1.GetSeatMapResponse
-	14, // 29: reservelock.eventcontent.v1.EventContentService.CreateEvent:output_type -> reservelock.eventcontent.v1.CreateEventResponse
-	16, // 30: reservelock.eventcontent.v1.EventContentService.GetEvent:output_type -> reservelock.eventcontent.v1.GetEventResponse
-	18, // 31: reservelock.eventcontent.v1.EventContentService.PublishEvent:output_type -> reservelock.eventcontent.v1.PublishEventResponse
-	23, // [23:32] is the sub-list for method output_type
-	14, // [14:23] is the sub-list for method input_type
-	14, // [14:14] is the sub-list for extension type_name
-	14, // [14:14] is the sub-list for extension extendee
-	0,  // [0:14] is the sub-list for field type_name
+	21, // 0: reservelock.eventcontent.v1.CreateVenueResponse.venue:type_name -> reservelock.eventcontent.v1.Venue
+	21, // 1: reservelock.eventcontent.v1.GetVenueResponse.venue:type_name -> reservelock.eventcontent.v1.Venue
+	22, // 2: reservelock.eventcontent.v1.CreateHallResponse.hall:type_name -> reservelock.eventcontent.v1.Hall
+	22, // 3: reservelock.eventcontent.v1.GetHallResponse.hall:type_name -> reservelock.eventcontent.v1.Hall
+	25, // 4: reservelock.eventcontent.v1.CreateSeatMapRequest.seats:type_name -> reservelock.eventcontent.v1.SeatInput
+	23, // 5: reservelock.eventcontent.v1.CreateSeatMapResponse.seat_map:type_name -> reservelock.eventcontent.v1.SeatMap
+	23, // 6: reservelock.eventcontent.v1.GetSeatMapResponse.seat_map:type_name -> reservelock.eventcontent.v1.SeatMap
+	27, // 7: reservelock.eventcontent.v1.CreateEventRequest.starts_at:type_name -> google.protobuf.Timestamp
+	26, // 8: reservelock.eventcontent.v1.CreateEventResponse.event:type_name -> reservelock.eventcontent.v1.Event
+	26, // 9: reservelock.eventcontent.v1.GetEventResponse.event:type_name -> reservelock.eventcontent.v1.Event
+	26, // 10: reservelock.eventcontent.v1.PublishEventResponse.event:type_name -> reservelock.eventcontent.v1.Event
+	26, // 11: reservelock.eventcontent.v1.ListEventsResponse.events:type_name -> reservelock.eventcontent.v1.Event
+	24, // 12: reservelock.eventcontent.v1.SeatMap.seats:type_name -> reservelock.eventcontent.v1.Seat
+	27, // 13: reservelock.eventcontent.v1.Event.starts_at:type_name -> google.protobuf.Timestamp
+	0,  // 14: reservelock.eventcontent.v1.Event.status:type_name -> reservelock.eventcontent.v1.EventStatus
+	1,  // 15: reservelock.eventcontent.v1.EventContentService.CreateVenue:input_type -> reservelock.eventcontent.v1.CreateVenueRequest
+	3,  // 16: reservelock.eventcontent.v1.EventContentService.GetVenue:input_type -> reservelock.eventcontent.v1.GetVenueRequest
+	5,  // 17: reservelock.eventcontent.v1.EventContentService.CreateHall:input_type -> reservelock.eventcontent.v1.CreateHallRequest
+	7,  // 18: reservelock.eventcontent.v1.EventContentService.GetHall:input_type -> reservelock.eventcontent.v1.GetHallRequest
+	9,  // 19: reservelock.eventcontent.v1.EventContentService.CreateSeatMap:input_type -> reservelock.eventcontent.v1.CreateSeatMapRequest
+	11, // 20: reservelock.eventcontent.v1.EventContentService.GetSeatMap:input_type -> reservelock.eventcontent.v1.GetSeatMapRequest
+	13, // 21: reservelock.eventcontent.v1.EventContentService.CreateEvent:input_type -> reservelock.eventcontent.v1.CreateEventRequest
+	15, // 22: reservelock.eventcontent.v1.EventContentService.GetEvent:input_type -> reservelock.eventcontent.v1.GetEventRequest
+	17, // 23: reservelock.eventcontent.v1.EventContentService.PublishEvent:input_type -> reservelock.eventcontent.v1.PublishEventRequest
+	19, // 24: reservelock.eventcontent.v1.EventContentService.ListEvents:input_type -> reservelock.eventcontent.v1.ListEventsRequest
+	2,  // 25: reservelock.eventcontent.v1.EventContentService.CreateVenue:output_type -> reservelock.eventcontent.v1.CreateVenueResponse
+	4,  // 26: reservelock.eventcontent.v1.EventContentService.GetVenue:output_type -> reservelock.eventcontent.v1.GetVenueResponse
+	6,  // 27: reservelock.eventcontent.v1.EventContentService.CreateHall:output_type -> reservelock.eventcontent.v1.CreateHallResponse
+	8,  // 28: reservelock.eventcontent.v1.EventContentService.GetHall:output_type -> reservelock.eventcontent.v1.GetHallResponse
+	10, // 29: reservelock.eventcontent.v1.EventContentService.CreateSeatMap:output_type -> reservelock.eventcontent.v1.CreateSeatMapResponse
+	12, // 30: reservelock.eventcontent.v1.EventContentService.GetSeatMap:output_type -> reservelock.eventcontent.v1.GetSeatMapResponse
+	14, // 31: reservelock.eventcontent.v1.EventContentService.CreateEvent:output_type -> reservelock.eventcontent.v1.CreateEventResponse
+	16, // 32: reservelock.eventcontent.v1.EventContentService.GetEvent:output_type -> reservelock.eventcontent.v1.GetEventResponse
+	18, // 33: reservelock.eventcontent.v1.EventContentService.PublishEvent:output_type -> reservelock.eventcontent.v1.PublishEventResponse
+	20, // 34: reservelock.eventcontent.v1.EventContentService.ListEvents:output_type -> reservelock.eventcontent.v1.ListEventsResponse
+	25, // [25:35] is the sub-list for method output_type
+	15, // [15:25] is the sub-list for method input_type
+	15, // [15:15] is the sub-list for extension type_name
+	15, // [15:15] is the sub-list for extension extendee
+	0,  // [0:15] is the sub-list for field type_name
 }
 
 func init() { file_reservelock_eventcontent_v1_event_content_proto_init() }
@@ -1622,7 +1712,7 @@ func file_reservelock_eventcontent_v1_event_content_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_reservelock_eventcontent_v1_event_content_proto_rawDesc), len(file_reservelock_eventcontent_v1_event_content_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   24,
+			NumMessages:   26,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

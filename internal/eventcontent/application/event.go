@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"sort"
 	"time"
 
 	"github.com/Mrilki/ReserveLock/internal/eventcontent/domain"
@@ -97,4 +98,17 @@ func (s *Service) PublishEvent(ctx context.Context, eventID string) (domain.Even
 		return domain.Event{}, err
 	}
 	return event, nil
+}
+
+func (s *Service) ListEvents(ctx context.Context) ([]domain.Event, error) {
+	events, err := s.eventRepository.List(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	sort.Slice(events, func(i, j int) bool {
+		return events[i].StartsAt.Before(events[j].StartsAt)
+	})
+
+	return events, nil
 }

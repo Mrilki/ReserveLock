@@ -36,3 +36,16 @@ func (r *EventRepository) GetByID(ctx context.Context, id string) (domain.Event,
 	}
 	return domain.Event{}, domain.ErrEventNotFound
 }
+
+func (r *EventRepository) List(ctx context.Context) ([]domain.Event, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	events := make([]domain.Event, 0, len(r.events))
+
+	for _, event := range r.events {
+		events = append(events, event)
+	}
+
+	return events, nil
+}

@@ -16,6 +16,7 @@ service EventContentService {
   rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse);
   rpc GetEvent(GetEventRequest) returns (GetEventResponse);
   rpc PublishEvent(PublishEventRequest) returns (PublishEventResponse);
+  rpc ListEvents(ListEventsRequest) returns (ListEventsResponse);
 }
 
 
@@ -102,6 +103,14 @@ message PublishEventRequest {
 
 message PublishEventResponse {
   Event event = 1;
+}
+
+message ListEventsRequest {
+
+}
+
+message ListEventsResponse {
+  repeated Event events = 1;
 }
 
 message Venue {
