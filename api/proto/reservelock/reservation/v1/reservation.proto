@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package reservelock.reservation.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/reservation/v1;reservationv1";
+
+service ReservationService {
+  rpc InitializeInventory(InitializeInventoryRequest)
+      returns (InitializeInventoryResponse);
+
+  rpc CreateReservation(CreateReservationRequest)
+      returns (CreateReservationResponse);
+
+  rpc GetReservation(GetReservationRequest)
+      returns (GetReservationResponse);
+}
+
+message InitializeInventoryRequest {
+  string event_id = 1;
+  repeated string seat_ids = 2;
+}
+
+message InitializeInventoryResponse {
+
+}
+
+message CreateReservationRequest {
+  string event_id = 1;
+  string user_id = 2;
+  repeated string seat_ids = 3;
+}
+
+message CreateReservationResponse {
+  Reservation reservation = 1;
+}
+
+message GetReservationRequest {
+  string reservation_id = 1;
+}
+
+message GetReservationResponse {
+  Reservation reservation = 1;
+}
+
+message Reservation {
+  string id = 1;
+  string event_id = 2;
+  string user_id = 3;
+  repeated string seat_ids = 4;
+  ReservationStatus status = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp expires_at = 7;
+}
+
+enum ReservationStatus {
+  RESERVATION_STATUS_UNSPECIFIED = 0;
+  RESERVATION_STATUS_PENDING = 1;
+  RESERVATION_STATUS_CONFIRMED = 2;
+  RESERVATION_STATUS_EXPIRED = 3;
+}
+
+
+
