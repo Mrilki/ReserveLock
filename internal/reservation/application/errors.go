@@ -7,4 +7,6 @@ var (
 	ErrSeatIDsRequired      = errors.New("seat ids are required")
 	ErrInvalidSeatID        = errors.New("invalid seat id")
 	ErrInvalidReservationID = errors.New("invalid reservation id")
+	ErrInvalidUserID        = errors.New("invalid user id")
+	ErrDuplicateSeatID      = errors.New("duplicate seat id")
 )

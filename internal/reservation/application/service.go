@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"time"
 
 	"github.com/Mrilki/ReserveLock/internal/reservation/domain"
 )
@@ -11,6 +12,20 @@ type InventoryRepository interface {
 		ctx context.Context,
 		eventID string,
 		seats []domain.SeatInventory,
+	) error
+	Hold(
+		ctx context.Context,
+		eventID string,
+		seatIDs []string,
+		reservationID string,
+		heldUntil time.Time,
+	) error
+
+	Release(
+		ctx context.Context,
+		eventID string,
+		seatIDs []string,
+		reservationID string,
 	) error
 }
 
@@ -53,10 +68,18 @@ func (s *Service) InitializeInventory(ctx context.Context, input InitializeInven
 		len(input.SeatIDs),
 	)
 
+	seen := make(map[string]struct{}, len(input.SeatIDs))
+
 	for _, seatID := range input.SeatIDs {
 		if seatID == "" {
 			return ErrInvalidSeatID
 		}
+
+		if _, exists := seen[seatID]; exists {
+			return ErrDuplicateSeatID
+		}
+
+		seen[seatID] = struct{}{}
 
 		seats = append(seats, domain.SeatInventory{
 			EventID: input.EventID,
@@ -69,19 +92,5 @@ func (s *Service) InitializeInventory(ctx context.Context, input InitializeInven
 		ctx,
 		input.EventID,
 		seats,
-	)
-}
-
-func (s *Service) GetReservation(
-	ctx context.Context,
-	reservationID string,
-) (domain.Reservation, error) {
-	if reservationID == "" {
-		return domain.Reservation{}, ErrInvalidReservationID
-	}
-
-	return s.reservationRepository.GetByID(
-		ctx,
-		reservationID,
 	)
 }
