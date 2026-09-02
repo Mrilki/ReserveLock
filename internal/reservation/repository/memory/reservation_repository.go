@@ -3,6 +3,7 @@ package memory
 import (
 	"context"
 	"sync"
+	"time"
 
 	"github.com/Mrilki/ReserveLock/internal/reservation/domain"
 )
@@ -43,4 +44,34 @@ func (r *ReservationRepository) GetByID(
 	}
 
 	return reservation, nil
+}
+
+func (r *ReservationRepository) ListExpiredPending(
+	ctx context.Context,
+	now time.Time,
+) ([]domain.Reservation, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	reservations := make(
+		[]domain.Reservation,
+		0,
+	)
+
+	for _, reservation := range r.reservations {
+		if reservation.Status != domain.ReservationStatusPending {
+			continue
+		}
+
+		if reservation.ExpiresAt.After(now) {
+			continue
+		}
+
+		reservations = append(
+			reservations,
+			reservation,
+		)
+	}
+
+	return reservations, nil
 }

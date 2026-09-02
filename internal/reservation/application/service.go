@@ -32,6 +32,7 @@ type InventoryRepository interface {
 type ReservationRepository interface {
 	Save(ctx context.Context, reservation domain.Reservation) error
 	GetByID(ctx context.Context, id string) (domain.Reservation, error)
+	ListExpiredPending(ctx context.Context, now time.Time) ([]domain.Reservation, error)
 }
 
 type Service struct {

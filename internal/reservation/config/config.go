@@ -9,8 +9,8 @@ type Config struct {
 	GRPCAddr string
 }
 
-func Load() *Config {
-	return &Config{
+func Load() Config {
+	return Config{
 		Base:     platformconfig.LoadBase("reservation-service"),
 		GRPCAddr: platformconfig.GetEnv("GRPC_ADDR", defaultGRPCAddr),
 	}

@@ -20,7 +20,10 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-const shutdownTimeout = 10 * time.Second
+const (
+	shutdownTimeout        = 10 * time.Second
+	expirationScanInterval = time.Second
+)
 
 func main() {
 	cfg := reservationconfig.Load()
@@ -82,6 +85,39 @@ func main() {
 		syscall.SIGTERM,
 	)
 	defer stop()
+
+	go func() {
+		ticker := time.NewTicker(expirationScanInterval)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case now := <-ticker.C:
+				expiredCount, err := reservationService.ExpireReservations(
+					ctx,
+					now.UTC(),
+				)
+				if err != nil {
+					logg.Error(
+						"failed to expire reservations",
+						zap.Error(err),
+					)
+
+					continue
+				}
+				if expiredCount > 0 {
+					logg.Info(
+						"reservations expired",
+						zap.Int(
+							"count",
+							expiredCount,
+						),
+					)
+				}
+			}
+		}
+	}()
 
 	serverErr := make(chan error, 1)
 

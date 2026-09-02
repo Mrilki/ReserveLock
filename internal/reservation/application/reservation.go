@@ -109,3 +109,65 @@ func (s *Service) CreateReservation(
 
 	return reservation, nil
 }
+
+func (s *Service) ExpireReservations(
+	ctx context.Context,
+	now time.Time,
+) (int, error) {
+	reservations, err :=
+		s.reservationRepository.ListExpiredPending(
+			ctx,
+			now,
+		)
+	if err != nil {
+		return 0, fmt.Errorf(
+			"list expired reservations: %w",
+			err,
+		)
+	}
+
+	expiredCount := 0
+	expirationErrors := make([]error, 0)
+
+	for _, reservation := range reservations {
+		err := s.inventoryRepository.Release(
+			ctx,
+			reservation.EventID,
+			reservation.SeatIDs,
+			reservation.ID,
+		)
+		if err != nil {
+			expirationErrors = append(
+				expirationErrors,
+				fmt.Errorf(
+					"release seats for reservation %s: %w",
+					reservation.ID,
+					err,
+				),
+			)
+			continue
+		}
+
+		reservation.Status = domain.ReservationStatusExpired
+		err = s.reservationRepository.Save(
+			ctx,
+			reservation,
+		)
+		if err != nil {
+			expirationErrors = append(
+				expirationErrors,
+				fmt.Errorf(
+					"save expired reservation %s: %w",
+					reservation.ID,
+					err,
+				),
+			)
+
+			continue
+		}
+
+		expiredCount++
+	}
+
+	return expiredCount, errors.Join(expirationErrors...)
+}
