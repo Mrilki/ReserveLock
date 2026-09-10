@@ -11,16 +11,22 @@ import (
 
 	"github.com/Mrilki/ReserveLock/internal/eventcontent/application"
 	eventcontentconfig "github.com/Mrilki/ReserveLock/internal/eventcontent/config"
-	"github.com/Mrilki/ReserveLock/internal/eventcontent/repository/memory"
+	"github.com/Mrilki/ReserveLock/internal/eventcontent/repository/mongodb"
 	eventcontentgrpc "github.com/Mrilki/ReserveLock/internal/eventcontent/transport/grpc"
 	eventcontentv1 "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/eventcontent/v1"
 	"github.com/Mrilki/ReserveLock/internal/platform/logger"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
-const shutdownTimeout = 10 * time.Second
+const (
+	shutdownTimeout       = 10 * time.Second
+	mongoOperationTimeout = 5 * time.Second
+)
 
 func main() {
 	cfg := eventcontentconfig.Load()
@@ -34,17 +40,76 @@ func main() {
 		_ = logg.Sync()
 	}()
 
+	mongoClient, err := mongo.Connect(
+		options.Client().ApplyURI(
+			cfg.MongoURI,
+		),
+	)
+	if err != nil {
+		logg.Error(
+			"failed to create mongo client",
+			zap.Error(err),
+		)
+		return
+	}
+	defer func() {
+		disconnectCtx, cancel :=
+			context.WithTimeout(
+				context.Background(),
+				mongoOperationTimeout,
+			)
+		defer cancel()
+
+		if err := mongoClient.Disconnect(
+			disconnectCtx,
+		); err != nil {
+			logg.Error(
+				"failed to disconnect mongo client",
+				zap.Error(err),
+			)
+		}
+	}()
+
+	pingCtx, pingCancel := context.WithTimeout(
+		context.Background(),
+		mongoOperationTimeout,
+	)
+
+	err = mongoClient.Ping(
+		pingCtx,
+		readpref.Primary(),
+	)
+
+	pingCancel()
+
+	if err != nil {
+		logg.Error(
+			"failed to ping mongo",
+			zap.Error(err),
+		)
+
+		return
+	}
+
+	database := mongoClient.Database(cfg.MongoDatabase)
+
+	venueRepository := mongodb.NewVenueRepository(database)
+	hallRepository := mongodb.NewHallRepository(database)
+	seatMapRepository := mongodb.NewSeatMapRepository(database)
+	eventRepository := mongodb.NewEventRepository(database)
+
+	eventContentService := application.NewService(
+		venueRepository,
+		hallRepository,
+		seatMapRepository,
+		eventRepository,
+	)
+
 	listener, err := net.Listen("tcp", cfg.GRPCAddr)
 	if err != nil {
 		logg.Error("failed to listen", zap.String("addr", cfg.GRPCAddr), zap.Error(err))
 		return
 	}
-
-	venueRepository := memory.NewVenueRepository()
-	hallRepository := memory.NewHallRepository()
-	seatMapRepository := memory.NewSeatMapRepository()
-	eventRepository := memory.NewEventRepository()
-	eventContentService := application.NewService(venueRepository, hallRepository, seatMapRepository, eventRepository)
 
 	grpcServer := grpc.NewServer()
 
@@ -78,8 +143,8 @@ func main() {
 		return
 	}
 
-	shutdownCtx, cannel := context.WithTimeout(context.Background(), shutdownTimeout)
-	defer cannel()
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+	defer cancel()
 
 	stopped := make(chan struct{})
 

@@ -67,7 +67,7 @@ func (s *Service) CreateEvent(ctx context.Context, input CreateEventInput) (doma
 		CreatedBy: input.CreatedBy,
 	}
 
-	if err := s.eventRepository.Save(ctx, event); err != nil {
+	if err := s.eventRepository.Create(ctx, event); err != nil {
 		return domain.Event{}, err
 	}
 
@@ -94,7 +94,7 @@ func (s *Service) PublishEvent(ctx context.Context, eventID string) (domain.Even
 	if err := event.Publish(); err != nil {
 		return domain.Event{}, err
 	}
-	if err := s.eventRepository.Save(ctx, event); err != nil {
+	if err := s.eventRepository.Update(ctx, event); err != nil {
 		return domain.Event{}, err
 	}
 	return event, nil

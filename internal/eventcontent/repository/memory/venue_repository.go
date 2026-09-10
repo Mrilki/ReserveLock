@@ -18,7 +18,7 @@ func NewVenueRepository() *VenueRepository {
 	}
 }
 
-func (r *VenueRepository) Save(ctx context.Context, venue domain.Venue) error {
+func (r *VenueRepository) Create(ctx context.Context, venue domain.Venue) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

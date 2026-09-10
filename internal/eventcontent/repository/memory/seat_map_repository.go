@@ -18,7 +18,7 @@ func NewSeatMapRepository() *SeatMapRepository {
 	}
 }
 
-func (r *SeatMapRepository) Save(ctx context.Context, seatMap domain.SeatMap) error {
+func (r *SeatMapRepository) Create(ctx context.Context, seatMap domain.SeatMap) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

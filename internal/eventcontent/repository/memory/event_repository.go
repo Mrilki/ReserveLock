@@ -18,12 +18,24 @@ func NewEventRepository() *EventRepository {
 	}
 }
 
-func (r *EventRepository) Save(ctx context.Context, event domain.Event) error {
+func (r *EventRepository) Create(ctx context.Context, event domain.Event) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	r.events[event.ID] = event
 
+	return nil
+}
+
+func (r *EventRepository) Update(ctx context.Context, event domain.Event) error {
+	r.mu.Lock()
+	r.mu.Unlock()
+
+	if _, exists := r.events[event.ID]; !exists {
+		return domain.ErrEventNotFound
+	}
+
+	r.events[event.ID] = event
 	return nil
 }
 

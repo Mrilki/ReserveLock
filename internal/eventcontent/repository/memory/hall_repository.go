@@ -18,7 +18,7 @@ func NewHallRepository() *HallRepository {
 	}
 }
 
-func (r *HallRepository) Save(ctx context.Context, hall domain.Hall) error {
+func (r *HallRepository) Create(ctx context.Context, hall domain.Hall) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

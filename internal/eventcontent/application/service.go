@@ -8,22 +8,23 @@ import (
 )
 
 type VenueRepository interface {
-	Save(ctx context.Context, venue domain.Venue) error
+	Create(ctx context.Context, venue domain.Venue) error
 	GetByID(ctx context.Context, id string) (domain.Venue, error)
 }
 
 type HallRepository interface {
-	Save(ctx context.Context, hall domain.Hall) error
+	Create(ctx context.Context, hall domain.Hall) error
 	GetByID(ctx context.Context, id string) (domain.Hall, error)
 }
 
 type SeatMapRepository interface {
-	Save(ctx context.Context, seatMap domain.SeatMap) error
+	Create(ctx context.Context, seatMap domain.SeatMap) error
 	GetByID(ctx context.Context, id string) (domain.SeatMap, error)
 }
 
 type EventRepository interface {
-	Save(ctx context.Context, event domain.Event) error
+	Create(ctx context.Context, event domain.Event) error
+	Update(ctx context.Context, event domain.Event) error
 	GetByID(ctx context.Context, id string) (domain.Event, error)
 	List(ctx context.Context) ([]domain.Event, error)
 }
@@ -83,7 +84,7 @@ func (s *Service) CreateVenue(ctx context.Context, input CreateVenueInput) (doma
 		CreatedBy: input.CreatedBy,
 	}
 
-	if err := s.venueRepository.Save(ctx, venue); err != nil {
+	if err := s.venueRepository.Create(ctx, venue); err != nil {
 		return domain.Venue{}, err
 	}
 	return venue, nil
@@ -116,7 +117,7 @@ func (s *Service) CreateHall(ctx context.Context, input CreateHallInput) (domain
 		CreatedBy: input.CreatedBy,
 	}
 
-	if err := s.hallRepository.Save(ctx, hall); err != nil {
+	if err := s.hallRepository.Create(ctx, hall); err != nil {
 		return domain.Hall{}, err
 	}
 	return hall, nil
@@ -156,7 +157,7 @@ func (s *Service) CreateSeatMap(ctx context.Context, input CreateSeatMapInput) (
 		CreatedBy: input.CreatedBy,
 	}
 
-	if err := s.seatMapRepository.Save(ctx, seatMap); err != nil {
+	if err := s.seatMapRepository.Create(ctx, seatMap); err != nil {
 		return domain.SeatMap{}, err
 	}
 	return seatMap, nil
