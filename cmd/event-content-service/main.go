@@ -53,11 +53,10 @@ func main() {
 		return
 	}
 	defer func() {
-		disconnectCtx, cancel :=
-			context.WithTimeout(
-				context.Background(),
-				mongoOperationTimeout,
-			)
+		disconnectCtx, cancel := context.WithTimeout(
+			context.Background(),
+			mongoOperationTimeout,
+		)
 		defer cancel()
 
 		if err := mongoClient.Disconnect(
@@ -75,10 +74,7 @@ func main() {
 		mongoOperationTimeout,
 	)
 
-	err = mongoClient.Ping(
-		pingCtx,
-		readpref.Primary(),
-	)
+	err = mongoClient.Ping(pingCtx, readpref.Primary())
 
 	pingCancel()
 

@@ -7,47 +7,20 @@ import (
 	"github.com/Mrilki/ReserveLock/internal/reservation/domain"
 )
 
-type InventoryRepository interface {
-	Initialize(
-		ctx context.Context,
-		eventID string,
-		seats []domain.SeatInventory,
-	) error
-	Hold(
-		ctx context.Context,
-		eventID string,
-		seatIDs []string,
-		reservationID string,
-		heldUntil time.Time,
-	) error
-
-	Release(
-		ctx context.Context,
-		eventID string,
-		seatIDs []string,
-		reservationID string,
-	) error
-}
-
-type ReservationRepository interface {
-	Save(ctx context.Context, reservation domain.Reservation) error
-	GetByID(ctx context.Context, id string) (domain.Reservation, error)
-	ListExpiredPending(ctx context.Context, now time.Time) ([]domain.Reservation, error)
+type Store interface {
+	InitializeInventory(ctx context.Context, eventID string, seats []domain.SeatInventory) error
+	CreateReservation(ctx context.Context, reservation domain.Reservation) error
+	GetReservationByID(ctx context.Context, id string) (domain.Reservation, error)
+	ListExpiredPendingIDs(ctx context.Context, now time.Time, limit int) ([]string, error)
+	ExpireReservation(ctx context.Context, id string, now time.Time) (bool, error)
 }
 
 type Service struct {
-	inventoryRepository   InventoryRepository
-	reservationRepository ReservationRepository
+	store Store
 }
 
-func NewService(
-	inventoryRepository InventoryRepository,
-	reservationRepository ReservationRepository,
-) *Service {
-	return &Service{
-		inventoryRepository:   inventoryRepository,
-		reservationRepository: reservationRepository,
-	}
+func NewService(store Store) *Service {
+	return &Service{store: store}
 }
 
 type InitializeInventoryInput struct {
@@ -63,11 +36,7 @@ func (s *Service) InitializeInventory(ctx context.Context, input InitializeInven
 		return ErrSeatIDsRequired
 	}
 
-	seats := make(
-		[]domain.SeatInventory,
-		0,
-		len(input.SeatIDs),
-	)
+	seats := make([]domain.SeatInventory, 0, len(input.SeatIDs))
 
 	seen := make(map[string]struct{}, len(input.SeatIDs))
 
@@ -89,9 +58,5 @@ func (s *Service) InitializeInventory(ctx context.Context, input InitializeInven
 		})
 	}
 
-	return s.inventoryRepository.Initialize(
-		ctx,
-		input.EventID,
-		seats,
-	)
+	return s.store.InitializeInventory(ctx, input.EventID, seats)
 }

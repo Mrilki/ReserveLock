@@ -26,5 +26,26 @@ services:
       retries: 10
       start_period: 10s
 
+  postgres:
+    image: postgres:17
+
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: ${RESERVATION_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${RESERVATION_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${RESERVATION_POSTGRES_DB}
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
 volumes:
   mongo_data:
+  postgres_data:

@@ -20,6 +20,6 @@ func Load() Config {
 		Base:          platformconfig.LoadBase("event-content-service"),
 		GRPCAddr:      platformconfig.GetEnv("GRPC_ADDR", defaultGRPCAddr),
 		MongoURI:      platformconfig.GetEnv("EVENT_CONTENT_MONGO_URI", defaultMongoURI),
-		MongoDatabase: platformconfig.GetEnv("EVENT_CONTENT_MONGO_DATABSE", defaultMongoDatabase),
+		MongoDatabase: platformconfig.GetEnv("EVENT_CONTENT_MONGO_DATABASE", defaultMongoDatabase),
 	}
 }

@@ -13,8 +13,9 @@ import (
 	"github.com/Mrilki/ReserveLock/internal/platform/logger"
 	"github.com/Mrilki/ReserveLock/internal/reservation/application"
 	reservationconfig "github.com/Mrilki/ReserveLock/internal/reservation/config"
-	"github.com/Mrilki/ReserveLock/internal/reservation/repository/memory"
+	reservationpostgres "github.com/Mrilki/ReserveLock/internal/reservation/repository/postgres"
 	reservationgrpc "github.com/Mrilki/ReserveLock/internal/reservation/transport/grpc"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -23,6 +24,7 @@ import (
 const (
 	shutdownTimeout        = 10 * time.Second
 	expirationScanInterval = time.Second
+	postgresConnectTimeout = 5 * time.Second
 )
 
 func main() {
@@ -43,10 +45,25 @@ func main() {
 		_ = logg.Sync()
 	}()
 
-	listener, err := net.Listen(
-		"tcp",
-		cfg.GRPCAddr,
-	)
+	posgresPool, err := pgxpool.New(context.Background(), cfg.PostgresDSN)
+	if err != nil {
+		logg.Error("failed to create postgres pool", zap.Error(err))
+		return
+	}
+	defer posgresPool.Close()
+
+	pingCtx, pingCancel := context.WithTimeout(context.Background(), postgresConnectTimeout)
+	err = posgresPool.Ping(pingCtx)
+	pingCancel()
+
+	if err != nil {
+		logg.Error("failed to ping postgres", zap.Error(err))
+		return
+	}
+
+	logg.Info("connected to postgres")
+
+	listener, err := net.Listen("tcp", cfg.GRPCAddr)
 	if err != nil {
 		logg.Error(
 			"failed to listen",
@@ -56,16 +73,9 @@ func main() {
 		return
 	}
 
-	inventoryRepository :=
-		memory.NewInventoryRepository()
+	reservationStore := reservationpostgres.NewStore(posgresPool)
 
-	reservationRepository :=
-		memory.NewReservationRepository()
-
-	reservationService := application.NewService(
-		inventoryRepository,
-		reservationRepository,
-	)
+	reservationService := application.NewService(reservationStore)
 
 	grpcServer := grpc.NewServer()
 
@@ -94,10 +104,7 @@ func main() {
 			case <-ctx.Done():
 				return
 			case now := <-ticker.C:
-				expiredCount, err := reservationService.ExpireReservations(
-					ctx,
-					now.UTC(),
-				)
+				expiredCount, err := reservationService.ExpireReservations(ctx, now.UTC())
 				if err != nil {
 					logg.Error(
 						"failed to expire reservations",
@@ -109,10 +116,7 @@ func main() {
 				if expiredCount > 0 {
 					logg.Info(
 						"reservations expired",
-						zap.Int(
-							"count",
-							expiredCount,
-						),
+						zap.Int("count", expiredCount),
 					)
 				}
 			}

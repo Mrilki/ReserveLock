@@ -10,7 +10,10 @@ import (
 	"github.com/google/uuid"
 )
 
-const reservationHoldDuration = 10 * time.Minute
+const (
+	reservationHoldDuration = 10 * time.Minute
+	expirationBatchSize     = 100
+)
 
 type CreateReservationInput struct {
 	EventID string
@@ -26,10 +29,7 @@ func (s *Service) GetReservation(
 		return domain.Reservation{}, ErrInvalidReservationID
 	}
 
-	return s.reservationRepository.GetByID(
-		ctx,
-		reservationID,
-	)
+	return s.store.GetReservationByID(ctx, reservationID)
 }
 
 func (s *Service) CreateReservation(
@@ -74,99 +74,36 @@ func (s *Service) CreateReservation(
 		ExpiresAt: now.Add(reservationHoldDuration),
 	}
 
-	err := s.inventoryRepository.Hold(
-		ctx,
-		reservation.EventID,
-		reservation.SeatIDs,
-		reservation.ID,
-		reservation.ExpiresAt,
-	)
+	err := s.store.CreateReservation(ctx, reservation)
 	if err != nil {
 		return domain.Reservation{}, err
-	}
-
-	err = s.reservationRepository.Save(ctx, reservation)
-	if err != nil {
-		releaseErr := s.inventoryRepository.Release(
-			ctx,
-			reservation.EventID,
-			reservation.SeatIDs,
-			reservation.ID,
-		)
-
-		if releaseErr != nil {
-			return domain.Reservation{}, errors.Join(
-				fmt.Errorf("save reservation: %w", err),
-				fmt.Errorf("rollback seat hold: %w", releaseErr),
-			)
-		}
-
-		return domain.Reservation{}, fmt.Errorf(
-			"save reservation: %w",
-			err,
-		)
 	}
 
 	return reservation, nil
 }
 
-func (s *Service) ExpireReservations(
-	ctx context.Context,
-	now time.Time,
-) (int, error) {
-	reservations, err :=
-		s.reservationRepository.ListExpiredPending(
-			ctx,
-			now,
-		)
+func (s *Service) ExpireReservations(ctx context.Context, now time.Time) (int, error) {
+	ids, err := s.store.ListExpiredPendingIDs(ctx, now, expirationBatchSize)
 	if err != nil {
-		return 0, fmt.Errorf(
-			"list expired reservations: %w",
-			err,
-		)
+		return 0, fmt.Errorf("list expired reservations: %w", err)
 	}
 
 	expiredCount := 0
 	expirationErrors := make([]error, 0)
 
-	for _, reservation := range reservations {
-		err := s.inventoryRepository.Release(
-			ctx,
-			reservation.EventID,
-			reservation.SeatIDs,
-			reservation.ID,
-		)
+	for _, id := range ids {
+		expired, err := s.store.ExpireReservation(ctx, id, now)
 		if err != nil {
 			expirationErrors = append(
 				expirationErrors,
-				fmt.Errorf(
-					"release seats for reservation %s: %w",
-					reservation.ID,
-					err,
-				),
+				fmt.Errorf("expire reservation %s: %w", id, err),
 			)
 			continue
 		}
 
-		reservation.Status = domain.ReservationStatusExpired
-		err = s.reservationRepository.Save(
-			ctx,
-			reservation,
-		)
-		if err != nil {
-			expirationErrors = append(
-				expirationErrors,
-				fmt.Errorf(
-					"save expired reservation %s: %w",
-					reservation.ID,
-					err,
-				),
-			)
-
-			continue
+		if expired {
+			expiredCount++
 		}
-
-		expiredCount++
 	}
 
 	return expiredCount, errors.Join(expirationErrors...)
