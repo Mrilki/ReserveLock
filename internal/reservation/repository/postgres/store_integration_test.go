@@ -270,3 +270,123 @@ func TestExpireReservations_Postgres(t *testing.T) {
 		t.Fatalf("seat should be reusable after expiration: %v", err)
 	}
 }
+
+func TestCreateReservation_MultipleSeatsAtomic_Postgres(t *testing.T) {
+	pool, service := newPostgresTestService(t)
+
+	eventID := uuid.NewString()
+	seat1 := uuid.NewString()
+	seat2 := uuid.NewString()
+	seat3 := uuid.NewString()
+
+	cleanupEvent(t, pool, eventID)
+
+	err := service.InitializeInventory(
+		context.Background(),
+		application.InitializeInventoryInput{
+			EventID: eventID,
+			SeatIDs: []string{seat1, seat2, seat3},
+		},
+	)
+	if err != nil {
+		t.Fatalf("initialize inventory: %v", err)
+	}
+
+	firstReservation, err := service.CreateReservation(
+		context.Background(),
+		application.CreateReservationInput{
+			EventID: eventID,
+			UserID:  "user-1",
+			SeatIDs: []string{seat1, seat2},
+		},
+	)
+	if err != nil {
+		t.Fatalf("create multi-seat reservation: %v", err)
+	}
+
+	var heldCount int
+
+	err = pool.QueryRow(
+		context.Background(),
+		`
+			SELECT count(*)
+			FROM seat_inventory
+			WHERE event_id = $1
+			  AND reservation_id = $2
+			  AND status = 'HELD'
+		`,
+		eventID,
+		firstReservation.ID,
+	).Scan(&heldCount)
+	if err != nil {
+		t.Fatalf("count held seats: %v", err)
+	}
+
+	if heldCount != 2 {
+		t.Fatalf("expected 2 held seats, got %d", heldCount)
+	}
+
+	_, err = service.CreateReservation(
+		context.Background(),
+		application.CreateReservationInput{
+			EventID: eventID,
+			UserID:  "user-2",
+			SeatIDs: []string{seat2, seat3},
+		},
+	)
+
+	if !errors.Is(err, domain.ErrSeatUnavailable) {
+		t.Fatalf("expected ErrSeatUnavailable, got %v", err)
+	}
+
+	var seat3Status string
+	var seat3ReservationIsNull bool
+
+	err = pool.QueryRow(
+		context.Background(),
+		`
+			SELECT status, reservation_id IS NULL
+			FROM seat_inventory
+			WHERE event_id = $1
+			  AND seat_id = $2
+		`,
+		eventID,
+		seat3,
+	).Scan(
+		&seat3Status,
+		&seat3ReservationIsNull,
+	)
+	if err != nil {
+		t.Fatalf("get third seat state: %v", err)
+	}
+
+	if seat3Status != string(domain.SeatInventoryStatusAvailable) {
+		t.Fatalf("expected third seat AVAILABLE, got %s", seat3Status)
+	}
+
+	if !seat3ReservationIsNull {
+		t.Fatal("failed reservation must not hold third seat")
+	}
+
+	var reservationCount int
+
+	err = pool.QueryRow(
+		context.Background(),
+		`
+			SELECT count(*)
+			FROM reservations
+			WHERE event_id = $1
+		`,
+		eventID,
+	).Scan(&reservationCount)
+	if err != nil {
+		t.Fatalf("count reservations: %v", err)
+	}
+
+	if reservationCount != 1 {
+		t.Fatalf(
+			"expected exactly 1 persisted reservation, got %d",
+			reservationCount,
+		)
+	}
+}

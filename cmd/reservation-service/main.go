@@ -45,15 +45,15 @@ func main() {
 		_ = logg.Sync()
 	}()
 
-	posgresPool, err := pgxpool.New(context.Background(), cfg.PostgresDSN)
+	postgresPool, err := pgxpool.New(context.Background(), cfg.PostgresDSN)
 	if err != nil {
 		logg.Error("failed to create postgres pool", zap.Error(err))
 		return
 	}
-	defer posgresPool.Close()
+	defer postgresPool.Close()
 
 	pingCtx, pingCancel := context.WithTimeout(context.Background(), postgresConnectTimeout)
-	err = posgresPool.Ping(pingCtx)
+	err = postgresPool.Ping(pingCtx)
 	pingCancel()
 
 	if err != nil {
@@ -73,7 +73,7 @@ func main() {
 		return
 	}
 
-	reservationStore := reservationpostgres.NewStore(posgresPool)
+	reservationStore := reservationpostgres.NewStore(postgresPool)
 
 	reservationService := application.NewService(reservationStore)
 

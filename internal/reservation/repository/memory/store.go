@@ -53,14 +53,21 @@ func (s *Store) CreateReservation(ctx context.Context, reservation domain.Reserv
 	if !ok {
 		return domain.ErrInventoryNotFound
 	}
+	hasUnavailableSeat := false
+
 	for _, seatID := range reservation.SeatIDs {
 		seat, ok := eventInventory[seatID]
 		if !ok {
 			return domain.ErrSeatNotFound
 		}
+
 		if seat.Status != domain.SeatInventoryStatusAvailable {
-			return domain.ErrSeatUnavailable
+			hasUnavailableSeat = true
 		}
+	}
+
+	if hasUnavailableSeat {
+		return domain.ErrSeatUnavailable
 	}
 
 	for _, seatID := range reservation.SeatIDs {
@@ -72,6 +79,7 @@ func (s *Store) CreateReservation(ctx context.Context, reservation domain.Reserv
 		eventInventory[seatID] = seat
 	}
 
+	reservation.SeatIDs = append([]string(nil), reservation.SeatIDs...)
 	s.reservations[reservation.ID] = reservation
 	return nil
 }
@@ -84,6 +92,7 @@ func (s *Store) GetReservationByID(ctx context.Context, id string) (domain.Reser
 	if !ok {
 		return domain.Reservation{}, domain.ErrReservationNotFound
 	}
+	reservation.SeatIDs = append([]string(nil), reservation.SeatIDs...)
 
 	return reservation, nil
 }
