@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package reservelock.eventcontent.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/eventcontent/v1;eventcontentv1";
+
+message EventPublished {
+  string message_id = 1;
+  string event_id = 2;
+  repeated string seat_ids = 3;
+  google.protobuf.Timestamp published_at = 4;
+}
