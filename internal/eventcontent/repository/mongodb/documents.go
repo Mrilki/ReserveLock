@@ -143,6 +143,15 @@ type eventDocument struct {
 	CreatedBy string             `bson:"created_by"`
 }
 
+type outboxDocument struct {
+	ID          string     `bson:"_id"`
+	EventType   string     `bson:"event_type"`
+	Key         string     `bson:"key"`
+	Payload     []byte     `bson:"payload"`
+	OccurredAt  time.Time  `bson:"occurred_at"`
+	PublishedAt *time.Time `bson:"published_at"`
+}
+
 func toEventDocument(event domain.Event) eventDocument {
 	return eventDocument{
 		ID:        event.ID,

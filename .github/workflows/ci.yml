@@ -81,7 +81,43 @@ jobs:
             postgres \
             "$TEST_POSTGRES_DSN" \
             up
+      - name: Start MongoDB replica set
+        run: |
+          docker run -d \
+            --name reservelock-mongo \
+            -p 27017:27017 \
+            mongo:8.0 \
+            --replSet rs0 \
+            --bind_ip_all
 
+          for i in {1..30}; do
+            if docker exec reservelock-mongo \
+              mongosh --quiet \
+              --eval "db.adminCommand({ ping: 1 }).ok" | grep -q 1; then
+              break
+            fi
+
+            sleep 1
+          done
+
+          docker exec reservelock-mongo \
+            mongosh --quiet \
+            --eval 'rs.initiate({_id:"rs0",members:[{_id:0,host:"localhost:27017"}]})'
+
+          for i in {1..30}; do
+            if docker exec reservelock-mongo \
+              mongosh --quiet \
+              --eval "db.hello().isWritablePrimary" | grep -q true; then
+              exit 0
+            fi
+
+            sleep 1
+          done
+
+          echo "MongoDB replica set did not become primary"
+          docker logs reservelock-mongo
+          exit 1
+          
       - name: Run tests
         run: go test ./...
 

@@ -4,7 +4,7 @@ import platformconfig "github.com/Mrilki/ReserveLock/internal/platform/config"
 
 const (
 	defaultGRPCAddr      = ":50051"
-	defaultMongoURI      = "mongodb://reservelock:reservelock-local@localhost:27017/?authSource=admin"
+	defaultMongoURI      = "mongodb://localhost:27017/?replicaSet=rs0&directConnection=true"
 	defaultMongoDatabase = "reservelock_event_content"
 )
 

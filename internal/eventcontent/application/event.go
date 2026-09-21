@@ -94,7 +94,25 @@ func (s *Service) PublishEvent(ctx context.Context, eventID string) (domain.Even
 	if err := event.Publish(); err != nil {
 		return domain.Event{}, err
 	}
-	if err := s.eventRepository.Update(ctx, event); err != nil {
+
+	seatMap, err := s.seatMapRepository.GetByID(ctx, event.SeatMapID)
+	if err != nil {
+		return domain.Event{}, err
+	}
+
+	seatIDs := make([]string, 0, len(seatMap.Seats))
+
+	for _, seat := range seatMap.Seats {
+		seatIDs = append(seatIDs, seat.ID)
+	}
+
+	publication := EventPublication{
+		MessageID:  uuid.NewString(),
+		SeatIDs:    seatIDs,
+		OccurredAt: time.Now().UTC(),
+	}
+
+	if err := s.eventRepository.Publish(ctx, event, publication); err != nil {
 		return domain.Event{}, err
 	}
 	return event, nil

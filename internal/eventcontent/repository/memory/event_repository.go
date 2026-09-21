@@ -4,6 +4,7 @@ import (
 	"context"
 	"sync"
 
+	"github.com/Mrilki/ReserveLock/internal/eventcontent/application"
 	"github.com/Mrilki/ReserveLock/internal/eventcontent/domain"
 )
 
@@ -27,12 +28,21 @@ func (r *EventRepository) Create(ctx context.Context, event domain.Event) error 
 	return nil
 }
 
-func (r *EventRepository) Update(ctx context.Context, event domain.Event) error {
+func (r *EventRepository) Publish(
+	ctx context.Context,
+	event domain.Event,
+	publication application.EventPublication,
+) error {
 	r.mu.Lock()
-	r.mu.Unlock()
+	defer r.mu.Unlock()
 
-	if _, exists := r.events[event.ID]; !exists {
+	existing, exists := r.events[event.ID]
+	if !exists {
 		return domain.ErrEventNotFound
+	}
+
+	if existing.Status != domain.EventStatusDraft {
+		return domain.ErrEventNotDraft
 	}
 
 	r.events[event.ID] = event

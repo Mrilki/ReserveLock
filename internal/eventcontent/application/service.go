@@ -2,10 +2,17 @@ package application
 
 import (
 	"context"
+	"time"
 
 	"github.com/Mrilki/ReserveLock/internal/eventcontent/domain"
 	"github.com/google/uuid"
 )
+
+type EventPublication struct {
+	MessageID  string
+	SeatIDs    []string
+	OccurredAt time.Time
+}
 
 type VenueRepository interface {
 	Create(ctx context.Context, venue domain.Venue) error
@@ -24,7 +31,7 @@ type SeatMapRepository interface {
 
 type EventRepository interface {
 	Create(ctx context.Context, event domain.Event) error
-	Update(ctx context.Context, event domain.Event) error
+	Publish(ctx context.Context, event domain.Event, publication EventPublication) error
 	GetByID(ctx context.Context, id string) (domain.Event, error)
 	List(ctx context.Context) ([]domain.Event, error)
 }

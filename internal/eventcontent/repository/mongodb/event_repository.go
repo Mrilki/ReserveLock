@@ -5,20 +5,35 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/Mrilki/ReserveLock/internal/eventcontent/application"
 	"github.com/Mrilki/ReserveLock/internal/eventcontent/domain"
+	eventcontentv1 "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/eventcontent/v1"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/mongo/writeconcern"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-const eventsCollection = "events"
+const (
+	eventsCollection     = "events"
+	outboxCollectionName = "outbox"
+
+	eventPublishedType = "reservelock.eventcontent.v1.EventPublished"
+)
 
 type EventRepository struct {
-	collection *mongo.Collection
+	client           *mongo.Client
+	collection       *mongo.Collection
+	outboxCollection *mongo.Collection
 }
 
 func NewEventRepository(database *mongo.Database) *EventRepository {
 	return &EventRepository{
-		collection: database.Collection(eventsCollection),
+		client:           database.Client(),
+		collection:       database.Collection(eventsCollection),
+		outboxCollection: database.Collection(outboxCollectionName),
 	}
 }
 
@@ -68,34 +83,95 @@ func (r *EventRepository) GetByID(
 	return document.toDomain(), nil
 }
 
-func (r *EventRepository) Update(
+func (r *EventRepository) Publish(
 	ctx context.Context,
 	event domain.Event,
+	publication application.EventPublication,
 ) error {
-	result, err := r.collection.ReplaceOne(
-		ctx,
-		bson.M{
-			"_id": event.ID,
-		},
-		toEventDocument(event),
-	)
-	if err != nil {
-		return fmt.Errorf(
-			"replace event: %w",
-			err,
-		)
+	message := &eventcontentv1.EventPublished{
+		MessageId:   publication.MessageID,
+		EventId:     event.ID,
+		SeatIds:     publication.SeatIDs,
+		PublishedAt: timestamppb.New(publication.OccurredAt),
 	}
 
-	if result.MatchedCount == 0 {
-		return domain.ErrEventNotFound
+	payload, err := proto.Marshal(message)
+	if err != nil {
+		return fmt.Errorf("marshal event published message: %w", err)
+	}
+
+	outbox := outboxDocument{
+		ID:          publication.MessageID,
+		EventType:   eventPublishedType,
+		Key:         event.ID,
+		Payload:     payload,
+		OccurredAt:  publication.OccurredAt,
+		PublishedAt: nil,
+	}
+
+	session, err := r.client.StartSession()
+	if err != nil {
+		return fmt.Errorf("start publish event session: %w", err)
+	}
+	defer session.EndSession(context.Background())
+
+	transactionOptions := options.Transaction().
+		SetWriteConcern(writeconcern.Majority())
+
+	_, err = session.WithTransaction(
+		ctx,
+		func(txCtx context.Context) (any, error) {
+			result, err := r.collection.ReplaceOne(
+				txCtx,
+				bson.M{
+					"_id":    event.ID,
+					"status": domain.EventStatusDraft,
+				},
+				toEventDocument(event),
+			)
+			if err != nil {
+				return nil, fmt.Errorf("replace published event: %w", err)
+			}
+
+			if result.MatchedCount == 0 {
+				var existing eventDocument
+
+				err := r.collection.FindOne(
+					txCtx,
+					bson.M{"_id": event.ID},
+				).Decode(&existing)
+
+				switch {
+				case errors.Is(err, mongo.ErrNoDocuments):
+					return nil, domain.ErrEventNotFound
+
+				case err != nil:
+					return nil, fmt.Errorf(
+						"check event after publish conflict: %w",
+						err,
+					)
+
+				default:
+					return nil, domain.ErrEventNotDraft
+				}
+			}
+
+			if _, err := r.outboxCollection.InsertOne(txCtx, outbox); err != nil {
+				return nil, fmt.Errorf("insert outbox message: %w", err)
+			}
+
+			return nil, nil
+		},
+		transactionOptions,
+	)
+	if err != nil {
+		return fmt.Errorf("publish event transaction: %w", err)
 	}
 
 	return nil
 }
 
-func (r *EventRepository) List(
-	ctx context.Context,
-) ([]domain.Event, error) {
+func (r *EventRepository) List(ctx context.Context) ([]domain.Event, error) {
 	cursor, err := r.collection.Find(
 		ctx,
 		bson.D{},
