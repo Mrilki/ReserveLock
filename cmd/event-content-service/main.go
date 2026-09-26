@@ -11,10 +11,13 @@ import (
 
 	"github.com/Mrilki/ReserveLock/internal/eventcontent/application"
 	eventcontentconfig "github.com/Mrilki/ReserveLock/internal/eventcontent/config"
+	kafkamessaging "github.com/Mrilki/ReserveLock/internal/eventcontent/messaging/kafka"
+	eventoutbox "github.com/Mrilki/ReserveLock/internal/eventcontent/outbox"
 	"github.com/Mrilki/ReserveLock/internal/eventcontent/repository/mongodb"
 	eventcontentgrpc "github.com/Mrilki/ReserveLock/internal/eventcontent/transport/grpc"
 	eventcontentv1 "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/eventcontent/v1"
 	"github.com/Mrilki/ReserveLock/internal/platform/logger"
+	"github.com/twmb/franz-go/pkg/kgo"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
@@ -94,6 +97,29 @@ func main() {
 	seatMapRepository := mongodb.NewSeatMapRepository(database)
 	eventRepository := mongodb.NewEventRepository(database)
 
+	outboxRepository := mongodb.NewOutboxRepository(database)
+
+	kafkaClient, err := kgo.NewClient(
+		kgo.SeedBrokers(cfg.KafkaBrokers...),
+	)
+	if err != nil {
+		logg.Error(
+			"failed to create kafka client",
+			zap.Error(err),
+		)
+		return
+	}
+
+	defer kafkaClient.Close()
+
+	outboxPublisher := kafkamessaging.NewPublisher(kafkaClient)
+
+	outboxWorker := eventoutbox.NewWorker(
+		outboxRepository,
+		outboxPublisher,
+		logg,
+	)
+
 	eventContentService := application.NewService(
 		venueRepository,
 		hallRepository,
@@ -121,6 +147,13 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
+	outboxWorkerDone := make(chan struct{})
+
+	go func() {
+		defer close(outboxWorkerDone)
+		outboxWorker.Run(ctx)
+	}()
+
 	serverErr := make(chan error, 1)
 
 	go func() {
@@ -136,7 +169,7 @@ func main() {
 		logg.Info("shutdown signal received")
 	case err := <-serverErr:
 		logg.Error("grpc server failed", zap.Error(err))
-		return
+		stop()
 	}
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
@@ -148,6 +181,14 @@ func main() {
 		grpcServer.GracefulStop()
 		close(stopped)
 	}()
+
+	select {
+	case <-outboxWorkerDone:
+		logg.Info("outbox worker stopped")
+
+	case <-shutdownCtx.Done():
+		logg.Warn("outbox worker shutdown timed out")
+	}
 
 	select {
 	case <-stopped:

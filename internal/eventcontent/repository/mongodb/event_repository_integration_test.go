@@ -53,6 +53,9 @@ func TestEventRepositoryPublishRollsBackWhenOutboxInsertFails(t *testing.T) {
 	publishedEvent := event
 
 	err = repository.Publish(ctx, publishedEvent, publication)
+	if err := publishedEvent.Publish(); err != nil {
+		t.Fatalf("publish domain event: %v", err)
+	}
 	if err == nil {
 		t.Fatal("expected publish to fail")
 	}

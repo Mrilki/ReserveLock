@@ -7,6 +7,7 @@ import (
 
 	"github.com/Mrilki/ReserveLock/internal/eventcontent/application"
 	"github.com/Mrilki/ReserveLock/internal/eventcontent/domain"
+	eventoutbox "github.com/Mrilki/ReserveLock/internal/eventcontent/outbox"
 	eventcontentv1 "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/eventcontent/v1"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -19,8 +20,6 @@ import (
 const (
 	eventsCollection     = "events"
 	outboxCollectionName = "outbox"
-
-	eventPublishedType = "reservelock.eventcontent.v1.EventPublished"
 )
 
 type EventRepository struct {
@@ -102,7 +101,7 @@ func (r *EventRepository) Publish(
 
 	outbox := outboxDocument{
 		ID:          publication.MessageID,
-		EventType:   eventPublishedType,
+		EventType:   eventoutbox.EventPublishedType,
 		Key:         event.ID,
 		Payload:     payload,
 		OccurredAt:  publication.OccurredAt,

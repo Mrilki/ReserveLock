@@ -13,6 +13,8 @@ jobs:
 
     env:
       TEST_POSTGRES_DSN: postgres://reservelock:reservelock-local@localhost:5432/reservelock_reservation?sslmode=disable
+      TEST_MONGO_URI: mongodb://localhost:27017/?replicaSet=rs0&directConnection=true
+      TEST_MONGO_DATABASE: reservelock_event_content_test
 
     services:
       postgres:
