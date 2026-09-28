@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	eventoutbox "github.com/Mrilki/ReserveLock/internal/eventcontent/outbox"
+	eventcontentcontract "github.com/Mrilki/ReserveLock/internal/integration/eventcontent"
 	"github.com/twmb/franz-go/pkg/kgo"
 )
 
@@ -55,7 +56,7 @@ func (p *Publisher) Publish(ctx context.Context, message eventoutbox.Message) er
 
 func topicForEventType(eventType string) (string, error) {
 	switch eventType {
-	case eventoutbox.EventPublishedType:
+	case eventcontentcontract.EventPublishedType:
 		return eventPublishedTopic, nil
 
 	default:

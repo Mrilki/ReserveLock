@@ -19,16 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ReservationService_InitializeInventory_FullMethodName = "/reservelock.reservation.v1.ReservationService/InitializeInventory"
-	ReservationService_CreateReservation_FullMethodName   = "/reservelock.reservation.v1.ReservationService/CreateReservation"
-	ReservationService_GetReservation_FullMethodName      = "/reservelock.reservation.v1.ReservationService/GetReservation"
+	ReservationService_CreateReservation_FullMethodName = "/reservelock.reservation.v1.ReservationService/CreateReservation"
+	ReservationService_GetReservation_FullMethodName    = "/reservelock.reservation.v1.ReservationService/GetReservation"
 )
 
 // ReservationServiceClient is the client API for ReservationService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ReservationServiceClient interface {
-	InitializeInventory(ctx context.Context, in *InitializeInventoryRequest, opts ...grpc.CallOption) (*InitializeInventoryResponse, error)
 	CreateReservation(ctx context.Context, in *CreateReservationRequest, opts ...grpc.CallOption) (*CreateReservationResponse, error)
 	GetReservation(ctx context.Context, in *GetReservationRequest, opts ...grpc.CallOption) (*GetReservationResponse, error)
 }
@@ -39,16 +37,6 @@ type reservationServiceClient struct {
 
 func NewReservationServiceClient(cc grpc.ClientConnInterface) ReservationServiceClient {
 	return &reservationServiceClient{cc}
-}
-
-func (c *reservationServiceClient) InitializeInventory(ctx context.Context, in *InitializeInventoryRequest, opts ...grpc.CallOption) (*InitializeInventoryResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(InitializeInventoryResponse)
-	err := c.cc.Invoke(ctx, ReservationService_InitializeInventory_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 func (c *reservationServiceClient) CreateReservation(ctx context.Context, in *CreateReservationRequest, opts ...grpc.CallOption) (*CreateReservationResponse, error) {
@@ -75,7 +63,6 @@ func (c *reservationServiceClient) GetReservation(ctx context.Context, in *GetRe
 // All implementations must embed UnimplementedReservationServiceServer
 // for forward compatibility.
 type ReservationServiceServer interface {
-	InitializeInventory(context.Context, *InitializeInventoryRequest) (*InitializeInventoryResponse, error)
 	CreateReservation(context.Context, *CreateReservationRequest) (*CreateReservationResponse, error)
 	GetReservation(context.Context, *GetReservationRequest) (*GetReservationResponse, error)
 	mustEmbedUnimplementedReservationServiceServer()
@@ -88,9 +75,6 @@ type ReservationServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedReservationServiceServer struct{}
 
-func (UnimplementedReservationServiceServer) InitializeInventory(context.Context, *InitializeInventoryRequest) (*InitializeInventoryResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method InitializeInventory not implemented")
-}
 func (UnimplementedReservationServiceServer) CreateReservation(context.Context, *CreateReservationRequest) (*CreateReservationResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateReservation not implemented")
 }
@@ -116,24 +100,6 @@ func RegisterReservationServiceServer(s grpc.ServiceRegistrar, srv ReservationSe
 		t.testEmbeddedByValue()
 	}
 	s.RegisterService(&ReservationService_ServiceDesc, srv)
-}
-
-func _ReservationService_InitializeInventory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(InitializeInventoryRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ReservationServiceServer).InitializeInventory(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: ReservationService_InitializeInventory_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ReservationServiceServer).InitializeInventory(ctx, req.(*InitializeInventoryRequest))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _ReservationService_CreateReservation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -179,10 +145,6 @@ var ReservationService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "reservelock.reservation.v1.ReservationService",
 	HandlerType: (*ReservationServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "InitializeInventory",
-			Handler:    _ReservationService_InitializeInventory_Handler,
-		},
 		{
 			MethodName: "CreateReservation",
 			Handler:    _ReservationService_CreateReservation_Handler,

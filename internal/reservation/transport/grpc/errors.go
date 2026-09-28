@@ -31,12 +31,6 @@ func toGRPCError(err error) error {
 			err.Error(),
 		)
 
-	case errors.Is(err, domain.ErrInventoryAlreadyExists):
-		return status.Error(
-			codes.AlreadyExists,
-			err.Error(),
-		)
-
 	case errors.Is(err, domain.ErrInventoryNotFound):
 		return status.Error(
 			codes.FailedPrecondition,

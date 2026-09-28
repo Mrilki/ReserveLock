@@ -74,94 +74,6 @@ func (ReservationStatus) EnumDescriptor() ([]byte, []int) {
 	return file_reservelock_reservation_v1_reservation_proto_rawDescGZIP(), []int{0}
 }
 
-type InitializeInventoryRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	EventId       string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
-	SeatIds       []string               `protobuf:"bytes,2,rep,name=seat_ids,json=seatIds,proto3" json:"seat_ids,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *InitializeInventoryRequest) Reset() {
-	*x = InitializeInventoryRequest{}
-	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[0]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *InitializeInventoryRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*InitializeInventoryRequest) ProtoMessage() {}
-
-func (x *InitializeInventoryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[0]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use InitializeInventoryRequest.ProtoReflect.Descriptor instead.
-func (*InitializeInventoryRequest) Descriptor() ([]byte, []int) {
-	return file_reservelock_reservation_v1_reservation_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *InitializeInventoryRequest) GetEventId() string {
-	if x != nil {
-		return x.EventId
-	}
-	return ""
-}
-
-func (x *InitializeInventoryRequest) GetSeatIds() []string {
-	if x != nil {
-		return x.SeatIds
-	}
-	return nil
-}
-
-type InitializeInventoryResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *InitializeInventoryResponse) Reset() {
-	*x = InitializeInventoryResponse{}
-	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *InitializeInventoryResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*InitializeInventoryResponse) ProtoMessage() {}
-
-func (x *InitializeInventoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use InitializeInventoryResponse.ProtoReflect.Descriptor instead.
-func (*InitializeInventoryResponse) Descriptor() ([]byte, []int) {
-	return file_reservelock_reservation_v1_reservation_proto_rawDescGZIP(), []int{1}
-}
-
 type CreateReservationRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	EventId       string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
@@ -173,7 +85,7 @@ type CreateReservationRequest struct {
 
 func (x *CreateReservationRequest) Reset() {
 	*x = CreateReservationRequest{}
-	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[2]
+	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -185,7 +97,7 @@ func (x *CreateReservationRequest) String() string {
 func (*CreateReservationRequest) ProtoMessage() {}
 
 func (x *CreateReservationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[2]
+	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -198,7 +110,7 @@ func (x *CreateReservationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateReservationRequest.ProtoReflect.Descriptor instead.
 func (*CreateReservationRequest) Descriptor() ([]byte, []int) {
-	return file_reservelock_reservation_v1_reservation_proto_rawDescGZIP(), []int{2}
+	return file_reservelock_reservation_v1_reservation_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *CreateReservationRequest) GetEventId() string {
@@ -231,7 +143,7 @@ type CreateReservationResponse struct {
 
 func (x *CreateReservationResponse) Reset() {
 	*x = CreateReservationResponse{}
-	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[3]
+	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -243,7 +155,7 @@ func (x *CreateReservationResponse) String() string {
 func (*CreateReservationResponse) ProtoMessage() {}
 
 func (x *CreateReservationResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[3]
+	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -256,7 +168,7 @@ func (x *CreateReservationResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateReservationResponse.ProtoReflect.Descriptor instead.
 func (*CreateReservationResponse) Descriptor() ([]byte, []int) {
-	return file_reservelock_reservation_v1_reservation_proto_rawDescGZIP(), []int{3}
+	return file_reservelock_reservation_v1_reservation_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *CreateReservationResponse) GetReservation() *Reservation {
@@ -275,7 +187,7 @@ type GetReservationRequest struct {
 
 func (x *GetReservationRequest) Reset() {
 	*x = GetReservationRequest{}
-	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[4]
+	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -287,7 +199,7 @@ func (x *GetReservationRequest) String() string {
 func (*GetReservationRequest) ProtoMessage() {}
 
 func (x *GetReservationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[4]
+	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -300,7 +212,7 @@ func (x *GetReservationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetReservationRequest.ProtoReflect.Descriptor instead.
 func (*GetReservationRequest) Descriptor() ([]byte, []int) {
-	return file_reservelock_reservation_v1_reservation_proto_rawDescGZIP(), []int{4}
+	return file_reservelock_reservation_v1_reservation_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *GetReservationRequest) GetReservationId() string {
@@ -319,7 +231,7 @@ type GetReservationResponse struct {
 
 func (x *GetReservationResponse) Reset() {
 	*x = GetReservationResponse{}
-	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[5]
+	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -331,7 +243,7 @@ func (x *GetReservationResponse) String() string {
 func (*GetReservationResponse) ProtoMessage() {}
 
 func (x *GetReservationResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[5]
+	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -344,7 +256,7 @@ func (x *GetReservationResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetReservationResponse.ProtoReflect.Descriptor instead.
 func (*GetReservationResponse) Descriptor() ([]byte, []int) {
-	return file_reservelock_reservation_v1_reservation_proto_rawDescGZIP(), []int{5}
+	return file_reservelock_reservation_v1_reservation_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *GetReservationResponse) GetReservation() *Reservation {
@@ -369,7 +281,7 @@ type Reservation struct {
 
 func (x *Reservation) Reset() {
 	*x = Reservation{}
-	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[6]
+	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -381,7 +293,7 @@ func (x *Reservation) String() string {
 func (*Reservation) ProtoMessage() {}
 
 func (x *Reservation) ProtoReflect() protoreflect.Message {
-	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[6]
+	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -394,7 +306,7 @@ func (x *Reservation) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Reservation.ProtoReflect.Descriptor instead.
 func (*Reservation) Descriptor() ([]byte, []int) {
-	return file_reservelock_reservation_v1_reservation_proto_rawDescGZIP(), []int{6}
+	return file_reservelock_reservation_v1_reservation_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *Reservation) GetId() string {
@@ -450,11 +362,7 @@ var File_reservelock_reservation_v1_reservation_proto protoreflect.FileDescripto
 
 const file_reservelock_reservation_v1_reservation_proto_rawDesc = "" +
 	"\n" +
-	",reservelock/reservation/v1/reservation.proto\x12\x1areservelock.reservation.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"R\n" +
-	"\x1aInitializeInventoryRequest\x12\x19\n" +
-	"\bevent_id\x18\x01 \x01(\tR\aeventId\x12\x19\n" +
-	"\bseat_ids\x18\x02 \x03(\tR\aseatIds\"\x1d\n" +
-	"\x1bInitializeInventoryResponse\"i\n" +
+	",reservelock/reservation/v1/reservation.proto\x12\x1areservelock.reservation.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"i\n" +
 	"\x18CreateReservationRequest\x12\x19\n" +
 	"\bevent_id\x18\x01 \x01(\tR\aeventId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x19\n" +
@@ -479,9 +387,8 @@ const file_reservelock_reservation_v1_reservation_proto_rawDesc = "" +
 	"\x1eRESERVATION_STATUS_UNSPECIFIED\x10\x00\x12\x1e\n" +
 	"\x1aRESERVATION_STATUS_PENDING\x10\x01\x12 \n" +
 	"\x1cRESERVATION_STATUS_CONFIRMED\x10\x02\x12\x1e\n" +
-	"\x1aRESERVATION_STATUS_EXPIRED\x10\x032\x99\x03\n" +
-	"\x12ReservationService\x12\x86\x01\n" +
-	"\x13InitializeInventory\x126.reservelock.reservation.v1.InitializeInventoryRequest\x1a7.reservelock.reservation.v1.InitializeInventoryResponse\x12\x80\x01\n" +
+	"\x1aRESERVATION_STATUS_EXPIRED\x10\x032\x90\x02\n" +
+	"\x12ReservationService\x12\x80\x01\n" +
 	"\x11CreateReservation\x124.reservelock.reservation.v1.CreateReservationRequest\x1a5.reservelock.reservation.v1.CreateReservationResponse\x12w\n" +
 	"\x0eGetReservation\x121.reservelock.reservation.v1.GetReservationRequest\x1a2.reservelock.reservation.v1.GetReservationResponseB[ZYgithub.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/reservation/v1;reservationv1b\x06proto3"
 
@@ -498,32 +405,28 @@ func file_reservelock_reservation_v1_reservation_proto_rawDescGZIP() []byte {
 }
 
 var file_reservelock_reservation_v1_reservation_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_reservelock_reservation_v1_reservation_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_reservelock_reservation_v1_reservation_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_reservelock_reservation_v1_reservation_proto_goTypes = []any{
-	(ReservationStatus)(0),              // 0: reservelock.reservation.v1.ReservationStatus
-	(*InitializeInventoryRequest)(nil),  // 1: reservelock.reservation.v1.InitializeInventoryRequest
-	(*InitializeInventoryResponse)(nil), // 2: reservelock.reservation.v1.InitializeInventoryResponse
-	(*CreateReservationRequest)(nil),    // 3: reservelock.reservation.v1.CreateReservationRequest
-	(*CreateReservationResponse)(nil),   // 4: reservelock.reservation.v1.CreateReservationResponse
-	(*GetReservationRequest)(nil),       // 5: reservelock.reservation.v1.GetReservationRequest
-	(*GetReservationResponse)(nil),      // 6: reservelock.reservation.v1.GetReservationResponse
-	(*Reservation)(nil),                 // 7: reservelock.reservation.v1.Reservation
-	(*timestamppb.Timestamp)(nil),       // 8: google.protobuf.Timestamp
+	(ReservationStatus)(0),            // 0: reservelock.reservation.v1.ReservationStatus
+	(*CreateReservationRequest)(nil),  // 1: reservelock.reservation.v1.CreateReservationRequest
+	(*CreateReservationResponse)(nil), // 2: reservelock.reservation.v1.CreateReservationResponse
+	(*GetReservationRequest)(nil),     // 3: reservelock.reservation.v1.GetReservationRequest
+	(*GetReservationResponse)(nil),    // 4: reservelock.reservation.v1.GetReservationResponse
+	(*Reservation)(nil),               // 5: reservelock.reservation.v1.Reservation
+	(*timestamppb.Timestamp)(nil),     // 6: google.protobuf.Timestamp
 }
 var file_reservelock_reservation_v1_reservation_proto_depIdxs = []int32{
-	7, // 0: reservelock.reservation.v1.CreateReservationResponse.reservation:type_name -> reservelock.reservation.v1.Reservation
-	7, // 1: reservelock.reservation.v1.GetReservationResponse.reservation:type_name -> reservelock.reservation.v1.Reservation
+	5, // 0: reservelock.reservation.v1.CreateReservationResponse.reservation:type_name -> reservelock.reservation.v1.Reservation
+	5, // 1: reservelock.reservation.v1.GetReservationResponse.reservation:type_name -> reservelock.reservation.v1.Reservation
 	0, // 2: reservelock.reservation.v1.Reservation.status:type_name -> reservelock.reservation.v1.ReservationStatus
-	8, // 3: reservelock.reservation.v1.Reservation.created_at:type_name -> google.protobuf.Timestamp
-	8, // 4: reservelock.reservation.v1.Reservation.expires_at:type_name -> google.protobuf.Timestamp
-	1, // 5: reservelock.reservation.v1.ReservationService.InitializeInventory:input_type -> reservelock.reservation.v1.InitializeInventoryRequest
-	3, // 6: reservelock.reservation.v1.ReservationService.CreateReservation:input_type -> reservelock.reservation.v1.CreateReservationRequest
-	5, // 7: reservelock.reservation.v1.ReservationService.GetReservation:input_type -> reservelock.reservation.v1.GetReservationRequest
-	2, // 8: reservelock.reservation.v1.ReservationService.InitializeInventory:output_type -> reservelock.reservation.v1.InitializeInventoryResponse
-	4, // 9: reservelock.reservation.v1.ReservationService.CreateReservation:output_type -> reservelock.reservation.v1.CreateReservationResponse
-	6, // 10: reservelock.reservation.v1.ReservationService.GetReservation:output_type -> reservelock.reservation.v1.GetReservationResponse
-	8, // [8:11] is the sub-list for method output_type
-	5, // [5:8] is the sub-list for method input_type
+	6, // 3: reservelock.reservation.v1.Reservation.created_at:type_name -> google.protobuf.Timestamp
+	6, // 4: reservelock.reservation.v1.Reservation.expires_at:type_name -> google.protobuf.Timestamp
+	1, // 5: reservelock.reservation.v1.ReservationService.CreateReservation:input_type -> reservelock.reservation.v1.CreateReservationRequest
+	3, // 6: reservelock.reservation.v1.ReservationService.GetReservation:input_type -> reservelock.reservation.v1.GetReservationRequest
+	2, // 7: reservelock.reservation.v1.ReservationService.CreateReservation:output_type -> reservelock.reservation.v1.CreateReservationResponse
+	4, // 8: reservelock.reservation.v1.ReservationService.GetReservation:output_type -> reservelock.reservation.v1.GetReservationResponse
+	7, // [7:9] is the sub-list for method output_type
+	5, // [5:7] is the sub-list for method input_type
 	5, // [5:5] is the sub-list for extension type_name
 	5, // [5:5] is the sub-list for extension extendee
 	0, // [0:5] is the sub-list for field type_name
@@ -540,7 +443,7 @@ func file_reservelock_reservation_v1_reservation_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_reservelock_reservation_v1_reservation_proto_rawDesc), len(file_reservelock_reservation_v1_reservation_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   7,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

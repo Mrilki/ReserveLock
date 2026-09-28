@@ -86,16 +86,12 @@ func TestCreateReservation_ConcurrentSameSeat_Postgres(t *testing.T) {
 
 	cleanupEvent(t, pool, eventID)
 
-	err := service.InitializeInventory(
-		context.Background(),
-		application.InitializeInventoryInput{
-			EventID: eventID,
-			SeatIDs: []string{seatID},
-		},
+	initializeInventory(
+		t,
+		service,
+		eventID,
+		[]string{seatID},
 	)
-	if err != nil {
-		t.Fatalf("initialize inventory: %v", err)
-	}
 
 	const workers = 20
 
@@ -160,7 +156,7 @@ func TestCreateReservation_ConcurrentSameSeat_Postgres(t *testing.T) {
 
 	var reservationCount int
 
-	err = pool.QueryRow(
+	err := pool.QueryRow(
 		context.Background(),
 		`SELECT count(*) FROM reservations WHERE event_id = $1`,
 		eventID,
@@ -211,16 +207,12 @@ func TestExpireReservations_Postgres(t *testing.T) {
 
 	cleanupEvent(t, pool, eventID)
 
-	err := service.InitializeInventory(
-		context.Background(),
-		application.InitializeInventoryInput{
-			EventID: eventID,
-			SeatIDs: []string{seatID},
-		},
+	initializeInventory(
+		t,
+		service,
+		eventID,
+		[]string{seatID},
 	)
-	if err != nil {
-		t.Fatalf("initialize inventory: %v", err)
-	}
 
 	reservation, err := service.CreateReservation(
 		context.Background(),
@@ -281,16 +273,12 @@ func TestCreateReservation_MultipleSeatsAtomic_Postgres(t *testing.T) {
 
 	cleanupEvent(t, pool, eventID)
 
-	err := service.InitializeInventory(
-		context.Background(),
-		application.InitializeInventoryInput{
-			EventID: eventID,
-			SeatIDs: []string{seat1, seat2, seat3},
-		},
+	initializeInventory(
+		t,
+		service,
+		eventID,
+		[]string{seat1, seat2, seat3},
 	)
-	if err != nil {
-		t.Fatalf("initialize inventory: %v", err)
-	}
 
 	firstReservation, err := service.CreateReservation(
 		context.Background(),
@@ -388,5 +376,30 @@ func TestCreateReservation_MultipleSeatsAtomic_Postgres(t *testing.T) {
 			"expected exactly 1 persisted reservation, got %d",
 			reservationCount,
 		)
+	}
+}
+
+func initializeInventory(
+	t *testing.T,
+	service *application.Service,
+	eventID string,
+	seatIDs []string,
+) {
+	t.Helper()
+
+	processed, err := service.HandleEventPublished(
+		context.Background(),
+		application.EventPublishedInput{
+			MessageID: uuid.NewString(),
+			EventID:   eventID,
+			SeatIDs:   seatIDs,
+		},
+	)
+	if err != nil {
+		t.Fatalf("handle event published: %v", err)
+	}
+
+	if !processed {
+		t.Fatal("expected event published message to be processed")
 	}
 }

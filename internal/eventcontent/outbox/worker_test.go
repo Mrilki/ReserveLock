@@ -3,6 +3,7 @@ package outbox
 import (
 	"context"
 	"errors"
+	eventcontentcontract "github.com/Mrilki/ReserveLock/internal/integration/eventcontent"
 	"testing"
 	"time"
 
@@ -51,14 +52,14 @@ func TestWorkerProcessBatchPublishesAndMarksMessages(t *testing.T) {
 	messages := []Message{
 		{
 			ID:         "message-1",
-			EventType:  EventPublishedType,
+			EventType:  eventcontentcontract.EventPublishedType,
 			Key:        "event-1",
 			Payload:    []byte("payload-1"),
 			OccurredAt: time.Now().UTC(),
 		},
 		{
 			ID:         "message-2",
-			EventType:  EventPublishedType,
+			EventType:  eventcontentcontract.EventPublishedType,
 			Key:        "event-2",
 			Payload:    []byte("payload-2"),
 			OccurredAt: time.Now().UTC(),
@@ -101,7 +102,7 @@ func TestWorkerProcessBatchDoesNotMarkMessageWhenPublishFails(t *testing.T) {
 		messages: []Message{
 			{
 				ID:         "message-1",
-				EventType:  EventPublishedType,
+				EventType:  eventcontentcontract.EventPublishedType,
 				Key:        "event-1",
 				Payload:    []byte("payload"),
 				OccurredAt: time.Now().UTC(),

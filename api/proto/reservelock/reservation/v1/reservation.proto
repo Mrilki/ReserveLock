@@ -7,23 +7,12 @@ import "google/protobuf/timestamp.proto";
 option go_package = "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/reservation/v1;reservationv1";
 
 service ReservationService {
-  rpc InitializeInventory(InitializeInventoryRequest)
-      returns (InitializeInventoryResponse);
 
   rpc CreateReservation(CreateReservationRequest)
       returns (CreateReservationResponse);
 
   rpc GetReservation(GetReservationRequest)
       returns (GetReservationResponse);
-}
-
-message InitializeInventoryRequest {
-  string event_id = 1;
-  repeated string seat_ids = 2;
-}
-
-message InitializeInventoryResponse {
-
 }
 
 message CreateReservationRequest {

@@ -7,8 +7,8 @@ import (
 
 	"github.com/Mrilki/ReserveLock/internal/eventcontent/application"
 	"github.com/Mrilki/ReserveLock/internal/eventcontent/domain"
-	eventoutbox "github.com/Mrilki/ReserveLock/internal/eventcontent/outbox"
 	eventcontentv1 "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/eventcontent/v1"
+	eventcontentcontract "github.com/Mrilki/ReserveLock/internal/integration/eventcontent"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
@@ -101,7 +101,7 @@ func (r *EventRepository) Publish(
 
 	outbox := outboxDocument{
 		ID:          publication.MessageID,
-		EventType:   eventoutbox.EventPublishedType,
+		EventType:   eventcontentcontract.EventPublishedType,
 		Key:         event.ID,
 		Payload:     payload,
 		OccurredAt:  publication.OccurredAt,

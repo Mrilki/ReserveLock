@@ -11,28 +11,46 @@ import (
 )
 
 type Store struct {
-	mu           sync.RWMutex
-	inventory    map[string]map[string]domain.SeatInventory
-	reservations map[string]domain.Reservation
+	mu                sync.RWMutex
+	inventory         map[string]map[string]domain.SeatInventory
+	reservations      map[string]domain.Reservation
+	processedMessages map[string]struct{}
 }
 
 func NewStore() *Store {
 	return &Store{
-		inventory:    make(map[string]map[string]domain.SeatInventory),
-		reservations: make(map[string]domain.Reservation),
+		inventory:         make(map[string]map[string]domain.SeatInventory),
+		reservations:      make(map[string]domain.Reservation),
+		processedMessages: make(map[string]struct{}),
 	}
 }
 
-func (s *Store) InitializeInventory(
+func (s *Store) ProcessEventPublished(
 	ctx context.Context,
+	messageID string,
 	eventID string,
 	seats []domain.SeatInventory,
-) error {
+) (bool, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	if _, exists := s.inventory[eventID]; exists {
-		return domain.ErrInventoryAlreadyExists
+	if _, exists := s.processedMessages[messageID]; exists {
+		return false, nil
+	}
+
+	if eventInventory, exists := s.inventory[eventID]; exists {
+		if len(eventInventory) != len(seats) {
+			return false, domain.ErrInventoryAlreadyExists
+		}
+
+		for _, seat := range seats {
+			if _, exists := eventInventory[seat.SeatID]; !exists {
+				return false, domain.ErrInventoryAlreadyExists
+			}
+		}
+
+		s.processedMessages[messageID] = struct{}{}
+		return true, nil
 	}
 
 	eventInventory := make(map[string]domain.SeatInventory, len(seats))
@@ -42,7 +60,9 @@ func (s *Store) InitializeInventory(
 	}
 
 	s.inventory[eventID] = eventInventory
-	return nil
+	s.processedMessages[messageID] = struct{}{}
+
+	return true, nil
 }
 
 func (s *Store) CreateReservation(ctx context.Context, reservation domain.Reservation) error {

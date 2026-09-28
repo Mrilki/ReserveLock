@@ -11,6 +11,7 @@ import (
 	"github.com/Mrilki/ReserveLock/internal/reservation/application"
 	"github.com/Mrilki/ReserveLock/internal/reservation/domain"
 	"github.com/Mrilki/ReserveLock/internal/reservation/repository/memory"
+	"github.com/google/uuid"
 )
 
 func newTestService() *application.Service {
@@ -25,15 +26,20 @@ func initializeInventory(
 ) {
 	t.Helper()
 
-	err := service.InitializeInventory(
+	processed, err := service.HandleEventPublished(
 		context.Background(),
-		application.InitializeInventoryInput{
-			EventID: eventID,
-			SeatIDs: seatIDs,
+		application.EventPublishedInput{
+			MessageID: uuid.NewString(),
+			EventID:   eventID,
+			SeatIDs:   seatIDs,
 		},
 	)
 	if err != nil {
-		t.Fatalf("initialize inventory: %v", err)
+		t.Fatalf("handle event published: %v", err)
+	}
+
+	if !processed {
+		t.Fatal("expected event published message to be processed")
 	}
 }
 
@@ -484,5 +490,31 @@ func TestCreateReservation_InventoryNotFound(t *testing.T) {
 			"expected ErrInventoryNotFound, got %v",
 			err,
 		)
+	}
+}
+
+func TestHandleEventPublished_DuplicateMessage(t *testing.T) {
+	service := newTestService()
+
+	input := application.EventPublishedInput{
+		MessageID: "message-1",
+		EventID:   "event-1",
+		SeatIDs:   []string{"seat-1"},
+	}
+
+	processed, err := service.HandleEventPublished(context.Background(), input)
+	if err != nil {
+		t.Fatalf("first event published: %v", err)
+	}
+	if !processed {
+		t.Fatal("expected first message to be processed")
+	}
+
+	processed, err = service.HandleEventPublished(context.Background(), input)
+	if err != nil {
+		t.Fatalf("duplicate event published: %v", err)
+	}
+	if processed {
+		t.Fatal("expected duplicate message to be ignored")
 	}
 }

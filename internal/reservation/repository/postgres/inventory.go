@@ -7,36 +7,50 @@ import (
 	"github.com/Mrilki/ReserveLock/internal/reservation/domain"
 )
 
-func (s *Store) InitializeInventory(
+func (s *Store) ProcessEventPublished(
 	ctx context.Context,
+	messageID string,
 	eventID string,
 	seats []domain.SeatInventory,
-) error {
+) (bool, error) {
+	seatIDs := make([]string, 0, len(seats))
+
+	for _, seat := range seats {
+		seatIDs = append(seatIDs, seat.SeatID)
+	}
+
 	tx, err := s.pool.Begin(ctx)
 	if err != nil {
-		return fmt.Errorf("begin initialize inventory transaction: %w", err)
+		return false, fmt.Errorf("begin event published transaction: %w", err)
 	}
 	defer func() {
 		_ = tx.Rollback(ctx)
 	}()
 
 	result, err := tx.Exec(ctx, `
+		INSERT INTO inbox_messages (message_id)
+		VALUES ($1)
+		ON CONFLICT DO NOTHING
+	`, messageID)
+	if err != nil {
+		return false, fmt.Errorf("insert inbox message: %w", err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return false, nil
+	}
+
+	result, err = tx.Exec(ctx, `
 		INSERT INTO event_inventories (event_id)
 		VALUES ($1)
 		ON CONFLICT DO NOTHING
 	`, eventID)
 	if err != nil {
-		return fmt.Errorf("insert event inventory: %w", err)
+		return false, fmt.Errorf("insert event inventory: %w", err)
 	}
 
 	if result.RowsAffected() == 0 {
-		return domain.ErrInventoryAlreadyExists
-	}
-
-	seatIDs := make([]string, 0, len(seats))
-
-	for _, seat := range seats {
-		seatIDs = append(seatIDs, seat.SeatID)
+		return false, domain.ErrInventoryAlreadyExists
 	}
 
 	result, err = tx.Exec(ctx, `
@@ -45,11 +59,11 @@ func (s *Store) InitializeInventory(
 		FROM unnest($2::text[]) AS seats(seat_id)
 	`, eventID, seatIDs)
 	if err != nil {
-		return fmt.Errorf("insert seat inventory: %w", err)
+		return false, fmt.Errorf("insert seat inventory: %w", err)
 	}
 
-	if result.RowsAffected() != int64(len(seats)) {
-		return fmt.Errorf(
+	if result.RowsAffected() != int64(len(seatIDs)) {
+		return false, fmt.Errorf(
 			"insert seat inventory: expected %d rows, inserted %d",
 			len(seatIDs),
 			result.RowsAffected(),
@@ -57,8 +71,8 @@ func (s *Store) InitializeInventory(
 	}
 
 	if err := tx.Commit(ctx); err != nil {
-		return fmt.Errorf("commit initialize inventory transaction: %w", err)
+		return false, fmt.Errorf("commit event published transaction: %w", err)
 	}
 
-	return nil
+	return true, nil
 }

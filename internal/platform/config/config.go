@@ -1,6 +1,9 @@
 package config
 
-import "os"
+import (
+	"os"
+	"strings"
+)
 
 const (
 	defaultHTTPAddr = ":8080"
@@ -28,4 +31,19 @@ func GetEnv(key, fallback string) string {
 	}
 
 	return value
+}
+
+func GetCSVEnv(key, fallback string) []string {
+	parts := strings.Split(GetEnv(key, fallback), ",")
+
+	values := make([]string, 0, len(parts))
+
+	for _, part := range parts {
+		value := strings.TrimSpace(part)
+		if value != "" {
+			values = append(values, value)
+		}
+	}
+
+	return values
 }

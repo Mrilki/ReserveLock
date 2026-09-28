@@ -13,6 +13,7 @@ import (
 	"github.com/Mrilki/ReserveLock/internal/platform/logger"
 	"github.com/Mrilki/ReserveLock/internal/reservation/application"
 	reservationconfig "github.com/Mrilki/ReserveLock/internal/reservation/config"
+	reservationkafka "github.com/Mrilki/ReserveLock/internal/reservation/messaging/kafka"
 	reservationpostgres "github.com/Mrilki/ReserveLock/internal/reservation/repository/postgres"
 	reservationgrpc "github.com/Mrilki/ReserveLock/internal/reservation/transport/grpc"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -77,6 +78,22 @@ func main() {
 
 	reservationService := application.NewService(reservationStore)
 
+	kafkaClient, err := reservationkafka.NewClient(cfg.KafkaBrokers)
+	if err != nil {
+		logg.Error(
+			"failed to create kafka consumer client",
+			zap.Error(err),
+		)
+		return
+	}
+	defer kafkaClient.Close()
+
+	eventPublishedConsumer := reservationkafka.NewConsumer(
+		kafkaClient,
+		reservationService,
+		logg,
+	)
+
 	grpcServer := grpc.NewServer()
 
 	reservationv1.RegisterReservationServiceServer(
@@ -95,6 +112,13 @@ func main() {
 		syscall.SIGTERM,
 	)
 	defer stop()
+
+	consumerDone := make(chan struct{})
+
+	go func() {
+		defer close(consumerDone)
+		eventPublishedConsumer.Run(ctx)
+	}()
 
 	go func() {
 		ticker := time.NewTicker(expirationScanInterval)
@@ -145,7 +169,7 @@ func main() {
 			"grpc server failed",
 			zap.Error(err),
 		)
-		return
+		stop()
 	}
 
 	shutdownCtx, cancel := context.WithTimeout(
@@ -170,5 +194,13 @@ func main() {
 			"grpc graceful shutdown timed out",
 		)
 		grpcServer.Stop()
+	}
+
+	select {
+	case <-consumerDone:
+		logg.Info("event published consumer stopped")
+
+	case <-shutdownCtx.Done():
+		logg.Warn("event published consumer shutdown timed out")
 	}
 }

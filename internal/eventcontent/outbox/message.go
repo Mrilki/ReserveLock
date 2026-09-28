@@ -5,8 +5,6 @@ import (
 	"time"
 )
 
-const EventPublishedType = "reservelock.eventcontent.v1.EventPublished"
-
 type Message struct {
 	ID         string
 	EventType  string

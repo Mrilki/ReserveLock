@@ -18,24 +18,6 @@ func NewServer(service *application.Service) reservationv1.ReservationServiceSer
 	}
 }
 
-func (s *server) InitializeInventory(
-	ctx context.Context,
-	request *reservationv1.InitializeInventoryRequest,
-) (*reservationv1.InitializeInventoryResponse, error) {
-	err := s.service.InitializeInventory(
-		ctx,
-		application.InitializeInventoryInput{
-			EventID: request.GetEventId(),
-			SeatIDs: request.GetSeatIds(),
-		},
-	)
-	if err != nil {
-		return nil, toGRPCError(err)
-	}
-
-	return &reservationv1.InitializeInventoryResponse{}, nil
-}
-
 func (s *server) CreateReservation(
 	ctx context.Context,
 	request *reservationv1.CreateReservationRequest,

@@ -1,8 +1,6 @@
 package config
 
 import (
-	"strings"
-
 	platformconfig "github.com/Mrilki/ReserveLock/internal/platform/config"
 )
 
@@ -27,20 +25,6 @@ func Load() Config {
 		GRPCAddr:      platformconfig.GetEnv("GRPC_ADDR", defaultGRPCAddr),
 		MongoURI:      platformconfig.GetEnv("EVENT_CONTENT_MONGO_URI", defaultMongoURI),
 		MongoDatabase: platformconfig.GetEnv("EVENT_CONTENT_MONGO_DATABASE", defaultMongoDatabase),
-		KafkaBrokers:  parseBrokers(platformconfig.GetEnv("KAFKA_BROKERS", defaultKafkaBrokers)),
+		KafkaBrokers:  platformconfig.GetCSVEnv("KAFKA_BROKERS", defaultKafkaBrokers),
 	}
-}
-
-func parseBrokers(value string) []string {
-	parts := strings.Split(value, ",")
-
-	brokers := make([]string, 0, len(parts))
-
-	for _, part := range parts {
-		broker := strings.TrimSpace(part)
-		if broker != "" {
-			brokers = append(brokers, broker)
-		}
-	}
-	return brokers
 }

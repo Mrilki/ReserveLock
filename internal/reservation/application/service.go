@@ -8,7 +8,7 @@ import (
 )
 
 type Store interface {
-	InitializeInventory(ctx context.Context, eventID string, seats []domain.SeatInventory) error
+	ProcessEventPublished(ctx context.Context, messageID string, eventID string, seats []domain.SeatInventory) (bool, error)
 	CreateReservation(ctx context.Context, reservation domain.Reservation) error
 	GetReservationByID(ctx context.Context, id string) (domain.Reservation, error)
 	ListExpiredPendingIDs(ctx context.Context, now time.Time, limit int) ([]string, error)
@@ -23,30 +23,33 @@ func NewService(store Store) *Service {
 	return &Service{store: store}
 }
 
-type InitializeInventoryInput struct {
-	EventID string
-	SeatIDs []string
+type EventPublishedInput struct {
+	MessageID string
+	EventID   string
+	SeatIDs   []string
 }
 
-func (s *Service) InitializeInventory(ctx context.Context, input InitializeInventoryInput) error {
+func (s *Service) HandleEventPublished(ctx context.Context, input EventPublishedInput) (bool, error) {
+	if input.MessageID == "" {
+		return false, ErrInvalidMessageID
+	}
 	if input.EventID == "" {
-		return ErrInvalidEventID
+		return false, ErrInvalidEventID
 	}
 	if len(input.SeatIDs) == 0 {
-		return ErrSeatIDsRequired
+		return false, ErrSeatIDsRequired
 	}
 
 	seats := make([]domain.SeatInventory, 0, len(input.SeatIDs))
-
 	seen := make(map[string]struct{}, len(input.SeatIDs))
 
 	for _, seatID := range input.SeatIDs {
 		if seatID == "" {
-			return ErrInvalidSeatID
+			return false, ErrInvalidSeatID
 		}
 
 		if _, exists := seen[seatID]; exists {
-			return ErrDuplicateSeatID
+			return false, ErrDuplicateSeatID
 		}
 
 		seen[seatID] = struct{}{}
@@ -58,5 +61,5 @@ func (s *Service) InitializeInventory(ctx context.Context, input InitializeInven
 		})
 	}
 
-	return s.store.InitializeInventory(ctx, input.EventID, seats)
+	return s.store.ProcessEventPublished(ctx, input.MessageID, input.EventID, seats)
 }

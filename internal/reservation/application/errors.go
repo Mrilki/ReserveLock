@@ -9,4 +9,5 @@ var (
 	ErrInvalidReservationID = errors.New("invalid reservation id")
 	ErrInvalidUserID        = errors.New("invalid user id")
 	ErrDuplicateSeatID      = errors.New("duplicate seat id")
+	ErrInvalidMessageID     = errors.New("invalid message id")
 )
