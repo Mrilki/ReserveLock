@@ -403,3 +403,70 @@ func initializeInventory(
 		t.Fatal("expected event published message to be processed")
 	}
 }
+
+func TestGetAvailability_Postgres(t *testing.T) {
+	pool, service := newPostgresTestService(t)
+
+	eventID := uuid.NewString()
+	seat1 := uuid.NewString()
+	seat2 := uuid.NewString()
+
+	cleanupEvent(t, pool, eventID)
+
+	initializeInventory(
+		t,
+		service,
+		eventID,
+		[]string{seat1, seat2},
+	)
+
+	_, err := service.CreateReservation(
+		context.Background(),
+		application.CreateReservationInput{
+			EventID: eventID,
+			UserID:  "user-1",
+			SeatIDs: []string{seat1},
+		},
+	)
+	if err != nil {
+		t.Fatalf("create reservation: %v", err)
+	}
+
+	seats, err := service.GetAvailability(
+		context.Background(),
+		eventID,
+	)
+	if err != nil {
+		t.Fatalf("get availability: %v", err)
+	}
+
+	if len(seats) != 2 {
+		t.Fatalf(
+			"expected 2 seats, got %d",
+			len(seats),
+		)
+	}
+
+	statuses := make(
+		map[string]domain.SeatInventoryStatus,
+		len(seats),
+	)
+
+	for _, seat := range seats {
+		statuses[seat.SeatID] = seat.Status
+	}
+
+	if statuses[seat1] != domain.SeatInventoryStatusHeld {
+		t.Fatalf(
+			"expected first seat HELD, got %s",
+			statuses[seat1],
+		)
+	}
+
+	if statuses[seat2] != domain.SeatInventoryStatusAvailable {
+		t.Fatalf(
+			"expected second seat AVAILABLE, got %s",
+			statuses[seat2],
+		)
+	}
+}

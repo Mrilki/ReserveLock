@@ -9,8 +9,6 @@ import (
 	"github.com/twmb/franz-go/pkg/kgo"
 )
 
-const eventPublishedTopic = "reservelock.event-content.event-published.v1"
-
 type Publisher struct {
 	client *kgo.Client
 }
@@ -57,7 +55,7 @@ func (p *Publisher) Publish(ctx context.Context, message eventoutbox.Message) er
 func topicForEventType(eventType string) (string, error) {
 	switch eventType {
 	case eventcontentcontract.EventPublishedType:
-		return eventPublishedTopic, nil
+		return eventcontentcontract.EventPublishedTopic, nil
 
 	default:
 		return "", fmt.Errorf(

@@ -37,3 +37,35 @@ func toProtoReservation(
 		ExpiresAt: timestamppb.New(reservation.ExpiresAt),
 	}
 }
+
+func toProtoSeatAvailabilityStatus(
+	status domain.SeatInventoryStatus,
+) reservationv1.SeatAvailabilityStatus {
+	switch status {
+	case domain.SeatInventoryStatusAvailable:
+		return reservationv1.SeatAvailabilityStatus_SEAT_AVAILABILITY_STATUS_AVAILABLE
+
+	case domain.SeatInventoryStatusHeld:
+		return reservationv1.SeatAvailabilityStatus_SEAT_AVAILABILITY_STATUS_HELD
+
+	case domain.SeatInventoryStatusReserved:
+		return reservationv1.SeatAvailabilityStatus_SEAT_AVAILABILITY_STATUS_RESERVED
+
+	default:
+		return reservationv1.SeatAvailabilityStatus_SEAT_AVAILABILITY_STATUS_UNSPECIFIED
+	}
+}
+
+func toProtoSeatAvailability(
+	seat domain.SeatInventory,
+) *reservationv1.SeatAvailability {
+	result := &reservationv1.SeatAvailability{
+		SeatId: seat.SeatID,
+		Status: toProtoSeatAvailabilityStatus(seat.Status),
+	}
+	if !seat.HeldUntil.IsZero() {
+		result.HeldUntil = timestamppb.New(seat.HeldUntil)
+	}
+
+	return result
+}

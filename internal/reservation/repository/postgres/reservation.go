@@ -117,7 +117,7 @@ func (s *Store) CreateReservation(
 			$1,
 			seat_id,
 			position
-		FROM unnest($2::text[])
+		FROM unnest($2::text[]) 
 			WITH ORDINALITY AS seats(seat_id, position)
 	`, reservation.ID, reservation.SeatIDs)
 	if err != nil {

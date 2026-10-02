@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	ReservationService_CreateReservation_FullMethodName = "/reservelock.reservation.v1.ReservationService/CreateReservation"
 	ReservationService_GetReservation_FullMethodName    = "/reservelock.reservation.v1.ReservationService/GetReservation"
+	ReservationService_GetAvailability_FullMethodName   = "/reservelock.reservation.v1.ReservationService/GetAvailability"
 )
 
 // ReservationServiceClient is the client API for ReservationService service.
@@ -29,6 +30,7 @@ const (
 type ReservationServiceClient interface {
 	CreateReservation(ctx context.Context, in *CreateReservationRequest, opts ...grpc.CallOption) (*CreateReservationResponse, error)
 	GetReservation(ctx context.Context, in *GetReservationRequest, opts ...grpc.CallOption) (*GetReservationResponse, error)
+	GetAvailability(ctx context.Context, in *GetAvailabilityRequest, opts ...grpc.CallOption) (*GetAvailabilityResponse, error)
 }
 
 type reservationServiceClient struct {
@@ -59,12 +61,23 @@ func (c *reservationServiceClient) GetReservation(ctx context.Context, in *GetRe
 	return out, nil
 }
 
+func (c *reservationServiceClient) GetAvailability(ctx context.Context, in *GetAvailabilityRequest, opts ...grpc.CallOption) (*GetAvailabilityResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetAvailabilityResponse)
+	err := c.cc.Invoke(ctx, ReservationService_GetAvailability_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ReservationServiceServer is the server API for ReservationService service.
 // All implementations must embed UnimplementedReservationServiceServer
 // for forward compatibility.
 type ReservationServiceServer interface {
 	CreateReservation(context.Context, *CreateReservationRequest) (*CreateReservationResponse, error)
 	GetReservation(context.Context, *GetReservationRequest) (*GetReservationResponse, error)
+	GetAvailability(context.Context, *GetAvailabilityRequest) (*GetAvailabilityResponse, error)
 	mustEmbedUnimplementedReservationServiceServer()
 }
 
@@ -80,6 +93,9 @@ func (UnimplementedReservationServiceServer) CreateReservation(context.Context, 
 }
 func (UnimplementedReservationServiceServer) GetReservation(context.Context, *GetReservationRequest) (*GetReservationResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetReservation not implemented")
+}
+func (UnimplementedReservationServiceServer) GetAvailability(context.Context, *GetAvailabilityRequest) (*GetAvailabilityResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetAvailability not implemented")
 }
 func (UnimplementedReservationServiceServer) mustEmbedUnimplementedReservationServiceServer() {}
 func (UnimplementedReservationServiceServer) testEmbeddedByValue()                            {}
@@ -138,6 +154,24 @@ func _ReservationService_GetReservation_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ReservationService_GetAvailability_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAvailabilityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ReservationServiceServer).GetAvailability(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ReservationService_GetAvailability_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ReservationServiceServer).GetAvailability(ctx, req.(*GetAvailabilityRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ReservationService_ServiceDesc is the grpc.ServiceDesc for ReservationService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -152,6 +186,10 @@ var ReservationService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetReservation",
 			Handler:    _ReservationService_GetReservation_Handler,
+		},
+		{
+			MethodName: "GetAvailability",
+			Handler:    _ReservationService_GetAvailability_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

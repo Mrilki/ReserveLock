@@ -9,6 +9,7 @@ import (
 
 type Store interface {
 	ProcessEventPublished(ctx context.Context, messageID string, eventID string, seats []domain.SeatInventory) (bool, error)
+	ListSeatInventory(ctx context.Context, eventID string) ([]domain.SeatInventory, error)
 	CreateReservation(ctx context.Context, reservation domain.Reservation) error
 	GetReservationByID(ctx context.Context, id string) (domain.Reservation, error)
 	ListExpiredPendingIDs(ctx context.Context, now time.Time, limit int) ([]string, error)

@@ -38,19 +38,8 @@ func (s *Store) ProcessEventPublished(
 		return false, nil
 	}
 
-	if eventInventory, exists := s.inventory[eventID]; exists {
-		if len(eventInventory) != len(seats) {
-			return false, domain.ErrInventoryAlreadyExists
-		}
-
-		for _, seat := range seats {
-			if _, exists := eventInventory[seat.SeatID]; !exists {
-				return false, domain.ErrInventoryAlreadyExists
-			}
-		}
-
-		s.processedMessages[messageID] = struct{}{}
-		return true, nil
+	if _, exists := s.inventory[eventID]; exists {
+		return false, domain.ErrInventoryAlreadyExists
 	}
 
 	eventInventory := make(map[string]domain.SeatInventory, len(seats))
@@ -219,4 +208,29 @@ func (s *Store) ExpireReservation(
 	s.reservations[id] = reservation
 
 	return true, nil
+}
+
+func (s *Store) ListSeatInventory(
+	ctx context.Context,
+	eventID string,
+) ([]domain.SeatInventory, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	eventInventory, exists := s.inventory[eventID]
+	if !exists {
+		return nil, domain.ErrInventoryNotFound
+	}
+
+	seats := make([]domain.SeatInventory, 0, len(eventInventory))
+
+	for _, seat := range eventInventory {
+		seats = append(seats, seat)
+	}
+
+	sort.Slice(seats, func(i, j int) bool {
+		return seats[i].SeatID < seats[j].SeatID
+	})
+
+	return seats, nil
 }

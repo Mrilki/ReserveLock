@@ -74,6 +74,58 @@ func (ReservationStatus) EnumDescriptor() ([]byte, []int) {
 	return file_reservelock_reservation_v1_reservation_proto_rawDescGZIP(), []int{0}
 }
 
+type SeatAvailabilityStatus int32
+
+const (
+	SeatAvailabilityStatus_SEAT_AVAILABILITY_STATUS_UNSPECIFIED SeatAvailabilityStatus = 0
+	SeatAvailabilityStatus_SEAT_AVAILABILITY_STATUS_AVAILABLE   SeatAvailabilityStatus = 1
+	SeatAvailabilityStatus_SEAT_AVAILABILITY_STATUS_HELD        SeatAvailabilityStatus = 2
+	SeatAvailabilityStatus_SEAT_AVAILABILITY_STATUS_RESERVED    SeatAvailabilityStatus = 3
+)
+
+// Enum value maps for SeatAvailabilityStatus.
+var (
+	SeatAvailabilityStatus_name = map[int32]string{
+		0: "SEAT_AVAILABILITY_STATUS_UNSPECIFIED",
+		1: "SEAT_AVAILABILITY_STATUS_AVAILABLE",
+		2: "SEAT_AVAILABILITY_STATUS_HELD",
+		3: "SEAT_AVAILABILITY_STATUS_RESERVED",
+	}
+	SeatAvailabilityStatus_value = map[string]int32{
+		"SEAT_AVAILABILITY_STATUS_UNSPECIFIED": 0,
+		"SEAT_AVAILABILITY_STATUS_AVAILABLE":   1,
+		"SEAT_AVAILABILITY_STATUS_HELD":        2,
+		"SEAT_AVAILABILITY_STATUS_RESERVED":    3,
+	}
+)
+
+func (x SeatAvailabilityStatus) Enum() *SeatAvailabilityStatus {
+	p := new(SeatAvailabilityStatus)
+	*p = x
+	return p
+}
+
+func (x SeatAvailabilityStatus) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (SeatAvailabilityStatus) Descriptor() protoreflect.EnumDescriptor {
+	return file_reservelock_reservation_v1_reservation_proto_enumTypes[1].Descriptor()
+}
+
+func (SeatAvailabilityStatus) Type() protoreflect.EnumType {
+	return &file_reservelock_reservation_v1_reservation_proto_enumTypes[1]
+}
+
+func (x SeatAvailabilityStatus) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use SeatAvailabilityStatus.Descriptor instead.
+func (SeatAvailabilityStatus) EnumDescriptor() ([]byte, []int) {
+	return file_reservelock_reservation_v1_reservation_proto_rawDescGZIP(), []int{1}
+}
+
 type CreateReservationRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	EventId       string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
@@ -266,6 +318,162 @@ func (x *GetReservationResponse) GetReservation() *Reservation {
 	return nil
 }
 
+type GetAvailabilityRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	EventId       string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetAvailabilityRequest) Reset() {
+	*x = GetAvailabilityRequest{}
+	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetAvailabilityRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAvailabilityRequest) ProtoMessage() {}
+
+func (x *GetAvailabilityRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAvailabilityRequest.ProtoReflect.Descriptor instead.
+func (*GetAvailabilityRequest) Descriptor() ([]byte, []int) {
+	return file_reservelock_reservation_v1_reservation_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *GetAvailabilityRequest) GetEventId() string {
+	if x != nil {
+		return x.EventId
+	}
+	return ""
+}
+
+type GetAvailabilityResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	EventId       string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
+	Seats         []*SeatAvailability    `protobuf:"bytes,2,rep,name=seats,proto3" json:"seats,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetAvailabilityResponse) Reset() {
+	*x = GetAvailabilityResponse{}
+	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetAvailabilityResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAvailabilityResponse) ProtoMessage() {}
+
+func (x *GetAvailabilityResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAvailabilityResponse.ProtoReflect.Descriptor instead.
+func (*GetAvailabilityResponse) Descriptor() ([]byte, []int) {
+	return file_reservelock_reservation_v1_reservation_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *GetAvailabilityResponse) GetEventId() string {
+	if x != nil {
+		return x.EventId
+	}
+	return ""
+}
+
+func (x *GetAvailabilityResponse) GetSeats() []*SeatAvailability {
+	if x != nil {
+		return x.Seats
+	}
+	return nil
+}
+
+type SeatAvailability struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SeatId        string                 `protobuf:"bytes,1,opt,name=seat_id,json=seatId,proto3" json:"seat_id,omitempty"`
+	Status        SeatAvailabilityStatus `protobuf:"varint,2,opt,name=status,proto3,enum=reservelock.reservation.v1.SeatAvailabilityStatus" json:"status,omitempty"`
+	HeldUntil     *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=held_until,json=heldUntil,proto3" json:"held_until,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SeatAvailability) Reset() {
+	*x = SeatAvailability{}
+	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SeatAvailability) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SeatAvailability) ProtoMessage() {}
+
+func (x *SeatAvailability) ProtoReflect() protoreflect.Message {
+	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SeatAvailability.ProtoReflect.Descriptor instead.
+func (*SeatAvailability) Descriptor() ([]byte, []int) {
+	return file_reservelock_reservation_v1_reservation_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *SeatAvailability) GetSeatId() string {
+	if x != nil {
+		return x.SeatId
+	}
+	return ""
+}
+
+func (x *SeatAvailability) GetStatus() SeatAvailabilityStatus {
+	if x != nil {
+		return x.Status
+	}
+	return SeatAvailabilityStatus_SEAT_AVAILABILITY_STATUS_UNSPECIFIED
+}
+
+func (x *SeatAvailability) GetHeldUntil() *timestamppb.Timestamp {
+	if x != nil {
+		return x.HeldUntil
+	}
+	return nil
+}
+
 type Reservation struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -281,7 +489,7 @@ type Reservation struct {
 
 func (x *Reservation) Reset() {
 	*x = Reservation{}
-	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[4]
+	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -293,7 +501,7 @@ func (x *Reservation) String() string {
 func (*Reservation) ProtoMessage() {}
 
 func (x *Reservation) ProtoReflect() protoreflect.Message {
-	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[4]
+	mi := &file_reservelock_reservation_v1_reservation_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -306,7 +514,7 @@ func (x *Reservation) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Reservation.ProtoReflect.Descriptor instead.
 func (*Reservation) Descriptor() ([]byte, []int) {
-	return file_reservelock_reservation_v1_reservation_proto_rawDescGZIP(), []int{4}
+	return file_reservelock_reservation_v1_reservation_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *Reservation) GetId() string {
@@ -372,7 +580,17 @@ const file_reservelock_reservation_v1_reservation_proto_rawDesc = "" +
 	"\x15GetReservationRequest\x12%\n" +
 	"\x0ereservation_id\x18\x01 \x01(\tR\rreservationId\"c\n" +
 	"\x16GetReservationResponse\x12I\n" +
-	"\vreservation\x18\x01 \x01(\v2'.reservelock.reservation.v1.ReservationR\vreservation\"\xa9\x02\n" +
+	"\vreservation\x18\x01 \x01(\v2'.reservelock.reservation.v1.ReservationR\vreservation\"3\n" +
+	"\x16GetAvailabilityRequest\x12\x19\n" +
+	"\bevent_id\x18\x01 \x01(\tR\aeventId\"x\n" +
+	"\x17GetAvailabilityResponse\x12\x19\n" +
+	"\bevent_id\x18\x01 \x01(\tR\aeventId\x12B\n" +
+	"\x05seats\x18\x02 \x03(\v2,.reservelock.reservation.v1.SeatAvailabilityR\x05seats\"\xb2\x01\n" +
+	"\x10SeatAvailability\x12\x17\n" +
+	"\aseat_id\x18\x01 \x01(\tR\x06seatId\x12J\n" +
+	"\x06status\x18\x02 \x01(\x0e22.reservelock.reservation.v1.SeatAvailabilityStatusR\x06status\x129\n" +
+	"\n" +
+	"held_until\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\theldUntil\"\xa9\x02\n" +
 	"\vReservation\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x19\n" +
 	"\bevent_id\x18\x02 \x01(\tR\aeventId\x12\x17\n" +
@@ -387,10 +605,16 @@ const file_reservelock_reservation_v1_reservation_proto_rawDesc = "" +
 	"\x1eRESERVATION_STATUS_UNSPECIFIED\x10\x00\x12\x1e\n" +
 	"\x1aRESERVATION_STATUS_PENDING\x10\x01\x12 \n" +
 	"\x1cRESERVATION_STATUS_CONFIRMED\x10\x02\x12\x1e\n" +
-	"\x1aRESERVATION_STATUS_EXPIRED\x10\x032\x90\x02\n" +
+	"\x1aRESERVATION_STATUS_EXPIRED\x10\x03*\xb4\x01\n" +
+	"\x16SeatAvailabilityStatus\x12(\n" +
+	"$SEAT_AVAILABILITY_STATUS_UNSPECIFIED\x10\x00\x12&\n" +
+	"\"SEAT_AVAILABILITY_STATUS_AVAILABLE\x10\x01\x12!\n" +
+	"\x1dSEAT_AVAILABILITY_STATUS_HELD\x10\x02\x12%\n" +
+	"!SEAT_AVAILABILITY_STATUS_RESERVED\x10\x032\x8c\x03\n" +
 	"\x12ReservationService\x12\x80\x01\n" +
 	"\x11CreateReservation\x124.reservelock.reservation.v1.CreateReservationRequest\x1a5.reservelock.reservation.v1.CreateReservationResponse\x12w\n" +
-	"\x0eGetReservation\x121.reservelock.reservation.v1.GetReservationRequest\x1a2.reservelock.reservation.v1.GetReservationResponseB[ZYgithub.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/reservation/v1;reservationv1b\x06proto3"
+	"\x0eGetReservation\x121.reservelock.reservation.v1.GetReservationRequest\x1a2.reservelock.reservation.v1.GetReservationResponse\x12z\n" +
+	"\x0fGetAvailability\x122.reservelock.reservation.v1.GetAvailabilityRequest\x1a3.reservelock.reservation.v1.GetAvailabilityResponseB[ZYgithub.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/reservation/v1;reservationv1b\x06proto3"
 
 var (
 	file_reservelock_reservation_v1_reservation_proto_rawDescOnce sync.Once
@@ -404,32 +628,41 @@ func file_reservelock_reservation_v1_reservation_proto_rawDescGZIP() []byte {
 	return file_reservelock_reservation_v1_reservation_proto_rawDescData
 }
 
-var file_reservelock_reservation_v1_reservation_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_reservelock_reservation_v1_reservation_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_reservelock_reservation_v1_reservation_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_reservelock_reservation_v1_reservation_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_reservelock_reservation_v1_reservation_proto_goTypes = []any{
 	(ReservationStatus)(0),            // 0: reservelock.reservation.v1.ReservationStatus
-	(*CreateReservationRequest)(nil),  // 1: reservelock.reservation.v1.CreateReservationRequest
-	(*CreateReservationResponse)(nil), // 2: reservelock.reservation.v1.CreateReservationResponse
-	(*GetReservationRequest)(nil),     // 3: reservelock.reservation.v1.GetReservationRequest
-	(*GetReservationResponse)(nil),    // 4: reservelock.reservation.v1.GetReservationResponse
-	(*Reservation)(nil),               // 5: reservelock.reservation.v1.Reservation
-	(*timestamppb.Timestamp)(nil),     // 6: google.protobuf.Timestamp
+	(SeatAvailabilityStatus)(0),       // 1: reservelock.reservation.v1.SeatAvailabilityStatus
+	(*CreateReservationRequest)(nil),  // 2: reservelock.reservation.v1.CreateReservationRequest
+	(*CreateReservationResponse)(nil), // 3: reservelock.reservation.v1.CreateReservationResponse
+	(*GetReservationRequest)(nil),     // 4: reservelock.reservation.v1.GetReservationRequest
+	(*GetReservationResponse)(nil),    // 5: reservelock.reservation.v1.GetReservationResponse
+	(*GetAvailabilityRequest)(nil),    // 6: reservelock.reservation.v1.GetAvailabilityRequest
+	(*GetAvailabilityResponse)(nil),   // 7: reservelock.reservation.v1.GetAvailabilityResponse
+	(*SeatAvailability)(nil),          // 8: reservelock.reservation.v1.SeatAvailability
+	(*Reservation)(nil),               // 9: reservelock.reservation.v1.Reservation
+	(*timestamppb.Timestamp)(nil),     // 10: google.protobuf.Timestamp
 }
 var file_reservelock_reservation_v1_reservation_proto_depIdxs = []int32{
-	5, // 0: reservelock.reservation.v1.CreateReservationResponse.reservation:type_name -> reservelock.reservation.v1.Reservation
-	5, // 1: reservelock.reservation.v1.GetReservationResponse.reservation:type_name -> reservelock.reservation.v1.Reservation
-	0, // 2: reservelock.reservation.v1.Reservation.status:type_name -> reservelock.reservation.v1.ReservationStatus
-	6, // 3: reservelock.reservation.v1.Reservation.created_at:type_name -> google.protobuf.Timestamp
-	6, // 4: reservelock.reservation.v1.Reservation.expires_at:type_name -> google.protobuf.Timestamp
-	1, // 5: reservelock.reservation.v1.ReservationService.CreateReservation:input_type -> reservelock.reservation.v1.CreateReservationRequest
-	3, // 6: reservelock.reservation.v1.ReservationService.GetReservation:input_type -> reservelock.reservation.v1.GetReservationRequest
-	2, // 7: reservelock.reservation.v1.ReservationService.CreateReservation:output_type -> reservelock.reservation.v1.CreateReservationResponse
-	4, // 8: reservelock.reservation.v1.ReservationService.GetReservation:output_type -> reservelock.reservation.v1.GetReservationResponse
-	7, // [7:9] is the sub-list for method output_type
-	5, // [5:7] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	9,  // 0: reservelock.reservation.v1.CreateReservationResponse.reservation:type_name -> reservelock.reservation.v1.Reservation
+	9,  // 1: reservelock.reservation.v1.GetReservationResponse.reservation:type_name -> reservelock.reservation.v1.Reservation
+	8,  // 2: reservelock.reservation.v1.GetAvailabilityResponse.seats:type_name -> reservelock.reservation.v1.SeatAvailability
+	1,  // 3: reservelock.reservation.v1.SeatAvailability.status:type_name -> reservelock.reservation.v1.SeatAvailabilityStatus
+	10, // 4: reservelock.reservation.v1.SeatAvailability.held_until:type_name -> google.protobuf.Timestamp
+	0,  // 5: reservelock.reservation.v1.Reservation.status:type_name -> reservelock.reservation.v1.ReservationStatus
+	10, // 6: reservelock.reservation.v1.Reservation.created_at:type_name -> google.protobuf.Timestamp
+	10, // 7: reservelock.reservation.v1.Reservation.expires_at:type_name -> google.protobuf.Timestamp
+	2,  // 8: reservelock.reservation.v1.ReservationService.CreateReservation:input_type -> reservelock.reservation.v1.CreateReservationRequest
+	4,  // 9: reservelock.reservation.v1.ReservationService.GetReservation:input_type -> reservelock.reservation.v1.GetReservationRequest
+	6,  // 10: reservelock.reservation.v1.ReservationService.GetAvailability:input_type -> reservelock.reservation.v1.GetAvailabilityRequest
+	3,  // 11: reservelock.reservation.v1.ReservationService.CreateReservation:output_type -> reservelock.reservation.v1.CreateReservationResponse
+	5,  // 12: reservelock.reservation.v1.ReservationService.GetReservation:output_type -> reservelock.reservation.v1.GetReservationResponse
+	7,  // 13: reservelock.reservation.v1.ReservationService.GetAvailability:output_type -> reservelock.reservation.v1.GetAvailabilityResponse
+	11, // [11:14] is the sub-list for method output_type
+	8,  // [8:11] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_reservelock_reservation_v1_reservation_proto_init() }
@@ -442,8 +675,8 @@ func file_reservelock_reservation_v1_reservation_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_reservelock_reservation_v1_reservation_proto_rawDesc), len(file_reservelock_reservation_v1_reservation_proto_rawDesc)),
-			NumEnums:      1,
-			NumMessages:   5,
+			NumEnums:      2,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

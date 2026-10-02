@@ -2,11 +2,15 @@ package config
 
 import platformconfig "github.com/Mrilki/ReserveLock/internal/platform/config"
 
-const defaultEventContentGRPCAddr = "localhost:50051"
+const (
+	defaultEventContentGRPCAddr = "localhost:50051"
+	defaultReservationGRPCAddr  = "localhost:50052"
+)
 
 type Config struct {
 	Base                 platformconfig.BaseConfig
 	EventContentGRPCAddr string
+	ReservationGRPCAddr  string
 }
 
 func Load() Config {
@@ -15,6 +19,10 @@ func Load() Config {
 		EventContentGRPCAddr: platformconfig.GetEnv(
 			"EVENT_CONTENT_GRPC_ADDR",
 			defaultEventContentGRPCAddr,
+		),
+		ReservationGRPCAddr: platformconfig.GetEnv(
+			"RESERVATION_GRPC_ADDR",
+			defaultReservationGRPCAddr,
 		),
 	}
 }

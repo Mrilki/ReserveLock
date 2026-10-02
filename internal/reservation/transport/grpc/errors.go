@@ -33,8 +33,8 @@ func toGRPCError(err error) error {
 
 	case errors.Is(err, domain.ErrInventoryNotFound):
 		return status.Error(
-			codes.FailedPrecondition,
-			err.Error(),
+			codes.Unavailable,
+			"event inventory is not ready",
 		)
 
 	case errors.Is(err, domain.ErrSeatUnavailable):

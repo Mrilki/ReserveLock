@@ -11,6 +11,7 @@ import (
 	"time"
 
 	eventcontentv1 "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/eventcontent/v1"
+	reservationv1 "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/reservation/v1"
 	"github.com/Mrilki/ReserveLock/internal/platform/httpx"
 	"github.com/Mrilki/ReserveLock/internal/platform/logger"
 	publicapi "github.com/Mrilki/ReserveLock/internal/publicapi/config"
@@ -34,7 +35,7 @@ func main() {
 		_ = logg.Sync()
 	}()
 
-	conn, err := grpc.NewClient(
+	eventContentConn, err := grpc.NewClient(
 		cfg.EventContentGRPCAddr,
 		grpc.WithTransportCredentials(
 			insecure.NewCredentials(),
@@ -48,12 +49,33 @@ func main() {
 		return
 	}
 	defer func() {
-		_ = conn.Close()
+		_ = eventContentConn.Close()
 	}()
 
-	eventContentClient := eventcontentv1.NewEventContentServiceClient(conn)
+	reservationConn, err := grpc.NewClient(
+		cfg.ReservationGRPCAddr,
+		grpc.WithTransportCredentials(
+			insecure.NewCredentials(),
+		),
+	)
+	if err != nil {
+		logg.Error(
+			"failed to create reservation grpc client",
+			zap.Error(err),
+		)
+		return
+	}
+	defer func() {
+		_ = eventContentConn.Close()
+	}()
 
-	handler := publichttp.NewHandler(eventContentClient)
+	eventContentClient := eventcontentv1.NewEventContentServiceClient(eventContentConn)
+	reservationConnClient := reservationv1.NewReservationServiceClient(reservationConn)
+
+	handler := publichttp.NewHandler(
+		eventContentClient,
+		reservationConnClient,
+	)
 
 	mux := http.NewServeMux()
 
@@ -70,6 +92,11 @@ func main() {
 	mux.HandleFunc(
 		"GET /events/{id}",
 		handler.GetEvent,
+	)
+
+	mux.HandleFunc(
+		"GET /events/{id}/availability",
+		handler.GetAvailability,
 	)
 
 	server := &http.Server{

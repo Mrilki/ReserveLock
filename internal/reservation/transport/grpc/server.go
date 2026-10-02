@@ -55,3 +55,24 @@ func (s *server) GetReservation(
 		Reservation: toProtoReservation(reservation),
 	}, nil
 }
+func (s *server) GetAvailability(
+	ctx context.Context,
+	request *reservationv1.GetAvailabilityRequest,
+) (*reservationv1.GetAvailabilityResponse, error) {
+	seats, err := s.service.GetAvailability(ctx, request.GetEventId())
+
+	if err != nil {
+		return nil, toGRPCError(err)
+	}
+
+	responseSeats := make([]*reservationv1.SeatAvailability, 0, len(seats))
+
+	for _, seat := range seats {
+		responseSeats = append(responseSeats, toProtoSeatAvailability(seat))
+	}
+
+	return &reservationv1.GetAvailabilityResponse{
+		EventId: request.EventId,
+		Seats:   responseSeats,
+	}, nil
+}
