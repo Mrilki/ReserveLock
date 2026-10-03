@@ -7,7 +7,7 @@ import (
 	reservationv1 "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/reservation/v1"
 )
 
-const eventContentTimeout = 5 * time.Second
+const upstreamTimeout = 5 * time.Second
 
 type Handler struct {
 	eventContentClient eventcontentv1.EventContentServiceClient

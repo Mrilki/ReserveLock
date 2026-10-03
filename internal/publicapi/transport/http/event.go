@@ -25,7 +25,7 @@ type ListEventsResponse struct {
 func (h *Handler) GetEvent(w http.ResponseWriter, r *http.Request) {
 	eventID := r.PathValue("id")
 
-	ctx, cancel := context.WithTimeout(r.Context(), eventContentTimeout)
+	ctx, cancel := context.WithTimeout(r.Context(), upstreamTimeout)
 	defer cancel()
 
 	response, err := h.eventContentClient.GetEvent(ctx, &eventcontentv1.GetEventRequest{
@@ -53,7 +53,7 @@ func (h *Handler) GetEvent(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) ListEvents(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(
 		r.Context(),
-		eventContentTimeout,
+		upstreamTimeout,
 	)
 	defer cancel()
 

@@ -25,7 +25,7 @@ func (h *Handler) GetAvailability(w http.ResponseWriter, r *http.Request) {
 
 	ctx, cancel := context.WithTimeout(
 		r.Context(),
-		eventContentTimeout,
+		upstreamTimeout,
 	)
 	defer cancel()
 
@@ -63,8 +63,10 @@ func (h *Handler) GetAvailability(w http.ResponseWriter, r *http.Request) {
 
 	for _, seat := range availability.GetSeats() {
 		if seat == nil {
-			continue
+			writeError(w, http.StatusInternalServerError, "internal error")
+			return
 		}
+
 		seats = append(seats, toSeatAvailabilityResponse(seat))
 	}
 

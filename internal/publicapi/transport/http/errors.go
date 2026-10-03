@@ -23,6 +23,9 @@ func writeGRPCError(w http.ResponseWriter, err error) {
 	case codes.DeadlineExceeded:
 		writeError(w, http.StatusGatewayTimeout, "upstream request timed out")
 
+	case codes.FailedPrecondition:
+		writeError(w, http.StatusConflict, grpcStatus.Message())
+
 	default:
 		writeError(w, http.StatusInternalServerError, "internal error")
 	}

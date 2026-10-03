@@ -66,7 +66,7 @@ func main() {
 		return
 	}
 	defer func() {
-		_ = eventContentConn.Close()
+		_ = reservationConn.Close()
 	}()
 
 	eventContentClient := eventcontentv1.NewEventContentServiceClient(eventContentConn)
@@ -97,6 +97,11 @@ func main() {
 	mux.HandleFunc(
 		"GET /events/{id}/availability",
 		handler.GetAvailability,
+	)
+
+	mux.HandleFunc(
+		"POST /events/{id}/reservations",
+		handler.CreateReservation,
 	)
 
 	server := &http.Server{
