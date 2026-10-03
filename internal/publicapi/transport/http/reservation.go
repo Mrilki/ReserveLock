@@ -28,7 +28,6 @@ func (h *Handler) CreateReservation(w http.ResponseWriter, r *http.Request) {
 	var request CreateReservationRequest
 
 	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(&request); err != nil {
 		writeError(w, http.StatusBadRequest, "invalid request body")
 		return
