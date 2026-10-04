@@ -10,7 +10,7 @@ import (
 )
 
 func newTestService() *application.Service {
-	return application.NewService(memory.NewStore())
+	return application.NewService(memory.NewStore(), nil)
 }
 
 func initializeInventory(

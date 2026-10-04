@@ -154,6 +154,31 @@ services:
 
     restart: "no"
 
+  redis:
+    image: redis:8.2
+
+    ports:
+      - "127.0.0.1:6379:6379"
+
+    command:
+      - redis-server
+      - --protected-mode
+      - "no"
+      - --save
+      - ""
+      - --appendonly
+      - "no"
+      - --maxmemory
+      - 128mb
+      - --maxmemory-policy
+      - allkeys-lru
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 1
+
 volumes:
   mongo_data:
   postgres_data:

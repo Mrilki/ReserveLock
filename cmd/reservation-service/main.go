@@ -15,6 +15,7 @@ import (
 	reservationconfig "github.com/Mrilki/ReserveLock/internal/reservation/config"
 	reservationkafka "github.com/Mrilki/ReserveLock/internal/reservation/messaging/kafka"
 	reservationpostgres "github.com/Mrilki/ReserveLock/internal/reservation/repository/postgres"
+	reservationredis "github.com/Mrilki/ReserveLock/internal/reservation/repository/redis"
 	reservationgrpc "github.com/Mrilki/ReserveLock/internal/reservation/transport/grpc"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
@@ -26,6 +27,7 @@ const (
 	shutdownTimeout        = 10 * time.Second
 	expirationScanInterval = time.Second
 	postgresConnectTimeout = 5 * time.Second
+	redisConnectTimeout    = time.Second
 )
 
 func main() {
@@ -76,7 +78,26 @@ func main() {
 
 	reservationStore := reservationpostgres.NewStore(postgresPool)
 
-	reservationService := application.NewService(reservationStore)
+	redisClient, err := reservationredis.NewClient(cfg.RedisURL)
+	if err != nil {
+		logg.Error("invalid redis configuration", zap.Error(err))
+		return
+	}
+	defer redisClient.Close()
+
+	redisCtx, redisCancel := context.WithTimeout(context.Background(), redisConnectTimeout)
+	err = redisClient.Ping(redisCtx).Err()
+	redisCancel()
+
+	if err != nil {
+		logg.Warn("redis unavailable, availability will use postgres", zap.Error(err))
+	} else {
+		logg.Info("connected to redis")
+	}
+
+	availabilityReader := reservationredis.NewAvailabilityReader(reservationStore, redisClient, logg)
+
+	reservationService := application.NewService(reservationStore, availabilityReader)
 
 	kafkaClient, err := reservationkafka.NewClient(cfg.KafkaBrokers)
 	if err != nil {

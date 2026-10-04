@@ -15,6 +15,7 @@ jobs:
       TEST_POSTGRES_DSN: postgres://reservelock:reservelock-local@localhost:5432/reservelock_reservation?sslmode=disable
       TEST_MONGO_URI: mongodb://localhost:27017/?replicaSet=rs0&directConnection=true
       TEST_MONGO_DATABASE: reservelock_event_content_test
+      TEST_REDIS_URL: redis://localhost:6379/0
 
     services:
       postgres:
@@ -30,6 +31,18 @@ jobs:
 
         options: >-
           --health-cmd "pg_isready -U reservelock -d reservelock_reservation"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+      redis:
+        image: redis:8.2
+
+        ports:
+          - 6379:6379
+
+        options: >-
+          --health-cmd "redis-cli ping"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10

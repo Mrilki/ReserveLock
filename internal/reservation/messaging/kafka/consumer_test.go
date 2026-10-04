@@ -12,7 +12,7 @@ import (
 )
 
 func TestConsumerProcessRecord(t *testing.T) {
-	service := application.NewService(memory.NewStore())
+	service := application.NewService(memory.NewStore(), nil)
 
 	payload, err := proto.Marshal(&eventcontentv1.EventPublished{
 		MessageId: "message-1",

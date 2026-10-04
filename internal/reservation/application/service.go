@@ -7,6 +7,10 @@ import (
 	"github.com/Mrilki/ReserveLock/internal/reservation/domain"
 )
 
+type AvailabilityReader interface {
+	ListSeatInventory(ctx context.Context, eventID string) ([]domain.SeatInventory, error)
+}
+
 type Store interface {
 	ProcessEventPublished(ctx context.Context, messageID string, eventID string, seats []domain.SeatInventory) (bool, error)
 	ListSeatInventory(ctx context.Context, eventID string) ([]domain.SeatInventory, error)
@@ -17,11 +21,19 @@ type Store interface {
 }
 
 type Service struct {
-	store Store
+	store              Store
+	availabilityReader AvailabilityReader
 }
 
-func NewService(store Store) *Service {
-	return &Service{store: store}
+func NewService(store Store, availabilityReader AvailabilityReader) *Service {
+	if availabilityReader == nil {
+		availabilityReader = store
+	}
+
+	return &Service{
+		store:              store,
+		availabilityReader: availabilityReader,
+	}
 }
 
 type EventPublishedInput struct {

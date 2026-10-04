@@ -35,7 +35,7 @@ func newPostgresTestService(
 
 	store := reservationpostgres.NewStore(pool)
 
-	return pool, application.NewService(store)
+	return pool, application.NewService(store, nil)
 }
 
 func cleanupEvent(
