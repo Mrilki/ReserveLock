@@ -48,6 +48,13 @@ func cleanupEvent(
 	t.Cleanup(func() {
 		ctx := context.Background()
 
+		if _, err := pool.Exec(ctx, `
+			DELETE FROM outbox_messages
+			WHERE payload ->> 'eventId' = $1
+		`, eventID); err != nil {
+			t.Errorf("cleanup outbox messages: %v", err)
+		}
+
 		if _, err := pool.Exec(
 			ctx,
 			`DELETE FROM seat_inventory WHERE event_id = $1`,

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	reservationcontract "github.com/Mrilki/ReserveLock/internal/integration/reservation"
 	"github.com/Mrilki/ReserveLock/internal/reservation/domain"
 	"github.com/jackc/pgx/v5"
 )
@@ -158,6 +159,10 @@ func (s *Store) CreateReservation(
 		)
 	}
 
+	if err := insertReservationOutbox(ctx, tx, reservation, reservationcontract.ReservationCreatedType, reservation.CreatedAt); err != nil {
+		return err
+	}
+
 	if err := tx.Commit(ctx); err != nil {
 		return fmt.Errorf("commit create reservation transaction: %w", err)
 	}
@@ -264,41 +269,46 @@ func (s *Store) ExpireReservation(
 		_ = tx.Rollback(ctx)
 	}()
 
-	var eventID string
+	reservation := domain.Reservation{
+		ID:     id,
+		Status: domain.ReservationStatusPending,
+	}
 
 	err = tx.QueryRow(ctx, `
-		SELECT event_id
-		FROM reservations
-		WHERE id = $1
-		  AND status = 'PENDING'
-		  AND expires_at <= $2
-		FOR UPDATE
-	`, id, now).Scan(&eventID)
+		SELECT
+			r.event_id,
+			r.user_id,
+			ARRAY(
+				SELECT seats.seat_id
+				FROM reservation_seats AS seats
+				WHERE seats.reservation_id = r.id
+				ORDER BY seats.position
+			),
+			r.created_at,
+			r.expires_at
+		FROM reservations AS r
+		WHERE r.id = $1
+		  AND r.status = 'PENDING'
+		  AND r.expires_at <= $2
+		FOR UPDATE OF r
+	`, id, now).Scan(
+		&reservation.EventID,
+		&reservation.UserID,
+		&reservation.SeatIDs,
+		&reservation.CreatedAt,
+		&reservation.ExpiresAt,
+	)
 
 	switch {
 	case errors.Is(err, pgx.ErrNoRows):
 		return false, nil
-
 	case err != nil:
 		return false, fmt.Errorf("lock expired reservation: %w", err)
 	}
 
-	var expectedSeats int64
-
-	err = tx.QueryRow(ctx, `
-		SELECT count(*)
-		FROM reservation_seats
-		WHERE reservation_id = $1
-	`, id).Scan(&expectedSeats)
-	if err != nil {
-		return false, fmt.Errorf("count reservation seats: %w", err)
-	}
-
+	expectedSeats := int64(len(reservation.SeatIDs))
 	if expectedSeats == 0 {
-		return false, fmt.Errorf(
-			"reservation %s has no reservation seats",
-			id,
-		)
+		return false, fmt.Errorf("reservation %s has no reservation seats", id)
 	}
 
 	result, err := tx.Exec(ctx, `
@@ -313,11 +323,10 @@ func (s *Store) ExpireReservation(
 		  AND inventory.seat_id = seats.seat_id
 		  AND inventory.status = 'HELD'
 		  AND inventory.reservation_id = $1
-	`, id, eventID)
+	`, id, reservation.EventID)
 	if err != nil {
 		return false, fmt.Errorf("release expired reservation seats: %w", err)
 	}
-
 	if result.RowsAffected() != expectedSeats {
 		return false, fmt.Errorf(
 			"release expired reservation seats: expected %d rows, updated %d",
@@ -341,6 +350,11 @@ func (s *Store) ExpireReservation(
 			"mark reservation expired: expected 1 row, updated %d",
 			result.RowsAffected(),
 		)
+	}
+	reservation.Status = domain.ReservationStatusExpired
+
+	if err := insertReservationOutbox(ctx, tx, reservation, reservationcontract.ReservationExpiredType, now); err != nil {
+		return false, err
 	}
 
 	if err := tx.Commit(ctx); err != nil {

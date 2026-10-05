@@ -7,6 +7,7 @@ import (
 	"sync"
 	"testing"
 
+	reservationcontract "github.com/Mrilki/ReserveLock/internal/integration/reservation"
 	"github.com/Mrilki/ReserveLock/internal/reservation/application"
 	"github.com/Mrilki/ReserveLock/internal/reservation/domain"
 	"github.com/google/uuid"
@@ -127,6 +128,8 @@ func TestCreateReservation_MultipleSeatsAtomic_Postgres(t *testing.T) {
 			reservationCount,
 		)
 	}
+
+	assertReservationOutboxCount(t, pool, eventID, reservationcontract.ReservationCreatedType, 1)
 }
 
 func TestCreateReservation_ConcurrentSameSeat_Postgres(t *testing.T) {
@@ -249,4 +252,7 @@ func TestCreateReservation_ConcurrentSameSeat_Postgres(t *testing.T) {
 	if reservationID == "" {
 		t.Fatal("expected reservation id on held seat")
 	}
+
+	assertReservationOutboxCount(t, pool, eventID, reservationcontract.ReservationCreatedType, 1)
+
 }
