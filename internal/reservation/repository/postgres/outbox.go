@@ -10,6 +10,7 @@ import (
 	reservationoutbox "github.com/Mrilki/ReserveLock/internal/reservation/outbox"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func insertReservationOutbox(
@@ -43,4 +44,64 @@ func insertReservationOutbox(
 	}
 
 	return nil
+}
+
+type OutboxRepository struct {
+	pool *pgxpool.Pool
+}
+
+func NewOutboxRepository(pool *pgxpool.Pool) *OutboxRepository {
+	return &OutboxRepository{pool: pool}
+}
+
+func (r *OutboxRepository) ListPending(ctx context.Context, limit int) ([]reservationoutbox.Message, error) {
+	rows, err := r.pool.Query(ctx, `
+		SELECT message_id, event_type, key, payload, occurred_at
+		FROM outbox_messages
+		WHERE published_at IS NULL
+		ORDER BY occurred_at, message_id
+		LIMIT $1
+	`, limit)
+	if err != nil {
+		return nil, fmt.Errorf("list pending reservation outbox messages: %w", err)
+	}
+	defer rows.Close()
+
+	messages := make([]reservationoutbox.Message, 0)
+
+	for rows.Next() {
+		var message reservationoutbox.Message
+
+		if err := rows.Scan(
+			&message.ID,
+			&message.EventType,
+			&message.Key,
+			&message.Payload,
+			&message.OccurredAt,
+		); err != nil {
+			return nil, fmt.Errorf("scan reservation outbox message: %w", err)
+		}
+
+		messages = append(messages, message)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate reservation outbox messages: %w", err)
+	}
+
+	return messages, nil
+}
+
+func (r *OutboxRepository) MarkPublished(ctx context.Context, id string, publishedAt time.Time) (bool, error) {
+	result, err := r.pool.Exec(ctx, `
+		UPDATE outbox_messages
+		SET published_at = $2
+		WHERE message_id = $1
+		  AND published_at IS NULL
+	`, id, publishedAt.UTC())
+	if err != nil {
+		return false, fmt.Errorf("mark reservation outbox message published: %w", err)
+	}
+
+	return result.RowsAffected() == 1, nil
 }

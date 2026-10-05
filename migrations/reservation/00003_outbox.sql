@@ -18,4 +18,4 @@ CREATE INDEX idx_outbox_messages_pending
 
 
 -- +goose Down
-DROP TABLE outbox_messages
+DROP TABLE outbox_messages;

@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package reservelock.reservation.v1;
+
+import "google/protobuf/timestamp.proto";
+import "reservelock/reservation/v1/reservation.proto";
+
+option go_package = "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/reservation/v1;reservationv1";
+
+message ReservationCreated {
+  string message_id = 1;
+  Reservation reservation = 2;
+  google.protobuf.Timestamp occurred_at = 3;
+}
+
+message ReservationExpired {
+  string message_id = 1;
+  Reservation reservation = 2;
+  google.protobuf.Timestamp occurred_at = 3;
+}
+
+message ReservationConfirmed {
+  string message_id = 1;
+  Reservation reservation = 2;
+  google.protobuf.Timestamp occurred_at = 3;
+}

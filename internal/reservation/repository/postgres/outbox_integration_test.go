@@ -244,8 +244,6 @@ func assertReservationOutboxCount(t *testing.T, pool *pgxpool.Pool, eventID stri
 
 func seedOutboxConflict(t *testing.T, pool *pgxpool.Pool, reservation domain.Reservation, eventType string) {
 	t.Helper()
-	// This fixture deliberately reserves the same unique (key, event_type).
-	// It forces the production INSERT to fail after the business updates.
 	payload, err := json.Marshal(map[string]string{"eventId": reservation.EventID})
 	if err != nil {
 		t.Fatalf("encode conflict fixture: %v", err)
@@ -264,5 +262,75 @@ func requireOutboxConflict(t *testing.T, err error) {
 	var pgErr *pgconn.PgError
 	if !errors.As(err, &pgErr) || pgErr.Code != "23505" || pgErr.ConstraintName != "outbox_messages_key_event_type_unique" {
 		t.Fatalf("expected injected outbox unique violation, got %v", err)
+	}
+}
+
+func TestOutboxRepository_PublishState_Postgres(t *testing.T) {
+	ctx := context.Background()
+	pool, service := newPostgresTestService(t)
+	eventID := uuid.NewString()
+	seatID := uuid.NewString()
+
+	cleanupEvent(t, pool, eventID)
+	initializeInventory(t, pool, service, eventID, []string{seatID})
+
+	reservation, err := service.CreateReservation(ctx, application.CreateReservationInput{
+		EventID: eventID,
+		UserID:  "user-1",
+		SeatIDs: []string{seatID},
+	})
+	if err != nil {
+		t.Fatalf("create reservation: %v", err)
+	}
+
+	repository := reservationpostgres.NewOutboxRepository(pool)
+
+	messages, err := repository.ListPending(ctx, 100)
+	if err != nil {
+		t.Fatalf("list pending messages: %v", err)
+	}
+	if len(messages) != 1 {
+		t.Fatalf("expected one pending message in isolated test database, got %d", len(messages))
+	}
+
+	message := messages[0]
+	if message.ID == "" || message.Key != reservation.ID || message.EventType != reservationcontract.ReservationCreatedType {
+		t.Fatalf("unexpected pending message: %+v", message)
+	}
+
+	var snapshot reservationoutbox.ReservationSnapshot
+	if err := json.Unmarshal(message.Payload, &snapshot); err != nil {
+		t.Fatalf("decode listed payload: %v", err)
+	}
+	assertReservationSnapshot(t, snapshot, reservation, domain.ReservationStatusPending)
+
+	publishedAt := time.Now().UTC().Truncate(time.Microsecond)
+
+	marked, err := repository.MarkPublished(ctx, message.ID, publishedAt)
+	if err != nil || !marked {
+		t.Fatalf("first mark: marked=%v err=%v", marked, err)
+	}
+
+	marked, err = repository.MarkPublished(ctx, message.ID, publishedAt.Add(time.Minute))
+	if err != nil || marked {
+		t.Fatalf("repeated mark must be a no-op: marked=%v err=%v", marked, err)
+	}
+
+	messages, err = repository.ListPending(ctx, 100)
+	if err != nil || len(messages) != 0 {
+		t.Fatalf("published message must leave pending selection: count=%d err=%v", len(messages), err)
+	}
+
+	var storedPublishedAt time.Time
+	err = pool.QueryRow(ctx, `
+		SELECT published_at
+		FROM outbox_messages
+		WHERE message_id = $1
+	`, message.ID).Scan(&storedPublishedAt)
+	if err != nil {
+		t.Fatalf("read published message: %v", err)
+	}
+	if !storedPublishedAt.Equal(publishedAt) {
+		t.Fatal("repeated mark must not overwrite publication time")
 	}
 }

@@ -14,10 +14,12 @@ import (
 	"github.com/Mrilki/ReserveLock/internal/reservation/application"
 	reservationconfig "github.com/Mrilki/ReserveLock/internal/reservation/config"
 	reservationkafka "github.com/Mrilki/ReserveLock/internal/reservation/messaging/kafka"
+	reservationoutbox "github.com/Mrilki/ReserveLock/internal/reservation/outbox"
 	reservationpostgres "github.com/Mrilki/ReserveLock/internal/reservation/repository/postgres"
 	reservationredis "github.com/Mrilki/ReserveLock/internal/reservation/repository/redis"
 	reservationgrpc "github.com/Mrilki/ReserveLock/internal/reservation/transport/grpc"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/twmb/franz-go/pkg/kgo"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -83,7 +85,9 @@ func main() {
 		logg.Error("invalid redis configuration", zap.Error(err))
 		return
 	}
-	defer redisClient.Close()
+	defer func() {
+		_ = redisClient.Close()
+	}()
 
 	redisCtx, redisCancel := context.WithTimeout(context.Background(), redisConnectTimeout)
 	err = redisClient.Ping(redisCtx).Err()
@@ -115,6 +119,19 @@ func main() {
 		logg,
 	)
 
+	publisherClient, err := kgo.NewClient(
+		kgo.SeedBrokers(cfg.KafkaBrokers...),
+		kgo.RequiredAcks(kgo.AllISRAcks()),
+	)
+	if err != nil {
+		logg.Error("failed to create kafka publisher client", zap.Error(err))
+		return
+	}
+	defer publisherClient.Close()
+
+	outboxRepository := reservationpostgres.NewOutboxRepository(postgresPool)
+	outboxPublisher := reservationkafka.NewPublisher(publisherClient)
+	outboxWorker := reservationoutbox.NewWorker(outboxRepository, outboxPublisher, logg)
 	grpcServer := grpc.NewServer()
 
 	reservationv1.RegisterReservationServiceServer(
@@ -139,6 +156,13 @@ func main() {
 	go func() {
 		defer close(consumerDone)
 		eventPublishedConsumer.Run(ctx)
+	}()
+
+	outboxDone := make(chan struct{})
+
+	go func() {
+		defer close(outboxDone)
+		outboxWorker.Run(ctx)
 	}()
 
 	go func() {
@@ -224,4 +248,13 @@ func main() {
 	case <-shutdownCtx.Done():
 		logg.Warn("event published consumer shutdown timed out")
 	}
+
+	select {
+	case <-outboxDone:
+		logg.Info("reservation outbox worker stopped")
+
+	case <-shutdownCtx.Done():
+		logg.Warn("reservation outbox worker shutdown timed out")
+	}
+
 }
