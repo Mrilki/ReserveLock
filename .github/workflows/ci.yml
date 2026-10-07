@@ -96,6 +96,18 @@ jobs:
             postgres \
             "$TEST_POSTGRES_DSN" \
             up
+      - name: Run payment migrations
+        run: |
+          docker exec "${{ job.services.postgres.id }}" \
+            psql -U reservelock -d postgres \
+            -c "CREATE DATABASE reservelock_payment_test;"
+
+          go run github.com/pressly/goose/v3/cmd/goose@v3.27.0 \
+            -dir migrations/payment \
+            postgres \
+            "$TEST_PAYMENT_POSTGRES_DSN" \
+            up
+          
       - name: Start MongoDB replica set
         run: |
           docker run -d \

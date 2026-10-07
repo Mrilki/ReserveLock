@@ -101,6 +101,7 @@ func main() {
 
 	kafkaClient, err := kgo.NewClient(
 		kgo.SeedBrokers(cfg.KafkaBrokers...),
+		kgo.RequiredAcks(kgo.AllISRAcks()),
 	)
 	if err != nil {
 		logg.Error(
