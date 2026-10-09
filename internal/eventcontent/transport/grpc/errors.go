@@ -1,6 +1,7 @@
 package eventcontentgrpc
 
 import (
+	"context"
 	"errors"
 
 	"github.com/Mrilki/ReserveLock/internal/eventcontent/application"
@@ -38,6 +39,9 @@ func toGRPCError(err error) error {
 
 	case errors.Is(err, domain.ErrEventNotDraft):
 		return status.Error(codes.FailedPrecondition, err.Error())
+
+	case errors.Is(err, context.Canceled), errors.Is(err, context.DeadlineExceeded):
+		return status.FromContextError(err).Err()
 
 	default:
 		return status.Error(codes.Internal, "internal error")

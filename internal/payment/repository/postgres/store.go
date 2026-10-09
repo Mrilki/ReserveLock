@@ -79,7 +79,7 @@ func (s *Store) ProcessReservationExpired(ctx context.Context, messageID, reserv
 		SET status = $2
 		WHERE reservation_id = $1
 		  AND status = $3
-	`, reservationID, string(domain.StatusCancelled), string(domain.StatusPending))
+	`, reservationID, string(domain.PaymentStatusCancelled), string(domain.PaymentStatusPending))
 	if err != nil {
 		return false, fmt.Errorf("cancel pending payment: %w", err)
 	}
@@ -114,7 +114,7 @@ func (s *Store) GetPaymentByReservationID(ctx context.Context, reservationID str
 		return domain.Payment{}, fmt.Errorf("get payment by reservation id: %w", err)
 	}
 
-	payment.Status = domain.Status(paymentStatus)
+	payment.Status = domain.PaymentStatus(paymentStatus)
 	return payment, nil
 }
 

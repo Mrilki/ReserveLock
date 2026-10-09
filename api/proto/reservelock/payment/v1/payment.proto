@@ -8,6 +8,7 @@ option go_package = "github.com/Mrilki/ReserveLock/internal/gen/proto/reserveloc
 
 service PaymentService {
   rpc GetPayment(GetPaymentRequest) returns (GetPaymentResponse);
+  rpc SimulatePayment(SimulatePaymentRequest) returns (SimulatePaymentResponse);
 }
 
 message GetPaymentRequest {
@@ -15,6 +16,15 @@ message GetPaymentRequest {
 }
 
 message GetPaymentResponse {
+  Payment payment = 1;
+}
+
+message SimulatePaymentRequest  {
+  string reservation_id = 1;
+  PaymentStatus status = 2;
+}
+
+message SimulatePaymentResponse {
   Payment payment = 1;
 }
 

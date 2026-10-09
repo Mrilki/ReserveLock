@@ -2,20 +2,20 @@ package domain
 
 import "time"
 
-type Status string
+type PaymentStatus string
 
 const (
-	StatusPending   Status = "PENDING"
-	StatusSucceeded Status = "SUCCEEDED"
-	StatusFailed    Status = "FAILED"
-	StatusCancelled Status = "CANCELLED"
+	PaymentStatusPending   PaymentStatus = "PENDING"
+	PaymentStatusSucceeded PaymentStatus = "SUCCEEDED"
+	PaymentStatusFailed    PaymentStatus = "FAILED"
+	PaymentStatusCancelled PaymentStatus = "CANCELLED"
 )
 
 type Payment struct {
 	ID            string
 	ReservationID string
 	UserID        string
-	Status        Status
+	Status        PaymentStatus
 	CreatedAt     time.Time
 	ExpiresAt     time.Time
 }

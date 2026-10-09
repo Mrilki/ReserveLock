@@ -26,3 +26,17 @@ func (s *server) GetPayment(ctx context.Context, request *paymentv1.GetPaymentRe
 		Payment: toProtoPayment(payment),
 	}, nil
 }
+
+func (s *server) SimulatePayment(ctx context.Context, request *paymentv1.SimulatePaymentRequest) (*paymentv1.SimulatePaymentResponse, error) {
+	payment, err := s.service.SimulatePayment(ctx, application.SimulatePaymentInput{
+		ReservationID: request.GetReservationId(),
+		Status:        fromProtoPaymentStatus(request.GetStatus()),
+	})
+	if err != nil {
+		return nil, toGRPCError(err)
+	}
+
+	return &paymentv1.SimulatePaymentResponse{
+		Payment: toProtoPayment(payment),
+	}, nil
+}

@@ -1,6 +1,7 @@
 package reservationgrpc
 
 import (
+	"context"
 	"errors"
 
 	"github.com/Mrilki/ReserveLock/internal/reservation/application"
@@ -18,30 +19,21 @@ func toGRPCError(err error) error {
 		errors.Is(err, application.ErrDuplicateSeatID),
 		errors.Is(err, application.ErrInvalidReservationID):
 
-		return status.Error(
-			codes.InvalidArgument,
-			err.Error(),
-		)
+		return status.Error(codes.InvalidArgument, err.Error())
 
 	case errors.Is(err, domain.ErrReservationNotFound),
 		errors.Is(err, domain.ErrSeatNotFound):
 
-		return status.Error(
-			codes.NotFound,
-			err.Error(),
-		)
+		return status.Error(codes.NotFound, err.Error())
 
 	case errors.Is(err, domain.ErrInventoryNotFound):
-		return status.Error(
-			codes.Unavailable,
-			"event inventory is not ready",
-		)
+		return status.Error(codes.Unavailable, "event inventory is not ready")
 
 	case errors.Is(err, domain.ErrSeatUnavailable):
-		return status.Error(
-			codes.FailedPrecondition,
-			err.Error(),
-		)
+		return status.Error(codes.FailedPrecondition, err.Error())
+
+	case errors.Is(err, context.Canceled), errors.Is(err, context.DeadlineExceeded):
+		return status.FromContextError(err).Err()
 
 	default:
 		return status.Error(

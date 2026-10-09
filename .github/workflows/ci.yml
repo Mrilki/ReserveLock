@@ -16,6 +16,7 @@ jobs:
       TEST_MONGO_URI: mongodb://localhost:27017/?replicaSet=rs0&directConnection=true
       TEST_MONGO_DATABASE: reservelock_event_content_test
       TEST_REDIS_URL: redis://localhost:6379/0
+      TEST_PAYMENT_POSTGRES_DSN: postgres://reservelock:reservelock-local@localhost:5432/reservelock_payment_test?sslmode=disable
 
     services:
       postgres:
@@ -107,7 +108,7 @@ jobs:
             postgres \
             "$TEST_PAYMENT_POSTGRES_DSN" \
             up
-          
+
       - name: Start MongoDB replica set
         run: |
           docker run -d \

@@ -12,12 +12,14 @@ import (
 
 func toGRPCError(err error) error {
 	switch {
-	case errors.Is(err, application.ErrInvalidReservationID):
+	case errors.Is(err, application.ErrInvalidReservationID),
+		errors.Is(err, application.ErrInvalidPaymentStatus):
 		return status.Error(codes.InvalidArgument, err.Error())
-
 	case errors.Is(err, domain.ErrPaymentNotFound):
 		return status.Error(codes.NotFound, err.Error())
-
+	case errors.Is(err, domain.ErrPaymentNotPending),
+		errors.Is(err, domain.ErrPaymentExpired):
+		return status.Error(codes.FailedPrecondition, err.Error())
 	case errors.Is(err, context.Canceled), errors.Is(err, context.DeadlineExceeded):
 		return status.FromContextError(err).Err()
 

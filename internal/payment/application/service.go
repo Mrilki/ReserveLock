@@ -12,6 +12,7 @@ type Store interface {
 	ProcessReservationCreated(ctx context.Context, messageID string, payment domain.Payment) (bool, error)
 	ProcessReservationExpired(ctx context.Context, messageID, reservationID string) (bool, error)
 	GetPaymentByReservationID(ctx context.Context, reservationID string) (domain.Payment, error)
+	CompletePayment(ctx context.Context, reservationID string, paymentStatus domain.PaymentStatus) (domain.Payment, error)
 }
 
 type Service struct {
@@ -30,20 +31,30 @@ type ReservationCreatedInput struct {
 	ExpiresAt     time.Time
 }
 
-func (s *Service) HandleReservationCreated(ctx context.Context, input ReservationCreatedInput) (bool, error) {
-	if input.MessageID == "" || input.ReservationID == "" || input.UserID == "" {
-		return false, ErrInvalidReservationEvent
-	}
+type SimulatePaymentInput struct {
+	ReservationID string
+	Status        domain.PaymentStatus
+}
 
+func (s *Service) HandleReservationCreated(ctx context.Context, input ReservationCreatedInput) (bool, error) {
+	if input.MessageID == "" {
+		return false, ErrInvalidMessageID
+	}
+	if input.ReservationID == "" {
+		return false, ErrInvalidReservationID
+	}
+	if input.UserID == "" {
+		return false, ErrInvalidUserID
+	}
 	if input.CreatedAt.IsZero() || !input.ExpiresAt.After(input.CreatedAt) {
-		return false, ErrInvalidReservationEvent
+		return false, ErrInvalidReservationTimestamps
 	}
 
 	payment := domain.Payment{
 		ID:            uuid.NewString(),
 		ReservationID: input.ReservationID,
 		UserID:        input.UserID,
-		Status:        domain.StatusPending,
+		Status:        domain.PaymentStatusPending,
 		CreatedAt:     input.CreatedAt.UTC(),
 		ExpiresAt:     input.ExpiresAt.UTC(),
 	}
@@ -52,8 +63,11 @@ func (s *Service) HandleReservationCreated(ctx context.Context, input Reservatio
 }
 
 func (s *Service) HandleReservationExpired(ctx context.Context, messageID string, reservationID string) (bool, error) {
-	if messageID == "" || reservationID == "" {
-		return false, ErrInvalidReservationEvent
+	if messageID == "" {
+		return false, ErrInvalidMessageID
+	}
+	if reservationID == "" {
+		return false, ErrInvalidReservationID
 	}
 
 	return s.store.ProcessReservationExpired(ctx, messageID, reservationID)
@@ -65,4 +79,15 @@ func (s *Service) GetPayment(ctx context.Context, reservationID string) (domain.
 	}
 
 	return s.store.GetPaymentByReservationID(ctx, reservationID)
+}
+
+func (s *Service) SimulatePayment(ctx context.Context, input SimulatePaymentInput) (domain.Payment, error) {
+	if input.ReservationID == "" {
+		return domain.Payment{}, ErrInvalidReservationID
+	}
+	if input.Status != domain.PaymentStatusFailed && input.Status != domain.PaymentStatusSucceeded {
+		return domain.Payment{}, ErrInvalidPaymentStatus
+	}
+
+	return s.store.CompletePayment(ctx, input.ReservationID, input.Status)
 }

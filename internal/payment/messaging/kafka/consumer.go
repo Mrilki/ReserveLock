@@ -159,8 +159,14 @@ func validateRecord(
 	reservation *reservationv1.Reservation,
 	expectedStatus reservationv1.ReservationStatus,
 ) error {
-	if messageID == "" || reservation == nil || reservation.GetId() == "" {
-		return fmt.Errorf("incomplete reservation event")
+	if messageID == "" {
+		return application.ErrInvalidMessageID
+	}
+	if reservation == nil {
+		return fmt.Errorf("reservation is missing in event %q", messageID)
+	}
+	if reservation.GetId() == "" {
+		return application.ErrInvalidReservationID
 	}
 
 	if headerValue(record, "message_id") != messageID || string(record.Key) != reservation.GetId() {

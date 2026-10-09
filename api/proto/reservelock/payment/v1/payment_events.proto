@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package reservelock.payment.v1;
+
+import "google/protobuf/timestamp.proto";
+import "reservelock/payment/v1/payment.proto";
+
+option go_package = "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/payment/v1;paymentv1";
+
+message PaymentSucceeded {
+  string message_id = 1;
+  Payment payment = 2;
+  google.protobuf.Timestamp occurred_at = 3;
+}
+
+message PaymentFailed {
+  string message_id = 1;
+  Payment payment = 2;
+  google.protobuf.Timestamp occurred_at = 3;
+}

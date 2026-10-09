@@ -165,6 +165,102 @@ func (x *GetPaymentResponse) GetPayment() *Payment {
 	return nil
 }
 
+type SimulatePaymentRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ReservationId string                 `protobuf:"bytes,1,opt,name=reservation_id,json=reservationId,proto3" json:"reservation_id,omitempty"`
+	Status        PaymentStatus          `protobuf:"varint,2,opt,name=status,proto3,enum=reservelock.payment.v1.PaymentStatus" json:"status,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SimulatePaymentRequest) Reset() {
+	*x = SimulatePaymentRequest{}
+	mi := &file_reservelock_payment_v1_payment_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SimulatePaymentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SimulatePaymentRequest) ProtoMessage() {}
+
+func (x *SimulatePaymentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_reservelock_payment_v1_payment_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SimulatePaymentRequest.ProtoReflect.Descriptor instead.
+func (*SimulatePaymentRequest) Descriptor() ([]byte, []int) {
+	return file_reservelock_payment_v1_payment_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *SimulatePaymentRequest) GetReservationId() string {
+	if x != nil {
+		return x.ReservationId
+	}
+	return ""
+}
+
+func (x *SimulatePaymentRequest) GetStatus() PaymentStatus {
+	if x != nil {
+		return x.Status
+	}
+	return PaymentStatus_PAYMENT_STATUS_UNSPECIFIED
+}
+
+type SimulatePaymentResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Payment       *Payment               `protobuf:"bytes,1,opt,name=payment,proto3" json:"payment,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SimulatePaymentResponse) Reset() {
+	*x = SimulatePaymentResponse{}
+	mi := &file_reservelock_payment_v1_payment_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SimulatePaymentResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SimulatePaymentResponse) ProtoMessage() {}
+
+func (x *SimulatePaymentResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_reservelock_payment_v1_payment_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SimulatePaymentResponse.ProtoReflect.Descriptor instead.
+func (*SimulatePaymentResponse) Descriptor() ([]byte, []int) {
+	return file_reservelock_payment_v1_payment_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *SimulatePaymentResponse) GetPayment() *Payment {
+	if x != nil {
+		return x.Payment
+	}
+	return nil
+}
+
 type Payment struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -179,7 +275,7 @@ type Payment struct {
 
 func (x *Payment) Reset() {
 	*x = Payment{}
-	mi := &file_reservelock_payment_v1_payment_proto_msgTypes[2]
+	mi := &file_reservelock_payment_v1_payment_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -191,7 +287,7 @@ func (x *Payment) String() string {
 func (*Payment) ProtoMessage() {}
 
 func (x *Payment) ProtoReflect() protoreflect.Message {
-	mi := &file_reservelock_payment_v1_payment_proto_msgTypes[2]
+	mi := &file_reservelock_payment_v1_payment_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -204,7 +300,7 @@ func (x *Payment) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Payment.ProtoReflect.Descriptor instead.
 func (*Payment) Descriptor() ([]byte, []int) {
-	return file_reservelock_payment_v1_payment_proto_rawDescGZIP(), []int{2}
+	return file_reservelock_payment_v1_payment_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *Payment) GetId() string {
@@ -257,6 +353,11 @@ const file_reservelock_payment_v1_payment_proto_rawDesc = "" +
 	"\x11GetPaymentRequest\x12%\n" +
 	"\x0ereservation_id\x18\x01 \x01(\tR\rreservationId\"O\n" +
 	"\x12GetPaymentResponse\x129\n" +
+	"\apayment\x18\x01 \x01(\v2\x1f.reservelock.payment.v1.PaymentR\apayment\"~\n" +
+	"\x16SimulatePaymentRequest\x12%\n" +
+	"\x0ereservation_id\x18\x01 \x01(\tR\rreservationId\x12=\n" +
+	"\x06status\x18\x02 \x01(\x0e2%.reservelock.payment.v1.PaymentStatusR\x06status\"T\n" +
+	"\x17SimulatePaymentResponse\x129\n" +
 	"\apayment\x18\x01 \x01(\v2\x1f.reservelock.payment.v1.PaymentR\apayment\"\x8e\x02\n" +
 	"\aPayment\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12%\n" +
@@ -272,10 +373,11 @@ const file_reservelock_payment_v1_payment_proto_rawDesc = "" +
 	"\x16PAYMENT_STATUS_PENDING\x10\x01\x12\x1c\n" +
 	"\x18PAYMENT_STATUS_SUCCEEDED\x10\x02\x12\x19\n" +
 	"\x15PAYMENT_STATUS_FAILED\x10\x03\x12\x1c\n" +
-	"\x18PAYMENT_STATUS_CANCELLED\x10\x042u\n" +
+	"\x18PAYMENT_STATUS_CANCELLED\x10\x042\xe9\x01\n" +
 	"\x0ePaymentService\x12c\n" +
 	"\n" +
-	"GetPayment\x12).reservelock.payment.v1.GetPaymentRequest\x1a*.reservelock.payment.v1.GetPaymentResponseBSZQgithub.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/payment/v1;paymentv1b\x06proto3"
+	"GetPayment\x12).reservelock.payment.v1.GetPaymentRequest\x1a*.reservelock.payment.v1.GetPaymentResponse\x12r\n" +
+	"\x0fSimulatePayment\x12..reservelock.payment.v1.SimulatePaymentRequest\x1a/.reservelock.payment.v1.SimulatePaymentResponseBSZQgithub.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/payment/v1;paymentv1b\x06proto3"
 
 var (
 	file_reservelock_payment_v1_payment_proto_rawDescOnce sync.Once
@@ -290,26 +392,32 @@ func file_reservelock_payment_v1_payment_proto_rawDescGZIP() []byte {
 }
 
 var file_reservelock_payment_v1_payment_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_reservelock_payment_v1_payment_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_reservelock_payment_v1_payment_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_reservelock_payment_v1_payment_proto_goTypes = []any{
-	(PaymentStatus)(0),            // 0: reservelock.payment.v1.PaymentStatus
-	(*GetPaymentRequest)(nil),     // 1: reservelock.payment.v1.GetPaymentRequest
-	(*GetPaymentResponse)(nil),    // 2: reservelock.payment.v1.GetPaymentResponse
-	(*Payment)(nil),               // 3: reservelock.payment.v1.Payment
-	(*timestamppb.Timestamp)(nil), // 4: google.protobuf.Timestamp
+	(PaymentStatus)(0),              // 0: reservelock.payment.v1.PaymentStatus
+	(*GetPaymentRequest)(nil),       // 1: reservelock.payment.v1.GetPaymentRequest
+	(*GetPaymentResponse)(nil),      // 2: reservelock.payment.v1.GetPaymentResponse
+	(*SimulatePaymentRequest)(nil),  // 3: reservelock.payment.v1.SimulatePaymentRequest
+	(*SimulatePaymentResponse)(nil), // 4: reservelock.payment.v1.SimulatePaymentResponse
+	(*Payment)(nil),                 // 5: reservelock.payment.v1.Payment
+	(*timestamppb.Timestamp)(nil),   // 6: google.protobuf.Timestamp
 }
 var file_reservelock_payment_v1_payment_proto_depIdxs = []int32{
-	3, // 0: reservelock.payment.v1.GetPaymentResponse.payment:type_name -> reservelock.payment.v1.Payment
-	0, // 1: reservelock.payment.v1.Payment.status:type_name -> reservelock.payment.v1.PaymentStatus
-	4, // 2: reservelock.payment.v1.Payment.created_at:type_name -> google.protobuf.Timestamp
-	4, // 3: reservelock.payment.v1.Payment.expires_at:type_name -> google.protobuf.Timestamp
-	1, // 4: reservelock.payment.v1.PaymentService.GetPayment:input_type -> reservelock.payment.v1.GetPaymentRequest
-	2, // 5: reservelock.payment.v1.PaymentService.GetPayment:output_type -> reservelock.payment.v1.GetPaymentResponse
-	5, // [5:6] is the sub-list for method output_type
-	4, // [4:5] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	5, // 0: reservelock.payment.v1.GetPaymentResponse.payment:type_name -> reservelock.payment.v1.Payment
+	0, // 1: reservelock.payment.v1.SimulatePaymentRequest.status:type_name -> reservelock.payment.v1.PaymentStatus
+	5, // 2: reservelock.payment.v1.SimulatePaymentResponse.payment:type_name -> reservelock.payment.v1.Payment
+	0, // 3: reservelock.payment.v1.Payment.status:type_name -> reservelock.payment.v1.PaymentStatus
+	6, // 4: reservelock.payment.v1.Payment.created_at:type_name -> google.protobuf.Timestamp
+	6, // 5: reservelock.payment.v1.Payment.expires_at:type_name -> google.protobuf.Timestamp
+	1, // 6: reservelock.payment.v1.PaymentService.GetPayment:input_type -> reservelock.payment.v1.GetPaymentRequest
+	3, // 7: reservelock.payment.v1.PaymentService.SimulatePayment:input_type -> reservelock.payment.v1.SimulatePaymentRequest
+	2, // 8: reservelock.payment.v1.PaymentService.GetPayment:output_type -> reservelock.payment.v1.GetPaymentResponse
+	4, // 9: reservelock.payment.v1.PaymentService.SimulatePayment:output_type -> reservelock.payment.v1.SimulatePaymentResponse
+	8, // [8:10] is the sub-list for method output_type
+	6, // [6:8] is the sub-list for method input_type
+	6, // [6:6] is the sub-list for extension type_name
+	6, // [6:6] is the sub-list for extension extendee
+	0, // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_reservelock_payment_v1_payment_proto_init() }
@@ -323,7 +431,7 @@ func file_reservelock_payment_v1_payment_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_reservelock_payment_v1_payment_proto_rawDesc), len(file_reservelock_payment_v1_payment_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   3,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

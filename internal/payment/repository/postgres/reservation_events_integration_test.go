@@ -38,7 +38,7 @@ func TestReservationCreated_DuplicateMessage_Postgres(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if second.ID != first.ID || second.Status != domain.StatusPending {
+	if second.ID != first.ID || second.Status != domain.PaymentStatusPending {
 		t.Fatalf("payment changed after duplicate: %+v", second)
 	}
 
@@ -108,7 +108,7 @@ func TestReservationExpired_CancelsPendingPayment_Postgres(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if payment.Status != domain.StatusCancelled {
+	if payment.Status != domain.PaymentStatusCancelled {
 		t.Fatalf("expected CANCELLED, got %s", payment.Status)
 	}
 
@@ -116,7 +116,7 @@ func TestReservationExpired_CancelsPendingPayment_Postgres(t *testing.T) {
 }
 
 func TestReservationExpired_KeepsCompletedPayment_Postgres(t *testing.T) {
-	for _, paymentStatus := range []domain.Status{domain.StatusSucceeded, domain.StatusFailed} {
+	for _, paymentStatus := range []domain.PaymentStatus{domain.PaymentStatusSucceeded, domain.PaymentStatusFailed} {
 		t.Run(string(paymentStatus), func(t *testing.T) {
 			service, pool := newPaymentTestService(t)
 			input := newReservationCreatedInput()
@@ -191,7 +191,9 @@ func cleanupPayment(t *testing.T, pool *pgxpool.Pool, reservationID string, mess
 
 	t.Cleanup(func() {
 		ctx := context.Background()
-
+		if _, err := pool.Exec(ctx, `DELETE FROM outbox_messages WHERE key = $1`, reservationID); err != nil {
+			t.Errorf("cleanup payment outbox: %v", err)
+		}
 		if _, err := pool.Exec(ctx, `DELETE FROM payments WHERE reservation_id = $1`, reservationID); err != nil {
 			t.Errorf("cleanup payment: %v", err)
 		}
