@@ -11,6 +11,7 @@ import (
 	"time"
 
 	eventcontentv1 "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/eventcontent/v1"
+	paymentv1 "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/payment/v1"
 	reservationv1 "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/reservation/v1"
 	"github.com/Mrilki/ReserveLock/internal/platform/httpx"
 	"github.com/Mrilki/ReserveLock/internal/platform/logger"
@@ -37,15 +38,11 @@ func main() {
 
 	eventContentConn, err := grpc.NewClient(
 		cfg.EventContentGRPCAddr,
-		grpc.WithTransportCredentials(
-			insecure.NewCredentials(),
-		),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
 		logg.Error(
-			"failed to create event content grpc client",
-			zap.Error(err),
-		)
+			"failed to create event content grpc client", zap.Error(err))
 		return
 	}
 	defer func() {
@@ -54,55 +51,52 @@ func main() {
 
 	reservationConn, err := grpc.NewClient(
 		cfg.ReservationGRPCAddr,
-		grpc.WithTransportCredentials(
-			insecure.NewCredentials(),
-		),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
 		logg.Error(
-			"failed to create reservation grpc client",
-			zap.Error(err),
-		)
+			"failed to create reservation grpc client", zap.Error(err))
 		return
 	}
 	defer func() {
 		_ = reservationConn.Close()
 	}()
 
+	paymentConn, err := grpc.NewClient(
+		cfg.PaymentGRPCAddr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		logg.Error("failed to create payment grpc client", zap.Error(err))
+		return
+	}
+	defer func() {
+		_ = paymentConn.Close()
+	}()
+
 	eventContentClient := eventcontentv1.NewEventContentServiceClient(eventContentConn)
 	reservationConnClient := reservationv1.NewReservationServiceClient(reservationConn)
+	paymentConnClient := paymentv1.NewPaymentServiceClient(paymentConn)
 
 	handler := publichttp.NewHandler(
 		eventContentClient,
 		reservationConnClient,
+		paymentConnClient,
 	)
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc(
-		"GET /health/live",
-		httpx.LiveHandler(cfg.Base.AppName),
-	)
+	mux.HandleFunc("GET /health/live", httpx.LiveHandler(cfg.Base.AppName))
 
-	mux.HandleFunc(
-		"GET /events",
-		handler.ListEvents,
-	)
+	mux.HandleFunc("GET /events", handler.ListEvents)
+	mux.HandleFunc("GET /events/{id}", handler.GetEvent)
 
-	mux.HandleFunc(
-		"GET /events/{id}",
-		handler.GetEvent,
-	)
+	mux.HandleFunc("GET /events/{id}/availability", handler.GetAvailability)
 
-	mux.HandleFunc(
-		"GET /events/{id}/availability",
-		handler.GetAvailability,
-	)
+	mux.HandleFunc("POST /events/{id}/reservations", handler.CreateReservation)
 
-	mux.HandleFunc(
-		"POST /events/{id}/reservations",
-		handler.CreateReservation,
-	)
+	mux.HandleFunc("GET /reservations/{id}/payment", handler.GetPayment)
+	mux.HandleFunc("POST /reservations/{id}/payment/simulate", handler.SimulatePayment)
 
 	server := &http.Server{
 		Addr:              cfg.Base.HTTPAddr,

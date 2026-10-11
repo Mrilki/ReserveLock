@@ -13,10 +13,12 @@ import (
 	"github.com/Mrilki/ReserveLock/internal/payment/application"
 	paymentconfig "github.com/Mrilki/ReserveLock/internal/payment/config"
 	paymentkafka "github.com/Mrilki/ReserveLock/internal/payment/messaging/kafka"
+	paymentoutbox "github.com/Mrilki/ReserveLock/internal/payment/outbox"
 	paymentpostgres "github.com/Mrilki/ReserveLock/internal/payment/repository/postgres"
 	paymentgrpc "github.com/Mrilki/ReserveLock/internal/payment/transport/grpc"
 	"github.com/Mrilki/ReserveLock/internal/platform/logger"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/twmb/franz-go/pkg/kgo"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -60,6 +62,16 @@ func main() {
 	}
 	defer client.Close()
 
+	publisherClient, err := kgo.NewClient(
+		kgo.SeedBrokers(cfg.KafkaBrokers...),
+		kgo.RequiredAcks(kgo.AllISRAcks()),
+	)
+	if err != nil {
+		logg.Error("failed to create payment kafka publisher client", zap.Error(err))
+		return
+	}
+
+	defer publisherClient.Close()
 	listener, err := net.Listen("tcp", cfg.GRPCAddr)
 	if err != nil {
 		logg.Error("failed to listen", zap.String("addr", cfg.GRPCAddr), zap.Error(err))
@@ -71,6 +83,10 @@ func main() {
 
 	service := application.NewService(paymentpostgres.NewStore(pool))
 	consumer := paymentkafka.NewConsumer(client, service, logg)
+
+	outboxRepository := paymentpostgres.NewOutboxRepository(pool)
+	outboxPublisher := paymentkafka.NewPublisher(publisherClient)
+	outboxWorker := paymentoutbox.NewWorker(outboxRepository, outboxPublisher, logg)
 
 	grpcServer := grpc.NewServer()
 	paymentv1.RegisterPaymentServiceServer(grpcServer, paymentgrpc.NewServer(service))
@@ -86,6 +102,12 @@ func main() {
 	go func() {
 		defer close(consumerDone)
 		consumer.Run(ctx)
+	}()
+
+	outboxDone := make(chan struct{})
+	go func() {
+		defer close(outboxDone)
+		outboxWorker.Run(ctx)
 	}()
 
 	serverErr := make(chan error, 1)
@@ -126,5 +148,12 @@ func main() {
 		logg.Info("payment consumer stopped")
 	case <-shutdownCtx.Done():
 		logg.Warn("payment consumer shutdown timed out")
+	}
+
+	select {
+	case <-outboxDone:
+		logg.Info("payment outbox worker stopped")
+	case <-shutdownCtx.Done():
+		logg.Warn("payment outbox worker shutdown timed out")
 	}
 }
