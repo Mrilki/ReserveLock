@@ -26,7 +26,7 @@ func NewPaymentClient(brokers []string) (*kgo.Client, error) {
 }
 
 func NewPaymentConsumer(client *kgo.Client, service *application.Service, logger *zap.Logger) *Consumer {
-	consumer := NewConsumer(client, service, logger)
+	consumer := newConsumer(client, service, logger)
 	consumer.handleRecord = consumer.processPaymentRecord
 
 	return consumer

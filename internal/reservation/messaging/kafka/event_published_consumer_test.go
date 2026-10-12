@@ -8,10 +8,11 @@ import (
 	"github.com/Mrilki/ReserveLock/internal/reservation/application"
 	"github.com/Mrilki/ReserveLock/internal/reservation/repository/memory"
 	"github.com/twmb/franz-go/pkg/kgo"
+	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
 )
 
-func TestConsumerProcessRecord(t *testing.T) {
+func TestEventPublishedConsumerProcessRecord(t *testing.T) {
 	service := application.NewService(memory.NewStore(), nil)
 
 	payload, err := proto.Marshal(&eventcontentv1.EventPublished{
@@ -23,11 +24,9 @@ func TestConsumerProcessRecord(t *testing.T) {
 		t.Fatalf("marshal event published: %v", err)
 	}
 
-	consumer := &Consumer{
-		service: service,
-	}
+	consumer := NewEventPublishedConsumer(nil, service, zap.NewNop())
 
-	processed, err := consumer.processRecord(
+	processed, err := consumer.handleRecord(
 		context.Background(),
 		&kgo.Record{
 			Value: payload,

@@ -103,7 +103,7 @@ func main() {
 
 	reservationService := application.NewService(reservationStore, availabilityReader)
 
-	kafkaClient, err := reservationkafka.NewClient(cfg.KafkaBrokers)
+	kafkaClient, err := reservationkafka.NewEventPublishedClient(cfg.KafkaBrokers)
 	if err != nil {
 		logg.Error(
 			"failed to create kafka consumer client",
@@ -113,7 +113,7 @@ func main() {
 	}
 	defer kafkaClient.Close()
 
-	eventPublishedConsumer := reservationkafka.NewConsumer(
+	eventPublishedConsumer := reservationkafka.NewEventPublishedConsumer(
 		kafkaClient,
 		reservationService,
 		logg,

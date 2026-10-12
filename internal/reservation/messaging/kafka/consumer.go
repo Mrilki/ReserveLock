@@ -2,21 +2,14 @@ package kafka
 
 import (
 	"context"
-	"fmt"
 	"time"
 
-	eventcontentv1 "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/eventcontent/v1"
-	eventcontentcontract "github.com/Mrilki/ReserveLock/internal/integration/eventcontent"
 	"github.com/Mrilki/ReserveLock/internal/reservation/application"
 	"github.com/twmb/franz-go/pkg/kgo"
 	"go.uber.org/zap"
-	"google.golang.org/protobuf/proto"
 )
 
-const (
-	eventPublishedConsumerGroup = "reservelock.reservation.event-published.v1"
-	retryInterval               = time.Second
-)
+const retryInterval = time.Second
 
 type Consumer struct {
 	client       *kgo.Client
@@ -25,24 +18,12 @@ type Consumer struct {
 	handleRecord func(context.Context, *kgo.Record) (bool, error)
 }
 
-func NewClient(brokers []string) (*kgo.Client, error) {
-	return kgo.NewClient(
-		kgo.SeedBrokers(brokers...),
-		kgo.ConsumerGroup(eventPublishedConsumerGroup),
-		kgo.ConsumeTopics(eventcontentcontract.EventPublishedTopic),
-		kgo.DisableAutoCommit(),
-	)
-}
-
-func NewConsumer(client *kgo.Client, service *application.Service, logger *zap.Logger) *Consumer {
-	consumer := &Consumer{
+func newConsumer(client *kgo.Client, service *application.Service, logger *zap.Logger) *Consumer {
+	return &Consumer{
 		client:  client,
 		service: service,
 		logger:  logger,
 	}
-	consumer.handleRecord = consumer.processRecord
-
-	return consumer
 }
 
 func (c *Consumer) Run(ctx context.Context) {
@@ -112,28 +93,6 @@ func (c *Consumer) Run(ctx context.Context) {
 		}
 
 	}
-
-}
-
-func (c *Consumer) processRecord(ctx context.Context, record *kgo.Record) (bool, error) {
-	var message eventcontentv1.EventPublished
-
-	if err := proto.Unmarshal(record.Value, &message); err != nil {
-		return false, fmt.Errorf("unmarshal event published: %w", err)
-	}
-
-	processed, err := c.service.HandleEventPublished(
-		ctx,
-		application.EventPublishedInput{
-			MessageID: message.GetMessageId(),
-			EventID:   message.GetEventId(),
-			SeatIDs:   message.GetSeatIds(),
-		},
-	)
-	if err != nil {
-		return false, fmt.Errorf("handle event published: %w", err)
-	}
-	return processed, nil
 
 }
 

@@ -105,12 +105,12 @@ func TestPaymentConsumerProcessRecord(t *testing.T) {
 
 			consumer := NewPaymentConsumer(nil, service, zap.NewNop())
 
-			processed, err := consumer.processPaymentRecord(ctx, record)
+			processed, err := consumer.handleRecord(ctx, record)
 			if err != nil || !processed {
 				t.Fatalf("first processing: processed=%v err=%v", processed, err)
 			}
 
-			processed, err = consumer.processPaymentRecord(ctx, record)
+			processed, err = consumer.handleRecord(ctx, record)
 			if err != nil || processed {
 				t.Fatalf("duplicate processing: processed=%v err=%v", processed, err)
 			}
@@ -132,7 +132,7 @@ func TestPaymentConsumerProcessRecord(t *testing.T) {
 			}
 
 			record.Key = []byte("another-reservation")
-			if _, err := consumer.processPaymentRecord(ctx, record); err == nil {
+			if _, err := consumer.handleRecord(ctx, record); err == nil {
 				t.Fatal("mismatched record key must be rejected")
 			}
 
@@ -143,7 +143,7 @@ func TestPaymentConsumerProcessRecord(t *testing.T) {
 				record.Headers[1].Value = []byte(paymentcontract.PaymentSucceededType)
 			}
 
-			if _, err := consumer.processPaymentRecord(ctx, record); err == nil {
+			if _, err := consumer.handleRecord(ctx, record); err == nil {
 				t.Fatal("event type and payment status mismatch must be rejected")
 			}
 		})
