@@ -73,6 +73,27 @@ func (h *Handler) CreateReservation(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusCreated, toReservationResponse(reservation))
 }
 
+func (h *Handler) GetReservation(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), upstreamTimeout)
+	defer cancel()
+
+	response, err := h.reservationClient.GetReservation(ctx, &reservationv1.GetReservationRequest{
+		ReservationId: r.PathValue("id"),
+	})
+	if err != nil {
+		writeGRPCError(w, err)
+		return
+	}
+
+	reservation := response.GetReservation()
+	if reservation == nil {
+		writeError(w, http.StatusInternalServerError, "internal error")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, toReservationResponse(reservation))
+}
+
 func toReservationResponse(
 	reservation *reservationv1.Reservation,
 ) ReservationResponse {

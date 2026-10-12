@@ -18,6 +18,8 @@ type Store interface {
 	GetReservationByID(ctx context.Context, id string) (domain.Reservation, error)
 	ListExpiredPendingIDs(ctx context.Context, now time.Time, limit int) ([]string, error)
 	ExpireReservation(ctx context.Context, id string, now time.Time) (bool, error)
+	ProcessPaymentSucceeded(ctx context.Context, messageID, reservationID, userID string) (bool, error)
+	ProcessPaymentFailed(ctx context.Context, messageID, reservationID, userID string) (bool, error)
 }
 
 type Service struct {

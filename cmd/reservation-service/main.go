@@ -118,6 +118,18 @@ func main() {
 		reservationService,
 		logg,
 	)
+	paymentKafkaClient, err := reservationkafka.NewPaymentClient(cfg.KafkaBrokers)
+	if err != nil {
+		logg.Error("failed to create payment kafka consumer client", zap.Error(err))
+		return
+	}
+	defer paymentKafkaClient.Close()
+
+	paymentConsumer := reservationkafka.NewPaymentConsumer(
+		paymentKafkaClient,
+		reservationService,
+		logg,
+	)
 
 	publisherClient, err := kgo.NewClient(
 		kgo.SeedBrokers(cfg.KafkaBrokers...),
@@ -156,6 +168,13 @@ func main() {
 	go func() {
 		defer close(consumerDone)
 		eventPublishedConsumer.Run(ctx)
+	}()
+
+	paymentConsumerDone := make(chan struct{})
+
+	go func() {
+		defer close(paymentConsumerDone)
+		paymentConsumer.Run(ctx)
 	}()
 
 	outboxDone := make(chan struct{})
@@ -247,6 +266,13 @@ func main() {
 
 	case <-shutdownCtx.Done():
 		logg.Warn("event published consumer shutdown timed out")
+	}
+	select {
+	case <-paymentConsumerDone:
+		logg.Info("payment consumer stopped")
+
+	case <-shutdownCtx.Done():
+		logg.Warn("payment consumer shutdown timed out")
 	}
 
 	select {

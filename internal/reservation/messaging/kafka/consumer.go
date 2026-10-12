@@ -19,9 +19,10 @@ const (
 )
 
 type Consumer struct {
-	client  *kgo.Client
-	service *application.Service
-	logger  *zap.Logger
+	client       *kgo.Client
+	service      *application.Service
+	logger       *zap.Logger
+	handleRecord func(context.Context, *kgo.Record) (bool, error)
 }
 
 func NewClient(brokers []string) (*kgo.Client, error) {
@@ -34,11 +35,14 @@ func NewClient(brokers []string) (*kgo.Client, error) {
 }
 
 func NewConsumer(client *kgo.Client, service *application.Service, logger *zap.Logger) *Consumer {
-	return &Consumer{
+	consumer := &Consumer{
 		client:  client,
 		service: service,
 		logger:  logger,
 	}
+	consumer.handleRecord = consumer.processRecord
+
+	return consumer
 }
 
 func (c *Consumer) Run(ctx context.Context) {
@@ -66,7 +70,7 @@ func (c *Consumer) Run(ctx context.Context) {
 		record := records[0]
 
 		for {
-			processed, err := c.processRecord(ctx, record)
+			processed, err := c.handleRecord(ctx, record)
 			if err == nil {
 				if !processed {
 					c.logger.Debug(

@@ -2,11 +2,11 @@ package postgres_test
 
 import (
 	"context"
-	"testing"
-
 	"github.com/Mrilki/ReserveLock/internal/reservation/application"
 	"github.com/Mrilki/ReserveLock/internal/reservation/domain"
+	reservationpostgres "github.com/Mrilki/ReserveLock/internal/reservation/repository/postgres"
 	"github.com/google/uuid"
+	"testing"
 )
 
 func TestExpireReservations_Postgres(t *testing.T) {
@@ -37,16 +37,18 @@ func TestExpireReservations_Postgres(t *testing.T) {
 		t.Fatalf("create reservation: %v", err)
 	}
 
-	expiredCount, err := service.ExpireReservations(
+	store := reservationpostgres.NewStore(pool)
+
+	expired, err := store.ExpireReservation(
 		context.Background(),
+		reservation.ID,
 		reservation.ExpiresAt,
 	)
 	if err != nil {
-		t.Fatalf("expire reservations: %v", err)
+		t.Fatalf("expire reservation: %v", err)
 	}
-
-	if expiredCount != 1 {
-		t.Fatalf("expected 1 expired reservation, got %d", expiredCount)
+	if !expired {
+		t.Fatal("expected reservation to expire")
 	}
 
 	stored, err := service.GetReservation(

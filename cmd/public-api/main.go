@@ -94,6 +94,7 @@ func main() {
 	mux.HandleFunc("GET /events/{id}/availability", handler.GetAvailability)
 
 	mux.HandleFunc("POST /events/{id}/reservations", handler.CreateReservation)
+	mux.HandleFunc("GET /reservations/{id}", handler.GetReservation)
 
 	mux.HandleFunc("GET /reservations/{id}/payment", handler.GetPayment)
 	mux.HandleFunc("POST /reservations/{id}/payment/simulate", handler.SimulatePayment)
