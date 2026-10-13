@@ -17,6 +17,7 @@ jobs:
       TEST_MONGO_DATABASE: reservelock_event_content_test
       TEST_REDIS_URL: redis://localhost:6379/0
       TEST_PAYMENT_POSTGRES_DSN: postgres://reservelock:reservelock-local@localhost:5432/reservelock_payment_test?sslmode=disable
+      TEST_ANALYTICS_CLICKHOUSE_DSN: clickhouse://reservelock:reservelock-local@localhost:9000/reservelock_analytics_test
 
     services:
       postgres:
@@ -47,6 +48,25 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
+
+      clickhouse:
+        image: clickhouse:26.8.15.10
+
+        env:
+          CLICKHOUSE_DB: reservelock_analytics_test
+          CLICKHOUSE_USER: reservelock
+          CLICKHOUSE_PASSWORD: reservelock-local
+
+        ports:
+          - 9000:9000
+
+        options: >-
+          --ulimit nofile=262144:262144
+          --health-cmd "clickhouse-client --user reservelock --password reservelock-local --query 'SELECT 1'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+          --health-start-period 20s
 
     steps:
       - name: Checkout repository
@@ -107,6 +127,14 @@ jobs:
             -dir migrations/payment \
             postgres \
             "$TEST_PAYMENT_POSTGRES_DSN" \
+            up
+          
+      - name: Run analytics migrations
+        run: |
+          go run github.com/pressly/goose/v3/cmd/goose@v3.27.0 \
+            -dir migrations/analytics \
+            clickhouse \
+            "$TEST_ANALYTICS_CLICKHOUSE_DSN" \
             up
 
       - name: Start MongoDB replica set
