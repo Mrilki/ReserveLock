@@ -41,8 +41,16 @@ func (s *Service) GetEventSummary(ctx context.Context, eventID string) (domain.E
 	if eventID == "" {
 		return domain.EventSummary{}, ErrInvalidEventID
 	}
+	summary, err := s.store.GetEventSummary(ctx, eventID)
+	if err != nil {
+		return domain.EventSummary{}, err
+	}
+	if summary.Created > 0 {
+		summary.ConfirmationRatePercent = float64(summary.Confirmed) / float64(summary.Created) * 100
+		summary.ExpirationRatePercent = float64(summary.Expired) / float64(summary.Created) * 100
+	}
 
-	return s.store.GetEventSummary(ctx, eventID)
+	return summary, nil
 }
 
 func validateReservationEvent(event domain.ReservationEvent) error {

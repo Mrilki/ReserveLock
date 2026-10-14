@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 
 	analyticsv1 "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/analytics/v1"
@@ -40,12 +41,28 @@ func TestGetEventSummaryHTTP(t *testing.T) {
 				Summary: &analyticsv1.EventSummary{
 					EventId: "event-1", Created: 5, Confirmed: 2, Expired: 1,
 					CreatedSeats: 10, ConfirmedSeats: 4, ExpiredSeats: 2,
+					ConfirmationRatePercent: 40, ExpirationRatePercent: 20,
+					AvgConfirmationSeconds: 30.5, AvgExpirationLagSeconds: 2.25,
+					Daily: []*analyticsv1.EventDailySummary{
+						{
+							Date: "2026-10-14", Created: 5, Confirmed: 2, Expired: 1,
+							CreatedSeats: 10, ConfirmedSeats: 4, ExpiredSeats: 2,
+						},
+					},
 				},
 			},
 			expectedCode: http.StatusOK,
 			expectedBody: EventSummaryResponse{
 				EventID: "event-1", Created: 5, Confirmed: 2, Expired: 1,
 				CreatedSeats: 10, ConfirmedSeats: 4, ExpiredSeats: 2,
+				ConfirmationRatePercent: 40, ExpirationRatePercent: 20,
+				AvgConfirmationSeconds: 30.5, AvgExpirationLagSeconds: 2.25,
+				Daily: []EventDailySummaryResponse{
+					{
+						Date: "2026-10-14", Created: 5, Confirmed: 2, Expired: 1,
+						CreatedSeats: 10, ConfirmedSeats: 4, ExpiredSeats: 2,
+					},
+				},
 			},
 		},
 		{
@@ -54,7 +71,10 @@ func TestGetEventSummaryHTTP(t *testing.T) {
 				Summary: &analyticsv1.EventSummary{EventId: "event-1"},
 			},
 			expectedCode: http.StatusOK,
-			expectedBody: EventSummaryResponse{EventID: "event-1"},
+			expectedBody: EventSummaryResponse{
+				EventID: "event-1",
+				Daily:   []EventDailySummaryResponse{},
+			},
 		},
 		{
 			name:          "unavailable",
@@ -112,7 +132,7 @@ func TestGetEventSummaryHTTP(t *testing.T) {
 			if err := json.Unmarshal(recorder.Body.Bytes(), &body); err != nil {
 				t.Fatal(err)
 			}
-			if body != test.expectedBody {
+			if !reflect.DeepEqual(body, test.expectedBody) {
 				t.Fatalf("body: got %+v, want %+v", body, test.expectedBody)
 			}
 
@@ -120,8 +140,8 @@ func TestGetEventSummaryHTTP(t *testing.T) {
 			if err := json.Unmarshal(recorder.Body.Bytes(), &fields); err != nil {
 				t.Fatal(err)
 			}
-			if len(fields) != 7 {
-				t.Fatalf("expected all seven response fields, got %s", recorder.Body)
+			if len(fields) != 12 {
+				t.Fatalf("expected all twelve response fields, got %s", recorder.Body)
 			}
 		})
 	}

@@ -32,19 +32,40 @@ func (s *testStore) GetEventSummary(_ context.Context, eventID string) (domain.E
 
 func TestGetEventSummary(t *testing.T) {
 	tests := []struct {
-		name    string
-		summary domain.EventSummary
+		name     string
+		summary  domain.EventSummary
+		expected *analyticsv1.EventSummary
 	}{
 		{
-			name: "all counters",
+			name: "complete summary",
 			summary: domain.EventSummary{
 				EventID: "event-1", Created: 5, Confirmed: 2, Expired: 1,
 				CreatedSeats: 10, ConfirmedSeats: 4, ExpiredSeats: 2,
+				AvgConfirmationSeconds: 30.5, AvgExpirationLagSeconds: 2.25,
+				Daily: []domain.EventDailySummary{
+					{
+						Date: "2026-10-14", Created: 5, Confirmed: 2, Expired: 1,
+						CreatedSeats: 10, ConfirmedSeats: 4, ExpiredSeats: 2,
+					},
+				},
+			},
+			expected: &analyticsv1.EventSummary{
+				EventId: "event-1", Created: 5, Confirmed: 2, Expired: 1,
+				CreatedSeats: 10, ConfirmedSeats: 4, ExpiredSeats: 2,
+				ConfirmationRatePercent: 40, ExpirationRatePercent: 20,
+				AvgConfirmationSeconds: 30.5, AvgExpirationLagSeconds: 2.25,
+				Daily: []*analyticsv1.EventDailySummary{
+					{
+						Date: "2026-10-14", Created: 5, Confirmed: 2, Expired: 1,
+						CreatedSeats: 10, ConfirmedSeats: 4, ExpiredSeats: 2,
+					},
+				},
 			},
 		},
 		{
-			name:    "no facts",
-			summary: domain.EventSummary{EventID: "event-1"},
+			name:     "no facts",
+			summary:  domain.EventSummary{EventID: "event-1"},
+			expected: &analyticsv1.EventSummary{EventId: "event-1"},
 		},
 	}
 
@@ -60,18 +81,8 @@ func TestGetEventSummary(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			expected := &analyticsv1.EventSummary{
-				EventId:        test.summary.EventID,
-				Created:        test.summary.Created,
-				Confirmed:      test.summary.Confirmed,
-				Expired:        test.summary.Expired,
-				CreatedSeats:   test.summary.CreatedSeats,
-				ConfirmedSeats: test.summary.ConfirmedSeats,
-				ExpiredSeats:   test.summary.ExpiredSeats,
-			}
-
-			if !proto.Equal(response.GetSummary(), expected) {
-				t.Fatalf("unexpected summary: got %v, want %v", response.GetSummary(), expected)
+			if !proto.Equal(response.GetSummary(), test.expected) {
+				t.Fatalf("unexpected summary: got %v, want %v", response.GetSummary(), test.expected)
 			}
 			if store.calls != 1 || store.eventID != "event-1" {
 				t.Fatalf("unexpected store call: calls=%d eventID=%q", store.calls, store.eventID)

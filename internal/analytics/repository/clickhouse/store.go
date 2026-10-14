@@ -63,28 +63,82 @@ func (s *Store) InsertReservationEvents(ctx context.Context, events []domain.Res
 }
 
 func (s *Store) GetEventSummary(ctx context.Context, eventID string) (domain.EventSummary, error) {
-	summary := domain.EventSummary{EventID: eventID}
+	summary := domain.EventSummary{
+		EventID: eventID,
+		Daily:   make([]domain.EventDailySummary, 0),
+	}
 
-	err := s.client.QueryRow(ctx, `
+	rows, err := s.client.Query(ctx, `
 		SELECT
+			toString(toDate(created_at)) AS day,
 			countIf(event_type = 'CREATED'),
 			countIf(event_type = 'CONFIRMED'),
 			countIf(event_type = 'EXPIRED'),
 			sumIf(length(seat_ids), event_type = 'CREATED'),
 			sumIf(length(seat_ids), event_type = 'CONFIRMED'),
-			sumIf(length(seat_ids), event_type = 'EXPIRED')
+			sumIf(length(seat_ids), event_type = 'EXPIRED'),
+			sumIf(
+				(toUnixTimestamp64Micro(occurred_at) - toUnixTimestamp64Micro(created_at)) / 1000000.0,
+				event_type = 'CONFIRMED'
+			),
+			sumIf(
+				(toUnixTimestamp64Micro(occurred_at) - toUnixTimestamp64Micro(expires_at)) / 1000000.0,
+				event_type = 'EXPIRED'
+			)
 		FROM reservation_events FINAL
 		WHERE event_id = ?
-	`, eventID).Scan(
-		&summary.Created,
-		&summary.Confirmed,
-		&summary.Expired,
-		&summary.CreatedSeats,
-		&summary.ConfirmedSeats,
-		&summary.ExpiredSeats,
-	)
+		GROUP BY day
+		ORDER BY day
+	`, eventID)
 	if err != nil {
 		return domain.EventSummary{}, fmt.Errorf("query event analytics summary: %w", err)
+	}
+	defer func() {
+		_ = rows.Close()
+	}()
+
+	var confirmationSeconds float64
+	var expirationLagSeconds float64
+
+	for rows.Next() {
+		var daily domain.EventDailySummary
+		var dailyConfirmationSeconds float64
+		var dailyExpirationLagSeconds float64
+		if err := rows.Scan(
+			&daily.Date,
+			&daily.Created,
+			&daily.Confirmed,
+			&daily.Expired,
+			&daily.CreatedSeats,
+			&daily.ConfirmedSeats,
+			&daily.ExpiredSeats,
+			&dailyConfirmationSeconds,
+			&dailyExpirationLagSeconds,
+		); err != nil {
+			return domain.EventSummary{}, fmt.Errorf("scan event analytics summary: %w", err)
+		}
+
+		summary.Daily = append(summary.Daily, daily)
+		summary.Created += daily.Created
+		summary.Confirmed += daily.Confirmed
+		summary.Expired += daily.Expired
+		summary.CreatedSeats += daily.CreatedSeats
+		summary.ConfirmedSeats += daily.ConfirmedSeats
+		summary.ExpiredSeats += daily.ExpiredSeats
+
+		confirmationSeconds += dailyConfirmationSeconds
+		expirationLagSeconds += dailyExpirationLagSeconds
+	}
+
+	if err := rows.Err(); err != nil {
+		return domain.EventSummary{}, fmt.Errorf("read event analytics summary: %w", err)
+	}
+
+	if summary.Confirmed > 0 {
+		summary.AvgConfirmationSeconds = confirmationSeconds / float64(summary.Confirmed)
+	}
+	if summary.Expired > 0 {
+		summary.AvgExpirationLagSeconds = expirationLagSeconds / float64(summary.Expired)
 	}
 
 	return summary, nil

@@ -24,4 +24,19 @@ message EventSummary {
   uint64 created_seats = 5;
   uint64 confirmed_seats = 6;
   uint64 expired_seats = 7;
+  double confirmation_rate_percent = 8;
+  double expiration_rate_percent = 9;
+  double avg_confirmation_seconds = 10;
+  double avg_expiration_lag_seconds = 11;
+  repeated EventDailySummary daily = 12;
+}
+
+message EventDailySummary {
+  string date = 1;
+  uint64 created = 2;
+  uint64 confirmed = 3;
+  uint64 expired = 4;
+  uint64 created_seats = 5;
+  uint64 confirmed_seats = 6;
+  uint64 expired_seats = 7;
 }

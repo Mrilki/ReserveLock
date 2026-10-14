@@ -3,6 +3,7 @@ package clickhouse_test
 import (
 	"context"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -60,33 +61,56 @@ func TestReservationEvents_ClickHouseReplay(t *testing.T) {
 		}
 	})
 
-	createdAt := time.Now().UTC().Truncate(time.Second).Add(-time.Minute)
+	base := time.Date(2026, 10, 10, 23, 59, 50, 0, time.UTC)
 
-	created := domain.ReservationEvent{
-		MessageID:     uuid.NewString(),
-		EventID:       eventID,
-		ReservationID: uuid.NewString(),
-		EventType:     domain.ReservationEventTypeCreated,
-		SeatIDs:       []string{"seat-1", "seat-2"},
-		CreatedAt:     createdAt,
-		ExpiresAt:     createdAt.Add(10 * time.Minute),
-		OccurredAt:    createdAt,
+	newCreated := func(createdAt time.Time, seats []string) domain.ReservationEvent {
+		return domain.ReservationEvent{
+			MessageID:     uuid.NewString(),
+			EventID:       eventID,
+			ReservationID: uuid.NewString(),
+			EventType:     domain.ReservationEventTypeCreated,
+			SeatIDs:       seats,
+			CreatedAt:     createdAt,
+			ExpiresAt:     createdAt.Add(10 * time.Minute),
+			OccurredAt:    createdAt,
+		}
 	}
 
-	confirmed := created
-	confirmed.MessageID = uuid.NewString()
-	confirmed.EventType = domain.ReservationEventTypeConfirmed
-	confirmed.OccurredAt = createdAt.Add(30 * time.Second)
+	createdA := newCreated(base, []string{"seat-1", "seat-2"})
+	createdB := newCreated(base.Add(time.Second), []string{"seat-3", "seat-4"})
+	createdC := newCreated(base.Add(2*time.Second), []string{"seat-5", "seat-6", "seat-7"})
+	createdD := newCreated(base.Add(24*time.Hour), []string{"seat-8"})
 
-	other := created
+	confirmedA := createdA
+	confirmedA.MessageID = uuid.NewString()
+	confirmedA.EventType = domain.ReservationEventTypeConfirmed
+	confirmedA.OccurredAt = createdA.CreatedAt.Add(10250 * time.Millisecond)
+
+	confirmedB := createdB
+	confirmedB.MessageID = uuid.NewString()
+	confirmedB.EventType = domain.ReservationEventTypeConfirmed
+	confirmedB.OccurredAt = createdB.CreatedAt.Add(20500 * time.Millisecond)
+
+	confirmedD := createdD
+	confirmedD.MessageID = uuid.NewString()
+	confirmedD.EventType = domain.ReservationEventTypeConfirmed
+	confirmedD.OccurredAt = createdD.CreatedAt.Add(90750 * time.Millisecond)
+
+	expiredC := createdC
+	expiredC.MessageID = uuid.NewString()
+	expiredC.EventType = domain.ReservationEventTypeExpired
+	expiredC.OccurredAt = createdC.ExpiresAt.Add(2250 * time.Millisecond)
+
+	other := createdA
 	other.MessageID = uuid.NewString()
 	other.EventID = otherEventID
 	other.ReservationID = uuid.NewString()
 
 	batches := [][]domain.ReservationEvent{
-		{created},
-		{created, confirmed, other},
-		{confirmed},
+		{createdA},
+		{createdA, confirmedA, createdB, confirmedB, createdC, expiredC, other},
+		{createdD, confirmedD, confirmedA},
+		{confirmedA},
 	}
 
 	for _, batch := range batches {
@@ -101,13 +125,27 @@ func TestReservationEvents_ClickHouseReplay(t *testing.T) {
 	}
 
 	expected := domain.EventSummary{
-		EventID:        eventID,
-		Created:        1,
-		Confirmed:      1,
-		CreatedSeats:   2,
-		ConfirmedSeats: 2,
+		EventID:                 eventID,
+		Created:                 4,
+		Confirmed:               3,
+		Expired:                 1,
+		CreatedSeats:            8,
+		ConfirmedSeats:          5,
+		ExpiredSeats:            3,
+		AvgConfirmationSeconds:  40.5,
+		AvgExpirationLagSeconds: 2.25,
+		Daily: []domain.EventDailySummary{
+			{
+				Date: "2026-10-10", Created: 3, Confirmed: 2, Expired: 1,
+				CreatedSeats: 7, ConfirmedSeats: 4, ExpiredSeats: 3,
+			},
+			{
+				Date: "2026-10-11", Created: 1, Confirmed: 1,
+				CreatedSeats: 1, ConfirmedSeats: 1,
+			},
+		},
 	}
-	if summary != expected {
+	if !reflect.DeepEqual(summary, expected) {
 		t.Fatalf("unexpected summary: got %+v, want %+v", summary, expected)
 	}
 
@@ -116,7 +154,7 @@ func TestReservationEvents_ClickHouseReplay(t *testing.T) {
 		SELECT count()
 		FROM reservation_events FINAL
 		WHERE event_id = ? AND message_id = ?
-	`, eventID, created.MessageID).Scan(&messageCount)
+	`, eventID, createdA.MessageID).Scan(&messageCount)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -124,12 +162,17 @@ func TestReservationEvents_ClickHouseReplay(t *testing.T) {
 		t.Fatalf("expected one logical created message, got %d", messageCount)
 	}
 
-	empty, err := store.GetEventSummary(ctx, uuid.NewString())
+	emptyEventID := uuid.NewString()
+	empty, err := store.GetEventSummary(ctx, emptyEventID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if empty.Created != 0 || empty.Confirmed != 0 || empty.Expired != 0 ||
-		empty.CreatedSeats != 0 || empty.ConfirmedSeats != 0 || empty.ExpiredSeats != 0 {
-		t.Fatalf("expected empty summary, got %+v", empty)
+
+	expectedEmpty := domain.EventSummary{
+		EventID: emptyEventID,
+		Daily:   []domain.EventDailySummary{},
+	}
+	if !reflect.DeepEqual(empty, expectedEmpty) {
+		t.Fatalf("expected empty summary: got %+v, want %+v", empty, expectedEmpty)
 	}
 }

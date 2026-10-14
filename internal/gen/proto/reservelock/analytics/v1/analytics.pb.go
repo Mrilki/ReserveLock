@@ -110,16 +110,21 @@ func (x *GetEventSummaryResponse) GetSummary() *EventSummary {
 }
 
 type EventSummary struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	EventId        string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
-	Created        uint64                 `protobuf:"varint,2,opt,name=created,proto3" json:"created,omitempty"`
-	Confirmed      uint64                 `protobuf:"varint,3,opt,name=confirmed,proto3" json:"confirmed,omitempty"`
-	Expired        uint64                 `protobuf:"varint,4,opt,name=expired,proto3" json:"expired,omitempty"`
-	CreatedSeats   uint64                 `protobuf:"varint,5,opt,name=created_seats,json=createdSeats,proto3" json:"created_seats,omitempty"`
-	ConfirmedSeats uint64                 `protobuf:"varint,6,opt,name=confirmed_seats,json=confirmedSeats,proto3" json:"confirmed_seats,omitempty"`
-	ExpiredSeats   uint64                 `protobuf:"varint,7,opt,name=expired_seats,json=expiredSeats,proto3" json:"expired_seats,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state                   protoimpl.MessageState `protogen:"open.v1"`
+	EventId                 string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
+	Created                 uint64                 `protobuf:"varint,2,opt,name=created,proto3" json:"created,omitempty"`
+	Confirmed               uint64                 `protobuf:"varint,3,opt,name=confirmed,proto3" json:"confirmed,omitempty"`
+	Expired                 uint64                 `protobuf:"varint,4,opt,name=expired,proto3" json:"expired,omitempty"`
+	CreatedSeats            uint64                 `protobuf:"varint,5,opt,name=created_seats,json=createdSeats,proto3" json:"created_seats,omitempty"`
+	ConfirmedSeats          uint64                 `protobuf:"varint,6,opt,name=confirmed_seats,json=confirmedSeats,proto3" json:"confirmed_seats,omitempty"`
+	ExpiredSeats            uint64                 `protobuf:"varint,7,opt,name=expired_seats,json=expiredSeats,proto3" json:"expired_seats,omitempty"`
+	ConfirmationRatePercent float64                `protobuf:"fixed64,8,opt,name=confirmation_rate_percent,json=confirmationRatePercent,proto3" json:"confirmation_rate_percent,omitempty"`
+	ExpirationRatePercent   float64                `protobuf:"fixed64,9,opt,name=expiration_rate_percent,json=expirationRatePercent,proto3" json:"expiration_rate_percent,omitempty"`
+	AvgConfirmationSeconds  float64                `protobuf:"fixed64,10,opt,name=avg_confirmation_seconds,json=avgConfirmationSeconds,proto3" json:"avg_confirmation_seconds,omitempty"`
+	AvgExpirationLagSeconds float64                `protobuf:"fixed64,11,opt,name=avg_expiration_lag_seconds,json=avgExpirationLagSeconds,proto3" json:"avg_expiration_lag_seconds,omitempty"`
+	Daily                   []*EventDailySummary   `protobuf:"bytes,12,rep,name=daily,proto3" json:"daily,omitempty"`
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
 }
 
 func (x *EventSummary) Reset() {
@@ -201,6 +206,133 @@ func (x *EventSummary) GetExpiredSeats() uint64 {
 	return 0
 }
 
+func (x *EventSummary) GetConfirmationRatePercent() float64 {
+	if x != nil {
+		return x.ConfirmationRatePercent
+	}
+	return 0
+}
+
+func (x *EventSummary) GetExpirationRatePercent() float64 {
+	if x != nil {
+		return x.ExpirationRatePercent
+	}
+	return 0
+}
+
+func (x *EventSummary) GetAvgConfirmationSeconds() float64 {
+	if x != nil {
+		return x.AvgConfirmationSeconds
+	}
+	return 0
+}
+
+func (x *EventSummary) GetAvgExpirationLagSeconds() float64 {
+	if x != nil {
+		return x.AvgExpirationLagSeconds
+	}
+	return 0
+}
+
+func (x *EventSummary) GetDaily() []*EventDailySummary {
+	if x != nil {
+		return x.Daily
+	}
+	return nil
+}
+
+type EventDailySummary struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Date           string                 `protobuf:"bytes,1,opt,name=date,proto3" json:"date,omitempty"`
+	Created        uint64                 `protobuf:"varint,2,opt,name=created,proto3" json:"created,omitempty"`
+	Confirmed      uint64                 `protobuf:"varint,3,opt,name=confirmed,proto3" json:"confirmed,omitempty"`
+	Expired        uint64                 `protobuf:"varint,4,opt,name=expired,proto3" json:"expired,omitempty"`
+	CreatedSeats   uint64                 `protobuf:"varint,5,opt,name=created_seats,json=createdSeats,proto3" json:"created_seats,omitempty"`
+	ConfirmedSeats uint64                 `protobuf:"varint,6,opt,name=confirmed_seats,json=confirmedSeats,proto3" json:"confirmed_seats,omitempty"`
+	ExpiredSeats   uint64                 `protobuf:"varint,7,opt,name=expired_seats,json=expiredSeats,proto3" json:"expired_seats,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *EventDailySummary) Reset() {
+	*x = EventDailySummary{}
+	mi := &file_reservelock_analytics_v1_analytics_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EventDailySummary) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EventDailySummary) ProtoMessage() {}
+
+func (x *EventDailySummary) ProtoReflect() protoreflect.Message {
+	mi := &file_reservelock_analytics_v1_analytics_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EventDailySummary.ProtoReflect.Descriptor instead.
+func (*EventDailySummary) Descriptor() ([]byte, []int) {
+	return file_reservelock_analytics_v1_analytics_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *EventDailySummary) GetDate() string {
+	if x != nil {
+		return x.Date
+	}
+	return ""
+}
+
+func (x *EventDailySummary) GetCreated() uint64 {
+	if x != nil {
+		return x.Created
+	}
+	return 0
+}
+
+func (x *EventDailySummary) GetConfirmed() uint64 {
+	if x != nil {
+		return x.Confirmed
+	}
+	return 0
+}
+
+func (x *EventDailySummary) GetExpired() uint64 {
+	if x != nil {
+		return x.Expired
+	}
+	return 0
+}
+
+func (x *EventDailySummary) GetCreatedSeats() uint64 {
+	if x != nil {
+		return x.CreatedSeats
+	}
+	return 0
+}
+
+func (x *EventDailySummary) GetConfirmedSeats() uint64 {
+	if x != nil {
+		return x.ConfirmedSeats
+	}
+	return 0
+}
+
+func (x *EventDailySummary) GetExpiredSeats() uint64 {
+	if x != nil {
+		return x.ExpiredSeats
+	}
+	return 0
+}
+
 var File_reservelock_analytics_v1_analytics_proto protoreflect.FileDescriptor
 
 const file_reservelock_analytics_v1_analytics_proto_rawDesc = "" +
@@ -209,9 +341,23 @@ const file_reservelock_analytics_v1_analytics_proto_rawDesc = "" +
 	"\x16GetEventSummaryRequest\x12\x19\n" +
 	"\bevent_id\x18\x01 \x01(\tR\aeventId\"[\n" +
 	"\x17GetEventSummaryResponse\x12@\n" +
-	"\asummary\x18\x01 \x01(\v2&.reservelock.analytics.v1.EventSummaryR\asummary\"\xee\x01\n" +
+	"\asummary\x18\x01 \x01(\v2&.reservelock.analytics.v1.EventSummaryR\asummary\"\x9c\x04\n" +
 	"\fEventSummary\x12\x19\n" +
 	"\bevent_id\x18\x01 \x01(\tR\aeventId\x12\x18\n" +
+	"\acreated\x18\x02 \x01(\x04R\acreated\x12\x1c\n" +
+	"\tconfirmed\x18\x03 \x01(\x04R\tconfirmed\x12\x18\n" +
+	"\aexpired\x18\x04 \x01(\x04R\aexpired\x12#\n" +
+	"\rcreated_seats\x18\x05 \x01(\x04R\fcreatedSeats\x12'\n" +
+	"\x0fconfirmed_seats\x18\x06 \x01(\x04R\x0econfirmedSeats\x12#\n" +
+	"\rexpired_seats\x18\a \x01(\x04R\fexpiredSeats\x12:\n" +
+	"\x19confirmation_rate_percent\x18\b \x01(\x01R\x17confirmationRatePercent\x126\n" +
+	"\x17expiration_rate_percent\x18\t \x01(\x01R\x15expirationRatePercent\x128\n" +
+	"\x18avg_confirmation_seconds\x18\n" +
+	" \x01(\x01R\x16avgConfirmationSeconds\x12;\n" +
+	"\x1aavg_expiration_lag_seconds\x18\v \x01(\x01R\x17avgExpirationLagSeconds\x12A\n" +
+	"\x05daily\x18\f \x03(\v2+.reservelock.analytics.v1.EventDailySummaryR\x05daily\"\xec\x01\n" +
+	"\x11EventDailySummary\x12\x12\n" +
+	"\x04date\x18\x01 \x01(\tR\x04date\x12\x18\n" +
 	"\acreated\x18\x02 \x01(\x04R\acreated\x12\x1c\n" +
 	"\tconfirmed\x18\x03 \x01(\x04R\tconfirmed\x12\x18\n" +
 	"\aexpired\x18\x04 \x01(\x04R\aexpired\x12#\n" +
@@ -233,21 +379,23 @@ func file_reservelock_analytics_v1_analytics_proto_rawDescGZIP() []byte {
 	return file_reservelock_analytics_v1_analytics_proto_rawDescData
 }
 
-var file_reservelock_analytics_v1_analytics_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_reservelock_analytics_v1_analytics_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_reservelock_analytics_v1_analytics_proto_goTypes = []any{
 	(*GetEventSummaryRequest)(nil),  // 0: reservelock.analytics.v1.GetEventSummaryRequest
 	(*GetEventSummaryResponse)(nil), // 1: reservelock.analytics.v1.GetEventSummaryResponse
 	(*EventSummary)(nil),            // 2: reservelock.analytics.v1.EventSummary
+	(*EventDailySummary)(nil),       // 3: reservelock.analytics.v1.EventDailySummary
 }
 var file_reservelock_analytics_v1_analytics_proto_depIdxs = []int32{
 	2, // 0: reservelock.analytics.v1.GetEventSummaryResponse.summary:type_name -> reservelock.analytics.v1.EventSummary
-	0, // 1: reservelock.analytics.v1.AnalyticsService.GetEventSummary:input_type -> reservelock.analytics.v1.GetEventSummaryRequest
-	1, // 2: reservelock.analytics.v1.AnalyticsService.GetEventSummary:output_type -> reservelock.analytics.v1.GetEventSummaryResponse
-	2, // [2:3] is the sub-list for method output_type
-	1, // [1:2] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	3, // 1: reservelock.analytics.v1.EventSummary.daily:type_name -> reservelock.analytics.v1.EventDailySummary
+	0, // 2: reservelock.analytics.v1.AnalyticsService.GetEventSummary:input_type -> reservelock.analytics.v1.GetEventSummaryRequest
+	1, // 3: reservelock.analytics.v1.AnalyticsService.GetEventSummary:output_type -> reservelock.analytics.v1.GetEventSummaryResponse
+	3, // [3:4] is the sub-list for method output_type
+	2, // [2:3] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_reservelock_analytics_v1_analytics_proto_init() }
@@ -261,7 +409,7 @@ func file_reservelock_analytics_v1_analytics_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_reservelock_analytics_v1_analytics_proto_rawDesc), len(file_reservelock_analytics_v1_analytics_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

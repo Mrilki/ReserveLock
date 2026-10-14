@@ -9,7 +9,22 @@ import (
 )
 
 type EventSummaryResponse struct {
-	EventID        string `json:"eventId"`
+	EventID                 string                      `json:"eventId"`
+	Created                 uint64                      `json:"created"`
+	Confirmed               uint64                      `json:"confirmed"`
+	Expired                 uint64                      `json:"expired"`
+	CreatedSeats            uint64                      `json:"createdSeats"`
+	ConfirmedSeats          uint64                      `json:"confirmedSeats"`
+	ExpiredSeats            uint64                      `json:"expiredSeats"`
+	ConfirmationRatePercent float64                     `json:"confirmationRatePercent"`
+	ExpirationRatePercent   float64                     `json:"expirationRatePercent"`
+	AvgConfirmationSeconds  float64                     `json:"avgConfirmationSeconds"`
+	AvgExpirationLagSeconds float64                     `json:"avgExpirationLagSeconds"`
+	Daily                   []EventDailySummaryResponse `json:"daily"`
+}
+
+type EventDailySummaryResponse struct {
+	Date           string `json:"date"`
 	Created        uint64 `json:"created"`
 	Confirmed      uint64 `json:"confirmed"`
 	Expired        uint64 `json:"expired"`
@@ -42,13 +57,31 @@ func (h *Handler) GetEventSummary(c *gin.Context) {
 }
 
 func toEventSummaryResponse(summary *analyticsv1.EventSummary) EventSummaryResponse {
+	daily := make([]EventDailySummaryResponse, 0, len(summary.GetDaily()))
+	for _, day := range summary.GetDaily() {
+		daily = append(daily, EventDailySummaryResponse{
+			Date:           day.GetDate(),
+			Created:        day.GetCreated(),
+			Confirmed:      day.GetConfirmed(),
+			Expired:        day.GetExpired(),
+			CreatedSeats:   day.GetCreatedSeats(),
+			ConfirmedSeats: day.GetConfirmedSeats(),
+			ExpiredSeats:   day.GetExpiredSeats(),
+		})
+	}
+
 	return EventSummaryResponse{
-		EventID:        summary.GetEventId(),
-		Created:        summary.GetCreated(),
-		Confirmed:      summary.GetConfirmed(),
-		Expired:        summary.GetExpired(),
-		CreatedSeats:   summary.GetCreatedSeats(),
-		ConfirmedSeats: summary.GetConfirmedSeats(),
-		ExpiredSeats:   summary.GetExpiredSeats(),
+		EventID:                 summary.GetEventId(),
+		Created:                 summary.GetCreated(),
+		Confirmed:               summary.GetConfirmed(),
+		Expired:                 summary.GetExpired(),
+		CreatedSeats:            summary.GetCreatedSeats(),
+		ConfirmedSeats:          summary.GetConfirmedSeats(),
+		ExpiredSeats:            summary.GetExpiredSeats(),
+		ConfirmationRatePercent: summary.GetConfirmationRatePercent(),
+		ExpirationRatePercent:   summary.GetExpirationRatePercent(),
+		AvgConfirmationSeconds:  summary.GetAvgConfirmationSeconds(),
+		AvgExpirationLagSeconds: summary.GetAvgExpirationLagSeconds(),
+		Daily:                   daily,
 	}
 }
