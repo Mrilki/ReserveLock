@@ -22,7 +22,7 @@ vet:
 
 .PHONY: test
 test:
-	go test ./...
+	go test -count=1 -timeout=5m ./...
 
 .PHONY: build
 build:

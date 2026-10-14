@@ -1,0 +1,15 @@
+.git
+.github
+.idea
+.vscode
+
+.env
+.env.*
+
+bin
+dist
+tmp
+
+**/*_test.go
+**/*.test
+**/*.out

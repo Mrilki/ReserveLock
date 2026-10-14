@@ -22,6 +22,8 @@ import (
 	"github.com/twmb/franz-go/pkg/kgo"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -146,6 +148,10 @@ func main() {
 	outboxWorker := reservationoutbox.NewWorker(outboxRepository, outboxPublisher, logg)
 	grpcServer := grpc.NewServer()
 
+	healthServer := health.NewServer()
+	healthServer.SetServingStatus("", healthpb.HealthCheckResponse_SERVING)
+	healthpb.RegisterHealthServer(grpcServer, healthServer)
+
 	reservationv1.RegisterReservationServiceServer(
 		grpcServer,
 		reservationgrpc.NewServer(reservationService),
@@ -235,6 +241,8 @@ func main() {
 		)
 		stop()
 	}
+
+	healthServer.Shutdown()
 
 	shutdownCtx, cancel := context.WithTimeout(
 		context.Background(),

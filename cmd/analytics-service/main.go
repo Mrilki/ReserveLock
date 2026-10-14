@@ -18,6 +18,8 @@ import (
 	"github.com/Mrilki/ReserveLock/internal/platform/logger"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -97,6 +99,11 @@ func main() {
 	}()
 
 	grpcServer := grpc.NewServer()
+
+	healthServer := health.NewServer()
+	healthServer.SetServingStatus("", healthpb.HealthCheckResponse_SERVING)
+	healthpb.RegisterHealthServer(grpcServer, healthServer)
+
 	analyticsv1.RegisterAnalyticsServiceServer(grpcServer, analyticsgrpc.NewServer(service))
 
 	if cfg.Base.AppEnv == "local" {
@@ -136,6 +143,8 @@ func main() {
 		exitCode = 1
 	}
 	stop()
+
+	healthServer.Shutdown()
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancel()

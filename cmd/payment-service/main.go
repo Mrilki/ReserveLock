@@ -21,6 +21,8 @@ import (
 	"github.com/twmb/franz-go/pkg/kgo"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -89,6 +91,11 @@ func main() {
 	outboxWorker := paymentoutbox.NewWorker(outboxRepository, outboxPublisher, logg)
 
 	grpcServer := grpc.NewServer()
+
+	healthServer := health.NewServer()
+	healthServer.SetServingStatus("", healthpb.HealthCheckResponse_SERVING)
+	healthpb.RegisterHealthServer(grpcServer, healthServer)
+
 	paymentv1.RegisterPaymentServiceServer(grpcServer, paymentgrpc.NewServer(service))
 
 	if cfg.Base.AppEnv == "local" {
@@ -126,6 +133,8 @@ func main() {
 		logg.Error("payment grpc server failed", zap.Error(err))
 	}
 	stop()
+
+	healthServer.Shutdown()
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancel()
