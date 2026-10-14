@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package reservelock.analytics.v1;
+
+option go_package = "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/analytics/v1;analyticsv1";
+
+service AnalyticsService {
+  rpc GetEventSummary(GetEventSummaryRequest) returns (GetEventSummaryResponse);
+}
+
+message GetEventSummaryRequest {
+  string event_id = 1;
+}
+
+message GetEventSummaryResponse {
+  EventSummary summary = 1;
+}
+
+message EventSummary {
+  string event_id = 1;
+  uint64 created = 2;
+  uint64 confirmed = 3;
+  uint64 expired = 4;
+  uint64 created_seats = 5;
+  uint64 confirmed_seats = 6;
+  uint64 expired_seats = 7;
+}

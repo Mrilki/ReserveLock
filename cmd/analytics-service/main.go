@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"net"
 	"os"
 	"os/signal"
 	"syscall"
@@ -12,8 +13,12 @@ import (
 	analyticsconfig "github.com/Mrilki/ReserveLock/internal/analytics/config"
 	analyticskafka "github.com/Mrilki/ReserveLock/internal/analytics/messaging/kafka"
 	analyticsclickhouse "github.com/Mrilki/ReserveLock/internal/analytics/repository/clickhouse"
+	analyticsgrpc "github.com/Mrilki/ReserveLock/internal/analytics/transport/grpc"
+	analyticsv1 "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/analytics/v1"
 	"github.com/Mrilki/ReserveLock/internal/platform/logger"
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 const (
@@ -81,9 +86,34 @@ func main() {
 	service := application.NewService(store)
 	consumer := analyticskafka.NewConsumer(kafkaClient, service, logg)
 
+	listener, err := net.Listen("tcp", cfg.GRPCAddr)
+	if err != nil {
+		logg.Error("failed to listen", zap.String("addr", cfg.GRPCAddr), zap.Error(err))
+		exitCode = 1
+		return
+	}
+	defer func() {
+		_ = listener.Close()
+	}()
+
+	grpcServer := grpc.NewServer()
+	analyticsv1.RegisterAnalyticsServiceServer(grpcServer, analyticsgrpc.NewServer(service))
+
+	if cfg.Base.AppEnv == "local" {
+		reflection.Register(grpcServer)
+	}
+
 	consumerErr := make(chan error, 1)
 	go func() {
 		consumerErr <- consumer.Run(ctx)
+	}()
+
+	serverErr := make(chan error, 1)
+	go func() {
+		logg.Info("analytics grpc server started", zap.String("addr", cfg.GRPCAddr))
+		if err := grpcServer.Serve(listener); err != nil {
+			serverErr <- err
+		}
 	}()
 
 	logg.Info("analytics consumer started")
@@ -100,28 +130,43 @@ func main() {
 			logg.Error("analytics consumer failed", zap.Error(err))
 			exitCode = 1
 		}
+
+	case err := <-serverErr:
+		logg.Error("analytics grpc server failed", zap.Error(err))
+		exitCode = 1
 	}
 	stop()
-
-	if consumerStopped {
-		logg.Info("analytics consumer stopped")
-		return
-	}
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancel()
 
-	select {
-	case err := <-consumerErr:
-		if err != nil {
-			logg.Error("analytics consumer shutdown failed", zap.Error(err))
-			exitCode = 1
-		} else {
-			logg.Info("analytics consumer stopped")
-		}
+	serverDone := make(chan struct{})
+	go func() {
+		grpcServer.GracefulStop()
+		close(serverDone)
+	}()
 
+	select {
+	case <-serverDone:
 	case <-shutdownCtx.Done():
-		logg.Warn("analytics consumer shutdown timed out")
+		logg.Warn("analytics grpc shutdown timed out")
 		exitCode = 1
+		grpcServer.Stop()
 	}
+
+	if !consumerStopped {
+		select {
+		case err := <-consumerErr:
+			if err != nil {
+				logg.Error("analytics consumer shutdown failed", zap.Error(err))
+				exitCode = 1
+			}
+
+		case <-shutdownCtx.Done():
+			logg.Warn("analytics consumer shutdown timed out")
+			exitCode = 1
+		}
+	}
+
+	logg.Info("analytics service stopped")
 }

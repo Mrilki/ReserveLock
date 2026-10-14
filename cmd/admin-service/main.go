@@ -11,6 +11,7 @@ import (
 
 	adminconfig "github.com/Mrilki/ReserveLock/internal/admin/config"
 	adminhttp "github.com/Mrilki/ReserveLock/internal/admin/transport/http"
+	analyticsv1 "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/analytics/v1"
 	eventcontentv1 "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/eventcontent/v1"
 	"github.com/Mrilki/ReserveLock/internal/platform/httpx"
 	"github.com/Mrilki/ReserveLock/internal/platform/logger"
@@ -38,9 +39,7 @@ func main() {
 
 	conn, err := grpc.NewClient(
 		cfg.EventContentGRPCAddr,
-		grpc.WithTransportCredentials(
-			insecure.NewCredentials(),
-		),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
 		logg.Error("failed to create event content grpc client", zap.Error(err))
@@ -50,10 +49,22 @@ func main() {
 	defer func() {
 		_ = conn.Close()
 	}()
-
 	eventContentClient := eventcontentv1.NewEventContentServiceClient(conn)
 
-	handler := adminhttp.NewHandler(eventContentClient)
+	analyticsConn, err := grpc.NewClient(
+		cfg.AnalyticsGRPCAddr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		logg.Error("failed to create analytics grpc client", zap.Error(err))
+		return
+	}
+	defer func() {
+		_ = analyticsConn.Close()
+	}()
+	analyticsClient := analyticsv1.NewAnalyticsServiceClient(analyticsConn)
+
+	handler := adminhttp.NewHandler(eventContentClient, analyticsClient)
 
 	router := gin.New()
 	router.Use(gin.Recovery())
@@ -70,6 +81,7 @@ func main() {
 		admin.POST("/seat-maps", handler.CreateSeatMap)
 		admin.POST("/events", handler.CreateEvent)
 		admin.POST("/events/:id/publish", handler.PublishEvent)
+		admin.GET("/events/:id/analytics", handler.GetEventSummary)
 	}
 
 	server := &http.Server{
@@ -95,6 +107,7 @@ func main() {
 			"admin service started",
 			zap.String("http_addr", cfg.Base.HTTPAddr),
 			zap.String("event_content_grpc_addr", cfg.EventContentGRPCAddr),
+			zap.String("analytics_grpc_addr", cfg.AnalyticsGRPCAddr),
 		)
 
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
