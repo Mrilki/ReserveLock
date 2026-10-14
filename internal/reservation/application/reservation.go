@@ -62,7 +62,7 @@ func (s *Service) CreateReservation(
 		seen[seatID] = struct{}{}
 	}
 
-	now := time.Now().UTC()
+	now := time.Now().UTC().Truncate(time.Microsecond)
 
 	reservation := domain.Reservation{
 		ID:        uuid.NewString(),
