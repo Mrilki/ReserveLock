@@ -122,12 +122,77 @@ jobs:
 
       - name: Validate Compose configuration
         run: docker compose --env-file .env.example --profile app config --quiet
+
+      - name: Run reservation migrations
+        run: |
+          go run github.com/pressly/goose/v3/cmd/goose@v3.27.0 \
+            -dir migrations/reservation \
+            postgres \
+            "$TEST_POSTGRES_DSN" \
+            up
+      - name: Run payment migrations
+        run: |
+          docker exec "${{ job.services.postgres.id }}" \
+            psql -U reservelock -d postgres \
+            -c "CREATE DATABASE reservelock_payment_test;"
+
+          go run github.com/pressly/goose/v3/cmd/goose@v3.27.0 \
+            -dir migrations/payment \
+            postgres \
+            "$TEST_PAYMENT_POSTGRES_DSN" \
+            up
+
+      - name: Run analytics migrations
+        run: |
+          go run github.com/pressly/goose/v3/cmd/goose@v3.27.0 \
+            -dir migrations/analytics \
+            clickhouse \
+            "$TEST_ANALYTICS_CLICKHOUSE_DSN" \
+            up
+
+      - name: Start MongoDB replica set
+        run: |
+          docker run -d \
+            --name reservelock-mongo \
+            -p 27017:27017 \
+            mongo:8.0 \
+            --replSet rs0 \
+            --bind_ip_all
+
+          for i in {1..30}; do
+            if docker exec reservelock-mongo \
+              mongosh --quiet \
+              --eval "db.adminCommand({ ping: 1 }).ok" | grep -q 1; then
+              break
+            fi
+
+            sleep 1
+          done
+
+          docker exec reservelock-mongo \
+            mongosh --quiet \
+            --eval 'rs.initiate({_id:"rs0",members:[{_id:0,host:"localhost:27017"}]})'
+
+          for i in {1..30}; do
+            if docker exec reservelock-mongo \
+              mongosh --quiet \
+              --eval "db.hello().isWritablePrimary" | grep -q true; then
+              exit 0
+            fi
+
+            sleep 1
+          done
+
+          echo "MongoDB replica set did not become primary"
+          docker logs reservelock-mongo
+          exit 1
           
       - name: Run tests
         run: go test -count=1 -timeout=5m ./...
 
       - name: Build
         run: go build ./...
+
   docker:
     name: Docker build (${{ matrix.service }})
     needs: go
