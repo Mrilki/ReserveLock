@@ -74,7 +74,7 @@ func TestEventRepositoryPublishRollsBackWhenOutboxInsertFails(t *testing.T) {
 		string(existing.Payload) != "existing" {
 		t.Fatalf("conflicting outbox message was changed: %+v", existing)
 	}
-	
+
 	storedEvent, err := repository.GetByID(ctx, event.ID)
 	if err != nil {
 		t.Fatalf("get event after failed publish: %v", err)
