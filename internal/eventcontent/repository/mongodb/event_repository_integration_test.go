@@ -52,14 +52,29 @@ func TestEventRepositoryPublishRollsBackWhenOutboxInsertFails(t *testing.T) {
 
 	publishedEvent := event
 
-	err = repository.Publish(ctx, publishedEvent, publication)
 	if err := publishedEvent.Publish(); err != nil {
 		t.Fatalf("publish domain event: %v", err)
 	}
-	if err == nil {
-		t.Fatal("expected publish to fail")
+
+	err = repository.Publish(ctx, publishedEvent, publication)
+	if !mongo.IsDuplicateKeyError(err) {
+		t.Fatalf("expected injected outbox duplicate key error, got %v", err)
 	}
 
+	var existing outboxDocument
+
+	err = database.Collection(outboxCollectionName).
+		FindOne(ctx, bson.M{"_id": publication.MessageID}).
+		Decode(&existing)
+	if err != nil {
+		t.Fatalf("read conflicting outbox message: %v", err)
+	}
+
+	if existing.EventType != "existing-message" ||
+		string(existing.Payload) != "existing" {
+		t.Fatalf("conflicting outbox message was changed: %+v", existing)
+	}
+	
 	storedEvent, err := repository.GetByID(ctx, event.ID)
 	if err != nil {
 		t.Fatalf("get event after failed publish: %v", err)

@@ -38,13 +38,20 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to initialize logger: %v", err)
 	}
+	exitCode := 0
+
 	defer func() {
 		_ = logg.Sync()
+
+		if exitCode != 0 {
+			os.Exit(exitCode)
+		}
 	}()
 
 	pool, err := pgxpool.New(context.Background(), cfg.PostgresDSN)
 	if err != nil {
 		logg.Error("failed to create payment postgres pool", zap.Error(err))
+		exitCode = 1
 		return
 	}
 	defer pool.Close()
@@ -54,15 +61,17 @@ func main() {
 	pingCancel()
 	if err != nil {
 		logg.Error("failed to ping payment postgres", zap.Error(err))
+		exitCode = 1
 		return
 	}
 
 	client, err := paymentkafka.NewClient(cfg.KafkaBrokers)
 	if err != nil {
 		logg.Error("failed to create payment kafka client", zap.Error(err))
+		exitCode = 1
 		return
 	}
-	defer client.Close()
+	defer client.CloseAllowingRebalance()
 
 	publisherClient, err := kgo.NewClient(
 		kgo.SeedBrokers(cfg.KafkaBrokers...),
@@ -70,6 +79,7 @@ func main() {
 	)
 	if err != nil {
 		logg.Error("failed to create payment kafka publisher client", zap.Error(err))
+		exitCode = 1
 		return
 	}
 
@@ -77,6 +87,7 @@ func main() {
 	listener, err := net.Listen("tcp", cfg.GRPCAddr)
 	if err != nil {
 		logg.Error("failed to listen", zap.String("addr", cfg.GRPCAddr), zap.Error(err))
+		exitCode = 1
 		return
 	}
 	defer func() {
@@ -105,10 +116,14 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
+	consumerErr := make(chan error, 1)
 	consumerDone := make(chan struct{})
 	go func() {
 		defer close(consumerDone)
-		consumer.Run(ctx)
+
+		if err := consumer.Run(ctx); err != nil {
+			consumerErr <- err
+		}
 	}()
 
 	outboxDone := make(chan struct{})
@@ -131,6 +146,10 @@ func main() {
 
 	case err := <-serverErr:
 		logg.Error("payment grpc server failed", zap.Error(err))
+		exitCode = 1
+	case err := <-consumerErr:
+		logg.Error("payment kafka consumer failed", zap.Error(err))
+		exitCode = 1
 	}
 	stop()
 

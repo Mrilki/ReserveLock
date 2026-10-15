@@ -33,8 +33,14 @@ func main() {
 		log.Fatalf("failed to initialize logger: %v", err)
 	}
 
+	exitCode := 0
+
 	defer func() {
 		_ = logg.Sync()
+
+		if exitCode != 0 {
+			os.Exit(exitCode)
+		}
 	}()
 
 	conn, err := grpc.NewClient(
@@ -43,6 +49,7 @@ func main() {
 	)
 	if err != nil {
 		logg.Error("failed to create event content grpc client", zap.Error(err))
+		exitCode = 1
 		return
 	}
 
@@ -57,6 +64,7 @@ func main() {
 	)
 	if err != nil {
 		logg.Error("failed to create analytics grpc client", zap.Error(err))
+		exitCode = 1
 		return
 	}
 	defer func() {
@@ -120,6 +128,7 @@ func main() {
 		logg.Info("shutdown signal received")
 	case err := <-serverErr:
 		logg.Error("http server failed", zap.Error(err))
+		exitCode = 1
 		return
 	}
 
@@ -131,6 +140,7 @@ func main() {
 
 	if err := server.Shutdown(shutdownCtx); err != nil {
 		logg.Error("http server shutdown failed", zap.Error(err))
+		exitCode = 1
 		return
 	}
 

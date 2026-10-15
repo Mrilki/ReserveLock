@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net"
 	"os"
@@ -48,13 +49,20 @@ func main() {
 		)
 	}
 
+	exitCode := 0
+
 	defer func() {
 		_ = logg.Sync()
+
+		if exitCode != 0 {
+			os.Exit(exitCode)
+		}
 	}()
 
 	postgresPool, err := pgxpool.New(context.Background(), cfg.PostgresDSN)
 	if err != nil {
 		logg.Error("failed to create postgres pool", zap.Error(err))
+		exitCode = 1
 		return
 	}
 	defer postgresPool.Close()
@@ -65,6 +73,7 @@ func main() {
 
 	if err != nil {
 		logg.Error("failed to ping postgres", zap.Error(err))
+		exitCode = 1
 		return
 	}
 
@@ -77,6 +86,7 @@ func main() {
 			zap.String("addr", cfg.GRPCAddr),
 			zap.Error(err),
 		)
+		exitCode = 1
 		return
 	}
 
@@ -85,6 +95,7 @@ func main() {
 	redisClient, err := reservationredis.NewClient(cfg.RedisURL)
 	if err != nil {
 		logg.Error("invalid redis configuration", zap.Error(err))
+		exitCode = 1
 		return
 	}
 	defer func() {
@@ -111,9 +122,10 @@ func main() {
 			"failed to create kafka consumer client",
 			zap.Error(err),
 		)
+		exitCode = 1
 		return
 	}
-	defer kafkaClient.Close()
+	defer kafkaClient.CloseAllowingRebalance()
 
 	eventPublishedConsumer := reservationkafka.NewEventPublishedConsumer(
 		kafkaClient,
@@ -123,9 +135,10 @@ func main() {
 	paymentKafkaClient, err := reservationkafka.NewPaymentClient(cfg.KafkaBrokers)
 	if err != nil {
 		logg.Error("failed to create payment kafka consumer client", zap.Error(err))
+		exitCode = 1
 		return
 	}
-	defer paymentKafkaClient.Close()
+	defer paymentKafkaClient.CloseAllowingRebalance()
 
 	paymentConsumer := reservationkafka.NewPaymentConsumer(
 		paymentKafkaClient,
@@ -139,6 +152,7 @@ func main() {
 	)
 	if err != nil {
 		logg.Error("failed to create kafka publisher client", zap.Error(err))
+		exitCode = 1
 		return
 	}
 	defer publisherClient.Close()
@@ -170,17 +184,24 @@ func main() {
 	defer stop()
 
 	consumerDone := make(chan struct{})
+	consumerErr := make(chan error, 2)
 
 	go func() {
 		defer close(consumerDone)
-		eventPublishedConsumer.Run(ctx)
+
+		if err := eventPublishedConsumer.Run(ctx); err != nil {
+			consumerErr <- fmt.Errorf("event published consumer: %w", err)
+		}
 	}()
 
 	paymentConsumerDone := make(chan struct{})
 
 	go func() {
 		defer close(paymentConsumerDone)
-		paymentConsumer.Run(ctx)
+
+		if err := paymentConsumer.Run(ctx); err != nil {
+			consumerErr <- fmt.Errorf("payment consumer: %w", err)
+		}
 	}()
 
 	outboxDone := make(chan struct{})
@@ -239,6 +260,11 @@ func main() {
 			"grpc server failed",
 			zap.Error(err),
 		)
+		exitCode = 1
+		stop()
+	case err := <-consumerErr:
+		logg.Error("kafka consumer failed", zap.Error(err))
+		exitCode = 1
 		stop()
 	}
 

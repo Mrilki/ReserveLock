@@ -22,6 +22,8 @@ func NewPaymentClient(brokers []string) (*kgo.Client, error) {
 		kgo.ConsumeTopics(paymentcontract.PaymentLifecycleTopic),
 		kgo.ConsumeResetOffset(kgo.NewOffset().AtStart()),
 		kgo.DisableAutoCommit(),
+		kgo.BlockRebalanceOnPoll(),
+		kgo.RebalanceTimeout(consumerRebalanceTimeout),
 	)
 }
 

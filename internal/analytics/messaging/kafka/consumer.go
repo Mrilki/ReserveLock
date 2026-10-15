@@ -89,13 +89,15 @@ func (c *Consumer) nextBatch(ctx context.Context) ([]*kgo.Record, error) {
 
 func (c *Consumer) pollRecords(ctx context.Context, limit int) ([]*kgo.Record, error) {
 	fetches := c.client.PollRecords(ctx, limit)
-	if ctx.Err() != nil {
-		return nil, ctx.Err()
-	}
 
 	for _, fetchErr := range fetches.Errors() {
 		if errors.Is(fetchErr.Err, kgo.ErrClientClosed) {
 			return nil, fetchErr.Err
+		}
+
+		if errors.Is(fetchErr.Err, context.Canceled) ||
+			errors.Is(fetchErr.Err, context.DeadlineExceeded) {
+			continue
 		}
 
 		c.logger.Error("analytics kafka fetch failed",
@@ -105,7 +107,12 @@ func (c *Consumer) pollRecords(ctx context.Context, limit int) ([]*kgo.Record, e
 		)
 	}
 
-	return fetches.Records(), nil
+	records := fetches.Records()
+	if len(records) > 0 {
+		return records, nil
+	}
+
+	return nil, ctx.Err()
 }
 
 func (c *Consumer) processBatch(ctx context.Context, records []*kgo.Record) error {

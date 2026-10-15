@@ -20,6 +20,8 @@ func NewEventPublishedClient(brokers []string) (*kgo.Client, error) {
 		kgo.ConsumerGroup(eventPublishedConsumerGroup),
 		kgo.ConsumeTopics(eventcontentcontract.EventPublishedTopic),
 		kgo.DisableAutoCommit(),
+		kgo.BlockRebalanceOnPoll(),
+		kgo.RebalanceTimeout(consumerRebalanceTimeout),
 	)
 }
 

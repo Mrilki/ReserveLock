@@ -41,10 +41,15 @@ func (s *testStore) GetEventSummary(_ context.Context, eventID string) (domain.E
 type testClient struct {
 	commits   int
 	failFirst bool
+	poll      func(context.Context, int) kgo.Fetches
 }
 
-func (c *testClient) PollRecords(context.Context, int) kgo.Fetches {
-	panic("PollRecords is not expected in processBatch tests")
+func (c *testClient) PollRecords(ctx context.Context, limit int) kgo.Fetches {
+	if c.poll == nil {
+		panic("PollRecords is not expected in this test")
+	}
+
+	return c.poll(ctx, limit)
 }
 
 func (c *testClient) AllowRebalance() {}
@@ -217,5 +222,45 @@ func testReservationRecord(t *testing.T, eventType string) *kgo.Record {
 			{Key: "message_id", Value: []byte("message-1")},
 			{Key: "event-type", Value: []byte(eventType)},
 		},
+	}
+}
+
+func TestPollRecordsKeepsReturnedRecordsAfterCancellation(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	record := &kgo.Record{
+		Topic:     reservationcontract.ReservationLifecycleTopic,
+		Partition: 0,
+		Offset:    42,
+	}
+
+	client := &testClient{
+		poll: func(context.Context, int) kgo.Fetches {
+			cancel()
+
+			return kgo.Fetches{{
+				Topics: []kgo.FetchTopic{{
+					Topic: record.Topic,
+					Partitions: []kgo.FetchPartition{{
+						Partition: record.Partition,
+						Records:   []*kgo.Record{record},
+					}},
+				}},
+			}}
+		},
+	}
+
+	consumer := &Consumer{
+		client: client,
+		logger: zap.NewNop(),
+	}
+
+	records, err := consumer.pollRecords(ctx, 1)
+	if err != nil {
+		t.Fatalf("returned records must be preserved: %v", err)
+	}
+	if len(records) != 1 || records[0] != record {
+		t.Fatalf("unexpected records: %+v", records)
 	}
 }

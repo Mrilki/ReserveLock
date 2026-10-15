@@ -41,8 +41,14 @@ func main() {
 		log.Fatalf("failed to initialize logger, %v", err)
 	}
 
+	exitCode := 0
+
 	defer func() {
 		_ = logg.Sync()
+
+		if exitCode != 0 {
+			os.Exit(exitCode)
+		}
 	}()
 
 	mongoClient, err := mongo.Connect(
@@ -55,6 +61,7 @@ func main() {
 			"failed to create mongo client",
 			zap.Error(err),
 		)
+		exitCode = 1
 		return
 	}
 	defer func() {
@@ -88,7 +95,7 @@ func main() {
 			"failed to ping mongo",
 			zap.Error(err),
 		)
-
+		exitCode = 1
 		return
 	}
 
@@ -110,6 +117,7 @@ func main() {
 			"failed to create kafka client",
 			zap.Error(err),
 		)
+		exitCode = 1
 		return
 	}
 
@@ -133,6 +141,7 @@ func main() {
 	listener, err := net.Listen("tcp", cfg.GRPCAddr)
 	if err != nil {
 		logg.Error("failed to listen", zap.String("addr", cfg.GRPCAddr), zap.Error(err))
+		exitCode = 1
 		return
 	}
 
@@ -176,6 +185,7 @@ func main() {
 		logg.Info("shutdown signal received")
 	case err := <-serverErr:
 		logg.Error("grpc server failed", zap.Error(err))
+		exitCode = 1
 		stop()
 	}
 
