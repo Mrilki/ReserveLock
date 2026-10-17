@@ -124,10 +124,7 @@ func (s *Store) processPaymentResult(ctx context.Context, messageID, reservation
 			return false, fmt.Errorf("confirm paid reservation: %w", err)
 		}
 		if result.RowsAffected() != 1 {
-			return false, fmt.Errorf(
-				"confirm paid reservation: expected 1 row, updated %d",
-				result.RowsAffected(),
-			)
+			return false, fmt.Errorf("confirm paid reservation: expected 1 row, updated %d", result.RowsAffected())
 		}
 
 		reservation.Status = domain.ReservationStatusConfirmed

@@ -6,6 +6,7 @@ import (
 
 	"github.com/Mrilki/ReserveLock/internal/payment/application"
 	"github.com/Mrilki/ReserveLock/internal/payment/domain"
+	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -26,4 +27,17 @@ func toGRPCError(err error) error {
 	default:
 		return status.Error(codes.Internal, "internal error")
 	}
+}
+
+func (s *server) rpcError(method string, err error) error {
+	rpcErr := toGRPCError(err)
+
+	if status.Code(rpcErr) == codes.Internal {
+		s.logger.Error("grpc request failed",
+			zap.String("method", method),
+			zap.Error(err),
+		)
+	}
+
+	return rpcErr
 }

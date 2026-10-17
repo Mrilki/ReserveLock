@@ -58,7 +58,6 @@ func toProtoEventStatus(status domain.EventStatus) eventcontentv1.EventStatus {
 	default:
 		return eventcontentv1.EventStatus_EVENT_STATUS_UNSPECIFIED
 	}
-
 }
 
 func toProtoEvent(event domain.Event) *eventcontentv1.Event {

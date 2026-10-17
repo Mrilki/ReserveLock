@@ -36,28 +36,19 @@ func NewEventRepository(database *mongo.Database) *EventRepository {
 	}
 }
 
-func (r *EventRepository) Create(
-	ctx context.Context,
-	event domain.Event,
-) error {
+func (r *EventRepository) Create(ctx context.Context, event domain.Event) error {
 	_, err := r.collection.InsertOne(
 		ctx,
 		toEventDocument(event),
 	)
 	if err != nil {
-		return fmt.Errorf(
-			"insert event: %w",
-			err,
-		)
+		return fmt.Errorf("insert event: %w", err)
 	}
 
 	return nil
 }
 
-func (r *EventRepository) GetByID(
-	ctx context.Context,
-	id string,
-) (domain.Event, error) {
+func (r *EventRepository) GetByID(ctx context.Context, id string) (domain.Event, error) {
 	var document eventDocument
 
 	err := r.collection.FindOne(
@@ -69,24 +60,16 @@ func (r *EventRepository) GetByID(
 
 	switch {
 	case errors.Is(err, mongo.ErrNoDocuments):
-		return domain.Event{},
-			domain.ErrEventNotFound
+		return domain.Event{}, domain.ErrEventNotFound
 
 	case err != nil:
-		return domain.Event{}, fmt.Errorf(
-			"find event by id: %w",
-			err,
-		)
+		return domain.Event{}, fmt.Errorf("find event by id: %w", err)
 	}
 
 	return document.toDomain(), nil
 }
 
-func (r *EventRepository) Publish(
-	ctx context.Context,
-	event domain.Event,
-	publication application.EventPublication,
-) error {
+func (r *EventRepository) Publish(ctx context.Context, event domain.Event, publication application.EventPublication) error {
 	message := &eventcontentv1.EventPublished{
 		MessageId:   publication.MessageID,
 		EventId:     event.ID,
@@ -145,10 +128,7 @@ func (r *EventRepository) Publish(
 					return nil, domain.ErrEventNotFound
 
 				case err != nil:
-					return nil, fmt.Errorf(
-						"check event after publish conflict: %w",
-						err,
-					)
+					return nil, fmt.Errorf("check event after publish conflict: %w", err)
 
 				default:
 					return nil, domain.ErrEventNotDraft
@@ -171,26 +151,14 @@ func (r *EventRepository) Publish(
 }
 
 func (r *EventRepository) List(ctx context.Context) ([]domain.Event, error) {
-	cursor, err := r.collection.Find(
-		ctx,
-		bson.D{},
-	)
+	cursor, err := r.collection.Find(ctx, bson.D{})
 	if err != nil {
-		return nil, fmt.Errorf(
-			"find events: %w",
-			err,
-		)
+		return nil, fmt.Errorf("find events: %w", err)
 	}
 	var documents []eventDocument
 
-	if err := cursor.All(
-		ctx,
-		&documents,
-	); err != nil {
-		return nil, fmt.Errorf(
-			"decode events: %w",
-			err,
-		)
+	if err := cursor.All(ctx, &documents); err != nil {
+		return nil, fmt.Errorf("decode events: %w", err)
 	}
 
 	events := make([]domain.Event, 0, len(documents))

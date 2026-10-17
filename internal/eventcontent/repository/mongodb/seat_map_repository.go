@@ -22,28 +22,16 @@ func NewSeatMapRepository(database *mongo.Database) *SeatMapRepository {
 	}
 }
 
-func (r *SeatMapRepository) Create(
-	ctx context.Context,
-	seatMap domain.SeatMap,
-) error {
-	_, err := r.collection.InsertOne(
-		ctx,
-		toSeatMapDocument(seatMap),
-	)
+func (r *SeatMapRepository) Create(ctx context.Context, seatMap domain.SeatMap) error {
+	_, err := r.collection.InsertOne(ctx, toSeatMapDocument(seatMap))
 	if err != nil {
-		return fmt.Errorf(
-			"insert seat map: %w",
-			err,
-		)
+		return fmt.Errorf("insert seat map: %w", err)
 	}
 
 	return nil
 }
 
-func (r *SeatMapRepository) GetByID(
-	ctx context.Context,
-	id string,
-) (domain.SeatMap, error) {
+func (r *SeatMapRepository) GetByID(ctx context.Context, id string) (domain.SeatMap, error) {
 	var document seatMapDocument
 
 	err := r.collection.FindOne(
@@ -55,14 +43,10 @@ func (r *SeatMapRepository) GetByID(
 
 	switch {
 	case errors.Is(err, mongo.ErrNoDocuments):
-		return domain.SeatMap{},
-			domain.ErrSeatMapNotFound
+		return domain.SeatMap{}, domain.ErrSeatMapNotFound
 
 	case err != nil:
-		return domain.SeatMap{}, fmt.Errorf(
-			"find seat map by id: %w",
-			err,
-		)
+		return domain.SeatMap{}, fmt.Errorf("find seat map by id: %w", err)
 	}
 
 	return document.toDomain(), nil

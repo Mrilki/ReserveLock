@@ -17,18 +17,9 @@ type Config struct {
 
 func Load() Config {
 	return Config{
-		Base: platformconfig.LoadBase("public-api"),
-		EventContentGRPCAddr: platformconfig.GetEnv(
-			"EVENT_CONTENT_GRPC_ADDR",
-			defaultEventContentGRPCAddr,
-		),
-		ReservationGRPCAddr: platformconfig.GetEnv(
-			"RESERVATION_GRPC_ADDR",
-			defaultReservationGRPCAddr,
-		),
-		PaymentGRPCAddr: platformconfig.GetEnv(
-			"PAYMENT_GRPC_ADDR",
-			defaultPaymentGRPCAddr,
-		),
+		Base:                 platformconfig.LoadBase("public-api"),
+		EventContentGRPCAddr: platformconfig.GetEnv("EVENT_CONTENT_GRPC_ADDR", defaultEventContentGRPCAddr),
+		ReservationGRPCAddr:  platformconfig.GetEnv("RESERVATION_GRPC_ADDR", defaultReservationGRPCAddr),
+		PaymentGRPCAddr:      platformconfig.GetEnv("PAYMENT_GRPC_ADDR", defaultPaymentGRPCAddr),
 	}
 }

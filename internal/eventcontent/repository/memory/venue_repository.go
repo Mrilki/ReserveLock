@@ -30,7 +30,7 @@ func (r *VenueRepository) GetByID(ctx context.Context, id string) (domain.Venue,
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	if venue, inMap := r.venues[id]; inMap {
+	if venue, ok := r.venues[id]; ok {
 		return venue, nil
 	}
 	return domain.Venue{}, domain.ErrVenueNotFound

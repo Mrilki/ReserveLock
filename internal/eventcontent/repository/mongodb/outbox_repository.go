@@ -80,3 +80,19 @@ func (r *OutboxRepository) MarkPublished(ctx context.Context, id string, publish
 
 	return result.ModifiedCount == 1, nil
 }
+
+func (r *OutboxRepository) EnsureIndexes(ctx context.Context) error {
+	_, err := r.collection.Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys: bson.D{
+			{Key: "published_at", Value: 1},
+			{Key: "occurred_at", Value: 1},
+			{Key: "_id", Value: 1},
+		},
+		Options: options.Index().SetName("outbox_pending"),
+	})
+	if err != nil {
+		return fmt.Errorf("create outbox pending index: %w", err)
+	}
+
+	return nil
+}

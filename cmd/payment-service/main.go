@@ -107,7 +107,7 @@ func main() {
 	healthServer.SetServingStatus("", healthpb.HealthCheckResponse_SERVING)
 	healthpb.RegisterHealthServer(grpcServer, healthServer)
 
-	paymentv1.RegisterPaymentServiceServer(grpcServer, paymentgrpc.NewServer(service))
+	paymentv1.RegisterPaymentServiceServer(grpcServer, paymentgrpc.NewServer(service, logg))
 
 	if cfg.Base.AppEnv == "local" {
 		reflection.Register(grpcServer)

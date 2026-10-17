@@ -1,8 +1,6 @@
 package application
 
-import (
-	"context"
-)
+import "context"
 
 type PaymentResultInput struct {
 	MessageID     string

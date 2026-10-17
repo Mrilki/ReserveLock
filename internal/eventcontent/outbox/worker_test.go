@@ -3,9 +3,10 @@ package outbox
 import (
 	"context"
 	"errors"
-	eventcontentcontract "github.com/Mrilki/ReserveLock/internal/integration/eventcontent"
 	"testing"
 	"time"
+
+	eventcontentcontract "github.com/Mrilki/ReserveLock/internal/integration/eventcontent"
 
 	"go.uber.org/zap"
 )
@@ -72,28 +73,18 @@ func TestWorkerProcessBatchPublishesAndMarksMessages(t *testing.T) {
 
 	publisher := &publisherStub{}
 
-	worker := NewWorker(
-		repository,
-		publisher,
-		zap.NewNop(),
-	)
+	worker := NewWorker(repository, publisher, zap.NewNop())
 
 	if err := worker.processBatch(context.Background()); err != nil {
 		t.Fatalf("process outbox batch: %v", err)
 	}
 
 	if len(publisher.messages) != 2 {
-		t.Fatalf(
-			"expected 2 published messages, got %d",
-			len(publisher.messages),
-		)
+		t.Fatalf("expected 2 published messages, got %d", len(publisher.messages))
 	}
 
 	if len(repository.marked) != 2 {
-		t.Fatalf(
-			"expected 2 marked messages, got %d",
-			len(repository.marked),
-		)
+		t.Fatalf("expected 2 marked messages, got %d", len(repository.marked))
 	}
 }
 
@@ -114,11 +105,7 @@ func TestWorkerProcessBatchDoesNotMarkMessageWhenPublishFails(t *testing.T) {
 		err: errors.New("kafka unavailable"),
 	}
 
-	worker := NewWorker(
-		repository,
-		publisher,
-		zap.NewNop(),
-	)
+	worker := NewWorker(repository, publisher, zap.NewNop())
 
 	err := worker.processBatch(context.Background())
 	if err == nil {
@@ -126,9 +113,6 @@ func TestWorkerProcessBatchDoesNotMarkMessageWhenPublishFails(t *testing.T) {
 	}
 
 	if len(repository.marked) != 0 {
-		t.Fatalf(
-			"expected no marked messages, got %d",
-			len(repository.marked),
-		)
+		t.Fatalf("expected no marked messages, got %d", len(repository.marked))
 	}
 }

@@ -21,10 +21,7 @@ type CreateReservationInput struct {
 	SeatIDs []string
 }
 
-func (s *Service) GetReservation(
-	ctx context.Context,
-	reservationID string,
-) (domain.Reservation, error) {
+func (s *Service) GetReservation(ctx context.Context, reservationID string) (domain.Reservation, error) {
 	if reservationID == "" {
 		return domain.Reservation{}, ErrInvalidReservationID
 	}
@@ -32,18 +29,13 @@ func (s *Service) GetReservation(
 	return s.store.GetReservationByID(ctx, reservationID)
 }
 
-func (s *Service) CreateReservation(
-	ctx context.Context,
-	input CreateReservationInput,
-) (domain.Reservation, error) {
+func (s *Service) CreateReservation(ctx context.Context, input CreateReservationInput) (domain.Reservation, error) {
 	if input.EventID == "" {
 		return domain.Reservation{}, ErrInvalidEventID
 	}
-
 	if input.UserID == "" {
 		return domain.Reservation{}, ErrInvalidUserID
 	}
-
 	if len(input.SeatIDs) == 0 {
 		return domain.Reservation{}, ErrSeatIDsRequired
 	}

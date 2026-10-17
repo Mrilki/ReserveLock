@@ -96,13 +96,11 @@ func (c *Consumer) processAndCommit(ctx context.Context, record *kgo.Record) err
 	}); err != nil {
 		return fmt.Errorf("handle record: %w", err)
 	}
-
 	if err := c.retry(recordCtx, "commit", func(attemptCtx context.Context) error {
 		return c.client.CommitRecords(attemptCtx, record)
 	}); err != nil {
 		return fmt.Errorf("commit record: %w", err)
 	}
-
 	return nil
 }
 

@@ -88,7 +88,6 @@ func (r *OutboxRepository) ListPending(ctx context.Context, limit int) ([]paymen
 	}
 
 	return messages, nil
-
 }
 
 func (r *OutboxRepository) MarkPublished(ctx context.Context, id string, publishedAt time.Time) (bool, error) {

@@ -26,10 +26,7 @@ func TestProcessEventPublished_DuplicateMessage_Postgres(t *testing.T) {
 		SeatIDs:   []string{seatID},
 	}
 
-	processed, err := service.HandleEventPublished(
-		context.Background(),
-		input,
-	)
+	processed, err := service.HandleEventPublished(context.Background(), input)
 	if err != nil {
 		t.Fatalf("first event published: %v", err)
 	}
@@ -38,10 +35,7 @@ func TestProcessEventPublished_DuplicateMessage_Postgres(t *testing.T) {
 		t.Fatal("expected first message to be processed")
 	}
 
-	processed, err = service.HandleEventPublished(
-		context.Background(),
-		input,
-	)
+	processed, err = service.HandleEventPublished(context.Background(), input)
 	if err != nil {
 		t.Fatalf("duplicate event published: %v", err)
 	}
@@ -66,10 +60,7 @@ func TestProcessEventPublished_DuplicateMessage_Postgres(t *testing.T) {
 	}
 
 	if inboxCount != 1 {
-		t.Fatalf(
-			"expected 1 inbox message, got %d",
-			inboxCount,
-		)
+		t.Fatalf("expected 1 inbox message, got %d", inboxCount)
 	}
 
 	var seatCount int
@@ -88,16 +79,11 @@ func TestProcessEventPublished_DuplicateMessage_Postgres(t *testing.T) {
 	}
 
 	if seatCount != 1 {
-		t.Fatalf(
-			"expected 1 seat inventory row, got %d",
-			seatCount,
-		)
+		t.Fatalf("expected 1 seat inventory row, got %d", seatCount)
 	}
 }
 
-func TestProcessEventPublished_RollsBackInboxWhenInventoryAlreadyExists_Postgres(
-	t *testing.T,
-) {
+func TestProcessEventPublished_RollsBackInboxWhenInventoryAlreadyExists_Postgres(t *testing.T) {
 	pool, service := newPostgresTestService(t)
 
 	eventID := uuid.NewString()
@@ -140,10 +126,7 @@ func TestProcessEventPublished_RollsBackInboxWhenInventoryAlreadyExists_Postgres
 	)
 
 	if !errors.Is(err, domain.ErrInventoryAlreadyExists) {
-		t.Fatalf(
-			"expected ErrInventoryAlreadyExists, got %v",
-			err,
-		)
+		t.Fatalf("expected ErrInventoryAlreadyExists, got %v", err)
 	}
 
 	if secondProcessed {
@@ -166,10 +149,7 @@ func TestProcessEventPublished_RollsBackInboxWhenInventoryAlreadyExists_Postgres
 	}
 
 	if secondInboxCount != 0 {
-		t.Fatalf(
-			"expected second inbox message to be rolled back, got %d rows",
-			secondInboxCount,
-		)
+		t.Fatalf("expected second inbox message to be rolled back, got %d rows", secondInboxCount)
 	}
 
 	var firstInboxCount int
@@ -188,9 +168,6 @@ func TestProcessEventPublished_RollsBackInboxWhenInventoryAlreadyExists_Postgres
 	}
 
 	if firstInboxCount != 1 {
-		t.Fatalf(
-			"expected first inbox message to remain, got %d rows",
-			firstInboxCount,
-		)
+		t.Fatalf("expected first inbox message to remain, got %d rows", firstInboxCount)
 	}
 }

@@ -15,7 +15,7 @@ import (
 	reservationv1 "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/reservation/v1"
 	"github.com/Mrilki/ReserveLock/internal/platform/httpx"
 	"github.com/Mrilki/ReserveLock/internal/platform/logger"
-	publicapi "github.com/Mrilki/ReserveLock/internal/publicapi/config"
+	publicapiconfig "github.com/Mrilki/ReserveLock/internal/publicapi/config"
 	publichttp "github.com/Mrilki/ReserveLock/internal/publicapi/transport/http"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -25,7 +25,7 @@ import (
 const shutdownTimeout = 10 * time.Second
 
 func main() {
-	cfg := publicapi.Load()
+	cfg := publicapiconfig.Load()
 
 	logg, err := logger.New(cfg.Base.AppName, cfg.Base.AppEnv)
 	if err != nil {
@@ -47,8 +47,7 @@ func main() {
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		logg.Error(
-			"failed to create event content grpc client", zap.Error(err))
+		logg.Error("failed to create event content grpc client", zap.Error(err))
 		exitCode = 1
 		return
 	}
@@ -61,8 +60,7 @@ func main() {
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		logg.Error(
-			"failed to create reservation grpc client", zap.Error(err))
+		logg.Error("failed to create reservation grpc client", zap.Error(err))
 		exitCode = 1
 		return
 	}
@@ -84,13 +82,13 @@ func main() {
 	}()
 
 	eventContentClient := eventcontentv1.NewEventContentServiceClient(eventContentConn)
-	reservationConnClient := reservationv1.NewReservationServiceClient(reservationConn)
-	paymentConnClient := paymentv1.NewPaymentServiceClient(paymentConn)
+	reservationClient := reservationv1.NewReservationServiceClient(reservationConn)
+	paymentClient := paymentv1.NewPaymentServiceClient(paymentConn)
 
 	handler := publichttp.NewHandler(
 		eventContentClient,
-		reservationConnClient,
-		paymentConnClient,
+		reservationClient,
+		paymentClient,
 	)
 
 	mux := http.NewServeMux()
@@ -117,11 +115,7 @@ func main() {
 		IdleTimeout:       60 * time.Second,
 	}
 
-	ctx, stop := signal.NotifyContext(
-		context.Background(),
-		os.Interrupt,
-		syscall.SIGTERM,
-	)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
 	serverErr := make(chan error, 1)

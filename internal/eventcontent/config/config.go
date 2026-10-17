@@ -1,8 +1,6 @@
 package config
 
-import (
-	platformconfig "github.com/Mrilki/ReserveLock/internal/platform/config"
-)
+import platformconfig "github.com/Mrilki/ReserveLock/internal/platform/config"
 
 const (
 	defaultGRPCAddr      = ":50051"

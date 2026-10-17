@@ -81,11 +81,7 @@ func TestEventRepositoryPublishRollsBackWhenOutboxInsertFails(t *testing.T) {
 	}
 
 	if storedEvent.Status != domain.EventStatusDraft {
-		t.Fatalf(
-			"expected event status %q after rollback, got %q",
-			domain.EventStatusDraft,
-			storedEvent.Status,
-		)
+		t.Fatalf("expected event status %q after rollback, got %q", domain.EventStatusDraft, storedEvent.Status)
 	}
 }
 
@@ -124,11 +120,7 @@ func TestEventRepositoryPublishAllowsOnlyOneConcurrentPublish(t *testing.T) {
 
 			<-start
 
-			errs <- repository.Publish(
-				ctx,
-				publishedEvent,
-				publication,
-			)
+			errs <- repository.Publish(ctx, publishedEvent, publication)
 		}(publication)
 	}
 
@@ -169,11 +161,7 @@ func TestEventRepositoryPublishAllowsOnlyOneConcurrentPublish(t *testing.T) {
 	}
 
 	if storedEvent.Status != domain.EventStatusPublished {
-		t.Fatalf(
-			"expected event status %q, got %q",
-			domain.EventStatusPublished,
-			storedEvent.Status,
-		)
+		t.Fatalf("expected event status %q, got %q", domain.EventStatusPublished, storedEvent.Status)
 	}
 
 	messageCount, err := database.Collection(outboxCollectionName).CountDocuments(
@@ -211,19 +199,13 @@ func newTestEventRepository(t *testing.T) (*EventRepository, *mongo.Database) {
 	}
 
 	t.Cleanup(func() {
-		disconnectCtx, cancel := context.WithTimeout(
-			context.Background(),
-			5*time.Second,
-		)
+		disconnectCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
 		_ = client.Disconnect(disconnectCtx)
 	})
 
-	pingCtx, cancel := context.WithTimeout(
-		context.Background(),
-		5*time.Second,
-	)
+	pingCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	if err := client.Ping(pingCtx, readpref.Primary()); err != nil {
@@ -239,10 +221,7 @@ func newTestEventRepository(t *testing.T) (*EventRepository, *mongo.Database) {
 	database := client.Database(databaseName)
 
 	t.Cleanup(func() {
-		dropCtx, cancel := context.WithTimeout(
-			context.Background(),
-			5*time.Second,
-		)
+		dropCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
 		_ = database.Drop(dropCtx)

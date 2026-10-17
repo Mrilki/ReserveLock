@@ -33,10 +33,7 @@ func (h *Handler) CreateVenue(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(
-		c.Request.Context(),
-		eventContentTimeout,
-	)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), eventContentTimeout)
 	defer cancel()
 
 	response, err := h.eventContentClient.CreateVenue(
@@ -68,5 +65,4 @@ func (h *Handler) CreateVenue(c *gin.Context) {
 		City:      venue.GetCity(),
 		CreatedBy: venue.GetCreatedBy(),
 	})
-
 }

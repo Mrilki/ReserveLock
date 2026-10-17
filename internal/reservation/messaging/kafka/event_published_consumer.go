@@ -32,24 +32,46 @@ func NewEventPublishedConsumer(client *kgo.Client, service *application.Service,
 	return consumer
 }
 
-func (c *Consumer) processEventPublishedRecord(ctx context.Context, record *kgo.Record) (bool, error) {
+func (c *Consumer) processEventPublishedRecord(
+	ctx context.Context,
+	record *kgo.Record,
+) (bool, error) {
+	if record == nil || record.Topic != eventcontentcontract.EventPublishedTopic {
+		return false, fmt.Errorf("unexpected event published topic")
+	}
+
+	if headerValue(record, "event-type") != eventcontentcontract.EventPublishedType {
+		return false, fmt.Errorf("unexpected event published type")
+	}
+
 	var message eventcontentv1.EventPublished
 
 	if err := proto.Unmarshal(record.Value, &message); err != nil {
 		return false, fmt.Errorf("unmarshal event published: %w", err)
 	}
 
-	processed, err := c.service.HandleEventPublished(
-		ctx,
-		application.EventPublishedInput{
-			MessageID: message.GetMessageId(),
-			EventID:   message.GetEventId(),
-			SeatIDs:   message.GetSeatIds(),
-		},
-	)
+	if message.GetMessageId() == "" || message.GetEventId() == "" {
+		return false, fmt.Errorf("incomplete event published identity")
+	}
+
+	if headerValue(record, "message_id") != message.GetMessageId() ||
+		string(record.Key) != message.GetEventId() {
+		return false, fmt.Errorf(
+			"event published identity mismatch for message %q",
+			message.GetMessageId())
+	}
+
+	if err := message.GetPublishedAt().CheckValid(); err != nil {
+		return false, fmt.Errorf("invalid event published timestamp: %w", err)
+	}
+
+	processed, err := c.service.HandleEventPublished(ctx, application.EventPublishedInput{
+		MessageID: message.GetMessageId(),
+		EventID:   message.GetEventId(),
+		SeatIDs:   message.GetSeatIds(),
+	})
 	if err != nil {
 		return false, fmt.Errorf("handle event published: %w", err)
 	}
 	return processed, nil
-
 }

@@ -16,36 +16,22 @@ type HallRepository struct {
 	collection *mongo.Collection
 }
 
-func NewHallRepository(
-	database *mongo.Database,
-) *HallRepository {
+func NewHallRepository(database *mongo.Database) *HallRepository {
 	return &HallRepository{
 		collection: database.Collection(hallsCollection),
 	}
 }
 
-func (r *HallRepository) Create(
-	ctx context.Context,
-	hall domain.Hall,
-) error {
-	_, err := r.collection.InsertOne(
-		ctx,
-		toHallDocument(hall),
-	)
+func (r *HallRepository) Create(ctx context.Context, hall domain.Hall) error {
+	_, err := r.collection.InsertOne(ctx, toHallDocument(hall))
 	if err != nil {
-		return fmt.Errorf(
-			"insert hall: %w",
-			err,
-		)
+		return fmt.Errorf("insert hall: %w", err)
 	}
 
 	return nil
 }
 
-func (r *HallRepository) GetByID(
-	ctx context.Context,
-	id string,
-) (domain.Hall, error) {
+func (r *HallRepository) GetByID(ctx context.Context, id string) (domain.Hall, error) {
 	var document hallDocument
 
 	err := r.collection.FindOne(
@@ -57,14 +43,10 @@ func (r *HallRepository) GetByID(
 
 	switch {
 	case errors.Is(err, mongo.ErrNoDocuments):
-		return domain.Hall{},
-			domain.ErrHallNotFound
+		return domain.Hall{}, domain.ErrHallNotFound
 
 	case err != nil:
-		return domain.Hall{}, fmt.Errorf(
-			"find hall by id: %w",
-			err,
-		)
+		return domain.Hall{}, fmt.Errorf("find hall by id: %w", err)
 	}
 
 	return document.toDomain(), nil

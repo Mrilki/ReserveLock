@@ -19,7 +19,7 @@ message GetPaymentResponse {
   Payment payment = 1;
 }
 
-message SimulatePaymentRequest  {
+message SimulatePaymentRequest {
   string reservation_id = 1;
   PaymentStatus status = 2;
 }

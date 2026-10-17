@@ -28,11 +28,7 @@ func (r *EventRepository) Create(ctx context.Context, event domain.Event) error 
 	return nil
 }
 
-func (r *EventRepository) Publish(
-	ctx context.Context,
-	event domain.Event,
-	publication application.EventPublication,
-) error {
+func (r *EventRepository) Publish(ctx context.Context, event domain.Event, publication application.EventPublication) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

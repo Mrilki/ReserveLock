@@ -8,10 +8,7 @@ import (
 	"github.com/Mrilki/ReserveLock/internal/reservation/domain"
 )
 
-func (s *Store) ListSeatInventory(
-	ctx context.Context,
-	eventID string,
-) ([]domain.SeatInventory, error) {
+func (s *Store) ListSeatInventory(ctx context.Context, eventID string) ([]domain.SeatInventory, error) {
 	var inventoryExists bool
 
 	err := s.pool.QueryRow(

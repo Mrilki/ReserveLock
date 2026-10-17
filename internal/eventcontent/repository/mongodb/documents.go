@@ -74,14 +74,8 @@ type seatMapDocument struct {
 	CreatedBy string         `bson:"created_by"`
 }
 
-func toSeatMapDocument(
-	seatMap domain.SeatMap,
-) seatMapDocument {
-	seats := make(
-		[]seatDocument,
-		0,
-		len(seatMap.Seats),
-	)
+func toSeatMapDocument(seatMap domain.SeatMap) seatMapDocument {
+	seats := make([]seatDocument, 0, len(seatMap.Seats))
 
 	for _, seat := range seatMap.Seats {
 		seats = append(
@@ -91,8 +85,7 @@ func toSeatMapDocument(
 				Section: seat.Section,
 				Row:     seat.Row,
 				Number:  seat.Number,
-			},
-		)
+			})
 	}
 
 	return seatMapDocument{
@@ -105,11 +98,7 @@ func toSeatMapDocument(
 }
 
 func (d seatMapDocument) toDomain() domain.SeatMap {
-	seats := make(
-		[]domain.Seat,
-		0,
-		len(d.Seats),
-	)
+	seats := make([]domain.Seat, 0, len(d.Seats))
 
 	for _, seat := range d.Seats {
 		seats = append(
@@ -119,8 +108,7 @@ func (d seatMapDocument) toDomain() domain.SeatMap {
 				Section: seat.Section,
 				Row:     seat.Row,
 				Number:  seat.Number,
-			},
-		)
+			})
 	}
 
 	return domain.SeatMap{

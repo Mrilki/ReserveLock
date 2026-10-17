@@ -17,7 +17,10 @@ type Handler struct {
 	analyticsClient    analyticsv1.AnalyticsServiceClient
 }
 
-func NewHandler(eventContentClient eventcontentv1.EventContentServiceClient, analyticsClient analyticsv1.AnalyticsServiceClient) *Handler {
+func NewHandler(
+	eventContentClient eventcontentv1.EventContentServiceClient,
+	analyticsClient analyticsv1.AnalyticsServiceClient,
+) *Handler {
 	return &Handler{
 		eventContentClient: eventContentClient,
 		analyticsClient:    analyticsClient,

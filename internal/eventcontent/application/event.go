@@ -125,6 +125,9 @@ func (s *Service) ListEvents(ctx context.Context) ([]domain.Event, error) {
 	}
 
 	sort.Slice(events, func(i, j int) bool {
+		if events[i].StartsAt.Equal(events[j].StartsAt) {
+			return events[i].ID < events[j].ID
+		}
 		return events[i].StartsAt.Before(events[j].StartsAt)
 	})
 

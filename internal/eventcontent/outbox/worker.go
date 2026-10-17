@@ -33,10 +33,7 @@ func (w *Worker) Run(ctx context.Context) {
 
 	for {
 		if err := w.processBatch(ctx); err != nil && ctx.Err() == nil {
-			w.logger.Error(
-				"failed to process outbox batch",
-				zap.Error(err),
-			)
+			w.logger.Error("failed to process outbox batch", zap.Error(err))
 		}
 
 		select {
@@ -56,33 +53,18 @@ func (w *Worker) processBatch(ctx context.Context) error {
 
 	for _, message := range messages {
 		if err := w.publisher.Publish(ctx, message); err != nil {
-			return fmt.Errorf(
-				"publish outbox message %q: %w",
-				message.ID,
-				err,
-			)
+			return fmt.Errorf("publish outbox message %q: %w", message.ID, err)
 		}
 
 		publishedAt := time.Now().UTC()
 
-		marked, err := w.repository.MarkPublished(
-			ctx,
-			message.ID,
-			publishedAt,
-		)
+		marked, err := w.repository.MarkPublished(ctx, message.ID, publishedAt)
 		if err != nil {
-			return fmt.Errorf(
-				"mark outbox message %q published: %w",
-				message.ID,
-				err,
-			)
+			return fmt.Errorf("mark outbox message %q published: %w", message.ID, err)
 		}
 
 		if !marked {
-			w.logger.Warn(
-				"outbox message was already marked published",
-				zap.String("message_id", message.ID),
-			)
+			w.logger.Warn("outbox message was already marked published", zap.String("message_id", message.ID))
 		}
 	}
 

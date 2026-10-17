@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	adminconfig "github.com/Mrilki/ReserveLock/internal/admin/config"
 	adminhttp "github.com/Mrilki/ReserveLock/internal/admin/transport/http"
@@ -19,8 +20,6 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-
-	"time"
 )
 
 const shutdownTimeout = 10 * time.Second
@@ -132,10 +131,7 @@ func main() {
 		return
 	}
 
-	shutdownCtx, cancel := context.WithTimeout(
-		context.Background(),
-		shutdownTimeout,
-	)
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancel()
 
 	if err := server.Shutdown(shutdownCtx); err != nil {

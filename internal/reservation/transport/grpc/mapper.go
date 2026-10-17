@@ -6,9 +6,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func toProtoReservationStatus(
-	status domain.ReservationStatus,
-) reservationv1.ReservationStatus {
+func toProtoReservationStatus(status domain.ReservationStatus) reservationv1.ReservationStatus {
 	switch status {
 	case domain.ReservationStatusPending:
 		return reservationv1.ReservationStatus_RESERVATION_STATUS_PENDING
@@ -24,9 +22,7 @@ func toProtoReservationStatus(
 	}
 }
 
-func toProtoReservation(
-	reservation domain.Reservation,
-) *reservationv1.Reservation {
+func toProtoReservation(reservation domain.Reservation) *reservationv1.Reservation {
 	return &reservationv1.Reservation{
 		Id:        reservation.ID,
 		EventId:   reservation.EventID,
@@ -38,9 +34,7 @@ func toProtoReservation(
 	}
 }
 
-func toProtoSeatAvailabilityStatus(
-	status domain.SeatInventoryStatus,
-) reservationv1.SeatAvailabilityStatus {
+func toProtoSeatAvailabilityStatus(status domain.SeatInventoryStatus) reservationv1.SeatAvailabilityStatus {
 	switch status {
 	case domain.SeatInventoryStatusAvailable:
 		return reservationv1.SeatAvailabilityStatus_SEAT_AVAILABILITY_STATUS_AVAILABLE
@@ -56,9 +50,7 @@ func toProtoSeatAvailabilityStatus(
 	}
 }
 
-func toProtoSeatAvailability(
-	seat domain.SeatInventory,
-) *reservationv1.SeatAvailability {
+func toProtoSeatAvailability(seat domain.SeatInventory) *reservationv1.SeatAvailability {
 	result := &reservationv1.SeatAvailability{
 		SeatId: seat.SeatID,
 		Status: toProtoSeatAvailabilityStatus(seat.Status),

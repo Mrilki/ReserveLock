@@ -11,10 +11,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func (s *Store) CreateReservation(
-	ctx context.Context,
-	reservation domain.Reservation,
-) error {
+func (s *Store) CreateReservation(ctx context.Context, reservation domain.Reservation) error {
 	tx, err := s.pool.Begin(ctx)
 	if err != nil {
 		return fmt.Errorf("begin create reservation transaction: %w", err)
@@ -170,10 +167,7 @@ func (s *Store) CreateReservation(
 	return nil
 }
 
-func (s *Store) GetReservationByID(
-	ctx context.Context,
-	id string,
-) (domain.Reservation, error) {
+func (s *Store) GetReservationByID(ctx context.Context, id string) (domain.Reservation, error) {
 	var reservation domain.Reservation
 	var status string
 
@@ -184,14 +178,14 @@ func (s *Store) GetReservationByID(
 			r.user_id,
 			ARRAY(
 				SELECT rs.seat_id
-				FROM reservation_seats rs
+				FROM reservation_seats AS rs
 				WHERE rs.reservation_id = r.id
 				ORDER BY rs.position
 			),
 			r.status,
 			r.created_at,
 			r.expires_at
-		FROM reservations r
+		FROM reservations AS r
 		WHERE r.id = $1
 	`, id).Scan(
 		&reservation.ID,
@@ -208,10 +202,7 @@ func (s *Store) GetReservationByID(
 		return domain.Reservation{}, domain.ErrReservationNotFound
 
 	case err != nil:
-		return domain.Reservation{}, fmt.Errorf(
-			"find reservation by id: %w",
-			err,
-		)
+		return domain.Reservation{}, fmt.Errorf("find reservation by id: %w", err)
 	}
 
 	reservation.Status = domain.ReservationStatus(status)
@@ -219,11 +210,7 @@ func (s *Store) GetReservationByID(
 	return reservation, nil
 }
 
-func (s *Store) ListExpiredPendingIDs(
-	ctx context.Context,
-	now time.Time,
-	limit int,
-) ([]string, error) {
+func (s *Store) ListExpiredPendingIDs(ctx context.Context, now time.Time, limit int) ([]string, error) {
 	rows, err := s.pool.Query(ctx, `
 		SELECT id
 		FROM reservations
@@ -256,11 +243,7 @@ func (s *Store) ListExpiredPendingIDs(
 	return ids, nil
 }
 
-func (s *Store) ExpireReservation(
-	ctx context.Context,
-	id string,
-	now time.Time,
-) (bool, error) {
+func (s *Store) ExpireReservation(ctx context.Context, id string, now time.Time) (bool, error) {
 	tx, err := s.pool.Begin(ctx)
 	if err != nil {
 		return false, fmt.Errorf("begin expire reservation transaction: %w", err)
@@ -346,10 +329,7 @@ func (s *Store) ExpireReservation(
 	}
 
 	if result.RowsAffected() != 1 {
-		return false, fmt.Errorf(
-			"mark reservation expired: expected 1 row, updated %d",
-			result.RowsAffected(),
-		)
+		return false, fmt.Errorf("mark reservation expired: expected 1 row, updated %d", result.RowsAffected())
 	}
 	reservation.Status = domain.ReservationStatusExpired
 

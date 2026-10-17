@@ -72,10 +72,7 @@ func (r *AvailabilityReader) ListSeatInventory(ctx context.Context, eventID stri
 	return seats, nil
 }
 
-func (r *AvailabilityReader) readCache(
-	ctx context.Context,
-	eventID string,
-) ([]domain.SeatInventory, bool, error) {
+func (r *AvailabilityReader) readCache(ctx context.Context, eventID string) ([]domain.SeatInventory, bool, error) {
 	cacheCtx, cancel := context.WithTimeout(ctx, redisOperationTimeout)
 	defer cancel()
 

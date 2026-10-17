@@ -19,7 +19,6 @@ service EventContentService {
   rpc ListEvents(ListEventsRequest) returns (ListEventsResponse);
 }
 
-
 message CreateVenueRequest {
   string name = 1;
   string city = 2;
@@ -105,9 +104,7 @@ message PublishEventResponse {
   Event event = 1;
 }
 
-message ListEventsRequest {
-
-}
+message ListEventsRequest {}
 
 message ListEventsResponse {
   repeated Event events = 1;
@@ -160,15 +157,8 @@ message Event {
   string created_by = 8;
 }
 
-
 enum EventStatus {
   EVENT_STATUS_UNSPECIFIED = 0;
   EVENT_STATUS_DRAFT = 1;
   EVENT_STATUS_PUBLISHED = 2;
 }
-
-
-
-
-
-

@@ -49,7 +49,7 @@ func (h *Handler) CreateReservation(w http.ResponseWriter, r *http.Request) {
 	event := eventResponse.GetEvent()
 
 	if event == nil ||
-		event.Status != eventcontentv1.EventStatus_EVENT_STATUS_PUBLISHED {
+		event.GetStatus() != eventcontentv1.EventStatus_EVENT_STATUS_PUBLISHED {
 		writeError(w, http.StatusNotFound, "event not found")
 		return
 	}
@@ -94,25 +94,17 @@ func (h *Handler) GetReservation(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, toReservationResponse(reservation))
 }
 
-func toReservationResponse(
-	reservation *reservationv1.Reservation,
-) ReservationResponse {
+func toReservationResponse(reservation *reservationv1.Reservation) ReservationResponse {
 	var createdAt string
 
 	if reservation.GetCreatedAt() != nil {
-		createdAt = reservation.GetCreatedAt().
-			AsTime().
-			UTC().
-			Format(time.RFC3339)
+		createdAt = reservation.GetCreatedAt().AsTime().UTC().Format(time.RFC3339)
 	}
 
 	var expiresAt string
 
 	if reservation.GetExpiresAt() != nil {
-		expiresAt = reservation.GetExpiresAt().
-			AsTime().
-			UTC().
-			Format(time.RFC3339)
+		expiresAt = reservation.GetExpiresAt().AsTime().UTC().Format(time.RFC3339)
 	}
 
 	return ReservationResponse{
@@ -125,19 +117,14 @@ func toReservationResponse(
 	}
 }
 
-func reservationStatusToString(
-	status reservationv1.ReservationStatus,
-) string {
+func reservationStatusToString(status reservationv1.ReservationStatus) string {
 	switch status {
 	case reservationv1.ReservationStatus_RESERVATION_STATUS_PENDING:
 		return "PENDING"
-
 	case reservationv1.ReservationStatus_RESERVATION_STATUS_CONFIRMED:
 		return "CONFIRMED"
-
 	case reservationv1.ReservationStatus_RESERVATION_STATUS_EXPIRED:
 		return "EXPIRED"
-
 	default:
 		return "UNSPECIFIED"
 	}

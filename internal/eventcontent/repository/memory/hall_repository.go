@@ -30,7 +30,7 @@ func (r *HallRepository) GetByID(ctx context.Context, id string) (domain.Hall, e
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	if hall, inMap := r.halls[id]; inMap {
+	if hall, ok := r.halls[id]; ok {
 		return hall, nil
 	}
 	return domain.Hall{}, domain.ErrHallNotFound

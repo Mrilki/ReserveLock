@@ -12,7 +12,6 @@ CREATE TABLE payments
     CHECK (expires_at > created_at)
 );
 
-
 CREATE TABLE inbox_messages
 (
     message_id   TEXT PRIMARY KEY,

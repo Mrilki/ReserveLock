@@ -7,15 +7,9 @@ import "google/protobuf/timestamp.proto";
 option go_package = "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/reservation/v1;reservationv1";
 
 service ReservationService {
-
-  rpc CreateReservation(CreateReservationRequest)
-      returns (CreateReservationResponse);
-
-  rpc GetReservation(GetReservationRequest)
-      returns (GetReservationResponse);
-
-  rpc GetAvailability(GetAvailabilityRequest)
-      returns (GetAvailabilityResponse);
+  rpc CreateReservation(CreateReservationRequest) returns (CreateReservationResponse);
+  rpc GetReservation(GetReservationRequest) returns (GetReservationResponse);
+  rpc GetAvailability(GetAvailabilityRequest) returns (GetAvailabilityResponse);
 }
 
 message CreateReservationRequest {
@@ -74,6 +68,3 @@ enum SeatAvailabilityStatus {
   SEAT_AVAILABILITY_STATUS_HELD = 2;
   SEAT_AVAILABILITY_STATUS_RESERVED = 3;
 }
-
-
-

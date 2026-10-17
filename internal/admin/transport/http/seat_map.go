@@ -56,10 +56,7 @@ func (h *Handler) CreateSeatMap(c *gin.Context) {
 		})
 	}
 
-	ctx, cancel := context.WithTimeout(
-		c.Request.Context(),
-		eventContentTimeout,
-	)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), eventContentTimeout)
 	defer cancel()
 
 	response, err := h.eventContentClient.CreateSeatMap(
@@ -69,8 +66,7 @@ func (h *Handler) CreateSeatMap(c *gin.Context) {
 			Name:      request.Name,
 			Seats:     seats,
 			CreatedBy: request.CreatedBy,
-		},
-	)
+		})
 	if err != nil {
 		writeGRPCError(c, err)
 		return
@@ -84,11 +80,7 @@ func (h *Handler) CreateSeatMap(c *gin.Context) {
 		return
 	}
 
-	responseSeats := make(
-		[]SeatResponse,
-		0,
-		len(seatMap.GetSeats()),
-	)
+	responseSeats := make([]SeatResponse, 0, len(seatMap.GetSeats()))
 
 	for _, seat := range seatMap.GetSeats() {
 		responseSeats = append(responseSeats, SeatResponse{
@@ -106,5 +98,4 @@ func (h *Handler) CreateSeatMap(c *gin.Context) {
 		Seats:     responseSeats,
 		CreatedBy: seatMap.GetCreatedBy(),
 	})
-
 }

@@ -11,9 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func newPostgresTestService(
-	t *testing.T,
-) (*pgxpool.Pool, *application.Service) {
+func newPostgresTestService(t *testing.T) (*pgxpool.Pool, *application.Service) {
 	t.Helper()
 
 	dsn := os.Getenv("TEST_POSTGRES_DSN")
@@ -38,11 +36,7 @@ func newPostgresTestService(
 	return pool, application.NewService(store, nil)
 }
 
-func cleanupEvent(
-	t *testing.T,
-	pool *pgxpool.Pool,
-	eventID string,
-) {
+func cleanupEvent(t *testing.T, pool *pgxpool.Pool, eventID string) {
 	t.Helper()
 
 	t.Cleanup(func() {
@@ -92,11 +86,7 @@ func initializeInventory(
 
 	messageID := uuid.NewString()
 
-	cleanupInboxMessages(
-		t,
-		pool,
-		messageID,
-	)
+	cleanupInboxMessages(t, pool, messageID)
 
 	processed, err := service.HandleEventPublished(
 		context.Background(),
@@ -115,11 +105,7 @@ func initializeInventory(
 	}
 }
 
-func cleanupInboxMessages(
-	t *testing.T,
-	pool *pgxpool.Pool,
-	messageIDs ...string,
-) {
+func cleanupInboxMessages(t *testing.T, pool *pgxpool.Pool, messageIDs ...string) {
 	t.Helper()
 
 	t.Cleanup(func() {
@@ -131,11 +117,7 @@ func cleanupInboxMessages(
 				`DELETE FROM inbox_messages WHERE message_id = $1`,
 				messageID,
 			); err != nil {
-				t.Errorf(
-					"cleanup inbox message %q: %v",
-					messageID,
-					err,
-				)
+				t.Errorf("cleanup inbox message %q: %v", messageID, err)
 			}
 		}
 	})

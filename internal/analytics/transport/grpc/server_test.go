@@ -8,6 +8,7 @@ import (
 	"github.com/Mrilki/ReserveLock/internal/analytics/application"
 	"github.com/Mrilki/ReserveLock/internal/analytics/domain"
 	analyticsv1 "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/analytics/v1"
+	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
@@ -39,9 +40,15 @@ func TestGetEventSummary(t *testing.T) {
 		{
 			name: "complete summary",
 			summary: domain.EventSummary{
-				EventID: "event-1", Created: 5, Confirmed: 2, Expired: 1,
-				CreatedSeats: 10, ConfirmedSeats: 4, ExpiredSeats: 2,
-				AvgConfirmationSeconds: 30.5, AvgExpirationLagSeconds: 2.25,
+				EventID:                 "event-1",
+				Created:                 5,
+				Confirmed:               2,
+				Expired:                 1,
+				CreatedSeats:            10,
+				ConfirmedSeats:          4,
+				ExpiredSeats:            2,
+				AvgConfirmationSeconds:  30.5,
+				AvgExpirationLagSeconds: 2.25,
 				Daily: []domain.EventDailySummary{
 					{
 						Date: "2026-10-14", Created: 5, Confirmed: 2, Expired: 1,
@@ -50,10 +57,17 @@ func TestGetEventSummary(t *testing.T) {
 				},
 			},
 			expected: &analyticsv1.EventSummary{
-				EventId: "event-1", Created: 5, Confirmed: 2, Expired: 1,
-				CreatedSeats: 10, ConfirmedSeats: 4, ExpiredSeats: 2,
-				ConfirmationRatePercent: 40, ExpirationRatePercent: 20,
-				AvgConfirmationSeconds: 30.5, AvgExpirationLagSeconds: 2.25,
+				EventId:                 "event-1",
+				Created:                 5,
+				Confirmed:               2,
+				Expired:                 1,
+				CreatedSeats:            10,
+				ConfirmedSeats:          4,
+				ExpiredSeats:            2,
+				ConfirmationRatePercent: 40,
+				ExpirationRatePercent:   20,
+				AvgConfirmationSeconds:  30.5,
+				AvgExpirationLagSeconds: 2.25,
 				Daily: []*analyticsv1.EventDailySummary{
 					{
 						Date: "2026-10-14", Created: 5, Confirmed: 2, Expired: 1,
@@ -72,7 +86,7 @@ func TestGetEventSummary(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			store := &testStore{summary: test.summary}
-			server := NewServer(application.NewService(store))
+			server := NewServer(application.NewService(store), zap.NewNop())
 
 			response, err := server.GetEventSummary(context.Background(), &analyticsv1.GetEventSummaryRequest{
 				EventId: "event-1",
@@ -109,7 +123,7 @@ func TestGetEventSummaryErrors(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			store := &testStore{err: test.storeErr}
-			server := NewServer(application.NewService(store))
+			server := NewServer(application.NewService(store), zap.NewNop())
 
 			response, err := server.GetEventSummary(context.Background(), &analyticsv1.GetEventSummaryRequest{
 				EventId: test.eventID,

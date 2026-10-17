@@ -23,18 +23,14 @@ type AvailabilityResponse struct {
 func (h *Handler) GetAvailability(w http.ResponseWriter, r *http.Request) {
 	eventID := r.PathValue("id")
 
-	ctx, cancel := context.WithTimeout(
-		r.Context(),
-		upstreamTimeout,
-	)
+	ctx, cancel := context.WithTimeout(r.Context(), upstreamTimeout)
 	defer cancel()
 
 	eventResponse, err := h.eventContentClient.GetEvent(
 		ctx,
 		&eventcontentv1.GetEventRequest{
 			EventId: eventID,
-		},
-	)
+		})
 	if err != nil {
 		writeGRPCError(w, err)
 		return
@@ -52,8 +48,7 @@ func (h *Handler) GetAvailability(w http.ResponseWriter, r *http.Request) {
 		ctx,
 		&reservationv1.GetAvailabilityRequest{
 			EventId: eventID,
-		},
-	)
+		})
 	if err != nil {
 		writeGRPCError(w, err)
 		return
@@ -74,17 +69,13 @@ func (h *Handler) GetAvailability(w http.ResponseWriter, r *http.Request) {
 		EventID: eventID,
 		Seats:   seats,
 	})
-
 }
 
 func toSeatAvailabilityResponse(seat *reservationv1.SeatAvailability) SeatAvailabilityResponse {
 	var heldUntil string
 
 	if seat.GetHeldUntil() != nil {
-		heldUntil = seat.GetHeldUntil().
-			AsTime().
-			UTC().
-			Format(time.RFC3339)
+		heldUntil = seat.GetHeldUntil().AsTime().UTC().Format(time.RFC3339)
 	}
 
 	return SeatAvailabilityResponse{
@@ -94,19 +85,14 @@ func toSeatAvailabilityResponse(seat *reservationv1.SeatAvailability) SeatAvaila
 	}
 }
 
-func seatAvailabilityStatusToString(
-	status reservationv1.SeatAvailabilityStatus,
-) string {
+func seatAvailabilityStatusToString(status reservationv1.SeatAvailabilityStatus) string {
 	switch status {
 	case reservationv1.SeatAvailabilityStatus_SEAT_AVAILABILITY_STATUS_AVAILABLE:
 		return "AVAILABLE"
-
 	case reservationv1.SeatAvailabilityStatus_SEAT_AVAILABILITY_STATUS_HELD:
 		return "HELD"
-
 	case reservationv1.SeatAvailabilityStatus_SEAT_AVAILABILITY_STATUS_RESERVED:
 		return "RESERVED"
-
 	default:
 		return "UNSPECIFIED"
 	}

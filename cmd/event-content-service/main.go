@@ -11,7 +11,7 @@ import (
 
 	"github.com/Mrilki/ReserveLock/internal/eventcontent/application"
 	eventcontentconfig "github.com/Mrilki/ReserveLock/internal/eventcontent/config"
-	kafkamessaging "github.com/Mrilki/ReserveLock/internal/eventcontent/messaging/kafka"
+	eventcontentkafka "github.com/Mrilki/ReserveLock/internal/eventcontent/messaging/kafka"
 	eventoutbox "github.com/Mrilki/ReserveLock/internal/eventcontent/outbox"
 	"github.com/Mrilki/ReserveLock/internal/eventcontent/repository/mongodb"
 	eventcontentgrpc "github.com/Mrilki/ReserveLock/internal/eventcontent/transport/grpc"
@@ -52,49 +52,30 @@ func main() {
 	}()
 
 	mongoClient, err := mongo.Connect(
-		options.Client().ApplyURI(
-			cfg.MongoURI,
-		),
+		options.Client().ApplyURI(cfg.MongoURI),
 	)
 	if err != nil {
-		logg.Error(
-			"failed to create mongo client",
-			zap.Error(err),
-		)
+		logg.Error("failed to create mongo client", zap.Error(err))
 		exitCode = 1
 		return
 	}
 	defer func() {
-		disconnectCtx, cancel := context.WithTimeout(
-			context.Background(),
-			mongoOperationTimeout,
-		)
+		disconnectCtx, cancel := context.WithTimeout(context.Background(), mongoOperationTimeout)
 		defer cancel()
 
-		if err := mongoClient.Disconnect(
-			disconnectCtx,
-		); err != nil {
-			logg.Error(
-				"failed to disconnect mongo client",
-				zap.Error(err),
-			)
+		if err := mongoClient.Disconnect(disconnectCtx); err != nil {
+			logg.Error("failed to disconnect mongo client", zap.Error(err))
 		}
 	}()
 
-	pingCtx, pingCancel := context.WithTimeout(
-		context.Background(),
-		mongoOperationTimeout,
-	)
+	pingCtx, pingCancel := context.WithTimeout(context.Background(), mongoOperationTimeout)
 
 	err = mongoClient.Ping(pingCtx, readpref.Primary())
 
 	pingCancel()
 
 	if err != nil {
-		logg.Error(
-			"failed to ping mongo",
-			zap.Error(err),
-		)
+		logg.Error("failed to ping mongo", zap.Error(err))
 		exitCode = 1
 		return
 	}
@@ -108,22 +89,28 @@ func main() {
 
 	outboxRepository := mongodb.NewOutboxRepository(database)
 
+	indexCtx, indexCancel := context.WithTimeout(context.Background(), mongoOperationTimeout)
+	err = outboxRepository.EnsureIndexes(indexCtx)
+	indexCancel()
+	if err != nil {
+		logg.Error("index outbox create", zap.Error(err))
+		exitCode = 1
+		return
+	}
+
 	kafkaClient, err := kgo.NewClient(
 		kgo.SeedBrokers(cfg.KafkaBrokers...),
 		kgo.RequiredAcks(kgo.AllISRAcks()),
 	)
 	if err != nil {
-		logg.Error(
-			"failed to create kafka client",
-			zap.Error(err),
-		)
+		logg.Error("failed to create kafka client", zap.Error(err))
 		exitCode = 1
 		return
 	}
 
 	defer kafkaClient.Close()
 
-	outboxPublisher := kafkamessaging.NewPublisher(kafkaClient)
+	outboxPublisher := eventcontentkafka.NewPublisher(kafkaClient)
 
 	outboxWorker := eventoutbox.NewWorker(
 		outboxRepository,
@@ -153,7 +140,7 @@ func main() {
 
 	eventcontentv1.RegisterEventContentServiceServer(
 		grpcServer,
-		eventcontentgrpc.NewServer(eventContentService),
+		eventcontentgrpc.NewServer(eventContentService, logg),
 	)
 	if cfg.Base.AppEnv == "local" {
 		reflection.Register(grpcServer)

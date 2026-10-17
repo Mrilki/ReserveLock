@@ -130,6 +130,7 @@ jobs:
             postgres \
             "$TEST_POSTGRES_DSN" \
             up
+
       - name: Run payment migrations
         run: |
           docker exec "${{ job.services.postgres.id }}" \

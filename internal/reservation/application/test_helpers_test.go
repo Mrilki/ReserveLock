@@ -13,12 +13,7 @@ func newTestService() *application.Service {
 	return application.NewService(memory.NewStore(), nil)
 }
 
-func initializeInventory(
-	t *testing.T,
-	service *application.Service,
-	eventID string,
-	seatIDs []string,
-) {
+func initializeInventory(t *testing.T, service *application.Service, eventID string, seatIDs []string) {
 	t.Helper()
 
 	processed, err := service.HandleEventPublished(

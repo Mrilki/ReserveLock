@@ -15,7 +15,5 @@ CREATE INDEX idx_outbox_messages_pending
     ON outbox_messages (occurred_at, message_id)
     WHERE published_at IS NULL;
 
-
-
 -- +goose Down
 DROP TABLE outbox_messages;

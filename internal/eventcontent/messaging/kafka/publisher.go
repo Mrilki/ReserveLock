@@ -43,11 +43,7 @@ func (p *Publisher) Publish(ctx context.Context, message eventoutbox.Message) er
 	}
 
 	if err := p.client.ProduceSync(ctx, record).FirstErr(); err != nil {
-		return fmt.Errorf(
-			"produce kafka message %q: %w",
-			message.ID,
-			err,
-		)
+		return fmt.Errorf("produce kafka message %q: %w", message.ID, err)
 	}
 	return nil
 }
@@ -58,9 +54,6 @@ func topicForEventType(eventType string) (string, error) {
 		return eventcontentcontract.EventPublishedTopic, nil
 
 	default:
-		return "", fmt.Errorf(
-			"unsupported outbox event type %q",
-			eventType,
-		)
+		return "", fmt.Errorf("unsupported outbox event type %q", eventType)
 	}
 }

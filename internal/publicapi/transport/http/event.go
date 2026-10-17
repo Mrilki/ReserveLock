@@ -51,10 +51,7 @@ func (h *Handler) GetEvent(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) ListEvents(w http.ResponseWriter, r *http.Request) {
-	ctx, cancel := context.WithTimeout(
-		r.Context(),
-		upstreamTimeout,
-	)
+	ctx, cancel := context.WithTimeout(r.Context(), upstreamTimeout)
 	defer cancel()
 
 	response, err := h.eventContentClient.ListEvents(
@@ -66,11 +63,7 @@ func (h *Handler) ListEvents(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	events := make(
-		[]EventResponse,
-		0,
-		len(response.GetEvents()),
-	)
+	events := make([]EventResponse, 0, len(response.GetEvents()))
 
 	for _, event := range response.GetEvents() {
 		if event == nil {
@@ -93,10 +86,7 @@ func toEventResponse(event *eventcontentv1.Event) EventResponse {
 	var startsAt string
 
 	if event.GetStartsAt() != nil {
-		startsAt = event.GetStartsAt().
-			AsTime().
-			UTC().
-			Format(time.RFC3339)
+		startsAt = event.GetStartsAt().AsTime().UTC().Format(time.RFC3339)
 	}
 
 	return EventResponse{

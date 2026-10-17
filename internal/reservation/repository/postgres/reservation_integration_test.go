@@ -91,10 +91,7 @@ func TestCreateReservation_MultipleSeatsAtomic_Postgres(t *testing.T) {
 		`,
 		eventID,
 		seat3,
-	).Scan(
-		&seat3Status,
-		&seat3ReservationIsNull,
-	)
+	).Scan(&seat3Status, &seat3ReservationIsNull)
 	if err != nil {
 		t.Fatalf("get third seat state: %v", err)
 	}
@@ -123,10 +120,7 @@ func TestCreateReservation_MultipleSeatsAtomic_Postgres(t *testing.T) {
 	}
 
 	if reservationCount != 1 {
-		t.Fatalf(
-			"expected exactly 1 persisted reservation, got %d",
-			reservationCount,
-		)
+		t.Fatalf("expected exactly 1 persisted reservation, got %d", reservationCount)
 	}
 
 	assertReservationOutboxCount(t, pool, eventID, reservationcontract.ReservationCreatedType, 1)
@@ -202,11 +196,7 @@ func TestCreateReservation_ConcurrentSameSeat_Postgres(t *testing.T) {
 	}
 
 	if unavailableCount != workers-1 {
-		t.Fatalf(
-			"expected %d unavailable errors, got %d",
-			workers-1,
-			unavailableCount,
-		)
+		t.Fatalf("expected %d unavailable errors, got %d", workers-1, unavailableCount)
 	}
 
 	var reservationCount int
@@ -221,10 +211,7 @@ func TestCreateReservation_ConcurrentSameSeat_Postgres(t *testing.T) {
 	}
 
 	if reservationCount != 1 {
-		t.Fatalf(
-			"expected 1 persisted reservation, got %d",
-			reservationCount,
-		)
+		t.Fatalf("expected 1 persisted reservation, got %d", reservationCount)
 	}
 
 	var status string
@@ -254,5 +241,4 @@ func TestCreateReservation_ConcurrentSameSeat_Postgres(t *testing.T) {
 	}
 
 	assertReservationOutboxCount(t, pool, eventID, reservationcontract.ReservationCreatedType, 1)
-
 }

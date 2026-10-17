@@ -29,46 +29,25 @@ func TestExpireReservations(t *testing.T) {
 		},
 	)
 	if err != nil {
-		t.Fatalf(
-			"create reservation: %v",
-			err,
-		)
+		t.Fatalf("create reservation: %v", err)
 	}
 
-	expiredCount, err := service.ExpireReservations(
-		context.Background(),
-		reservation.ExpiresAt,
-	)
+	expiredCount, err := service.ExpireReservations(context.Background(), reservation.ExpiresAt)
 	if err != nil {
-		t.Fatalf(
-			"expire reservations: %v",
-			err,
-		)
+		t.Fatalf("expire reservations: %v", err)
 	}
 
 	if expiredCount != 1 {
-		t.Fatalf(
-			"expected 1 expired reservation, got %d",
-			expiredCount,
-		)
+		t.Fatalf("expected 1 expired reservation, got %d", expiredCount)
 	}
 
-	stored, err := service.GetReservation(
-		context.Background(),
-		reservation.ID,
-	)
+	stored, err := service.GetReservation(context.Background(), reservation.ID)
 	if err != nil {
-		t.Fatalf(
-			"get reservation: %v",
-			err,
-		)
+		t.Fatalf("get reservation: %v", err)
 	}
 
 	if stored.Status != domain.ReservationStatusExpired {
-		t.Fatalf(
-			"expected EXPIRED status, got %s",
-			stored.Status,
-		)
+		t.Fatalf("expected EXPIRED status, got %s", stored.Status)
 	}
 
 	_, err = service.CreateReservation(
@@ -80,10 +59,7 @@ func TestExpireReservations(t *testing.T) {
 		},
 	)
 	if err != nil {
-		t.Fatalf(
-			"seat should be available after expiration: %v",
-			err,
-		)
+		t.Fatalf("seat should be available after expiration: %v", err)
 	}
 }
 
@@ -106,10 +82,7 @@ func TestExpireReservations_DoesNotExpireActiveReservation(t *testing.T) {
 		},
 	)
 	if err != nil {
-		t.Fatalf(
-			"create reservation: %v",
-			err,
-		)
+		t.Fatalf("create reservation: %v", err)
 	}
 
 	expiredCount, err := service.ExpireReservations(
@@ -117,35 +90,20 @@ func TestExpireReservations_DoesNotExpireActiveReservation(t *testing.T) {
 		reservation.ExpiresAt.Add(-time.Second),
 	)
 	if err != nil {
-		t.Fatalf(
-			"expire reservations: %v",
-			err,
-		)
+		t.Fatalf("expire reservations: %v", err)
 	}
 
 	if expiredCount != 0 {
-		t.Fatalf(
-			"expected 0 expired reservations, got %d",
-			expiredCount,
-		)
+		t.Fatalf("expected 0 expired reservations, got %d", expiredCount)
 	}
 
-	stored, err := service.GetReservation(
-		context.Background(),
-		reservation.ID,
-	)
+	stored, err := service.GetReservation(context.Background(), reservation.ID)
 	if err != nil {
-		t.Fatalf(
-			"get reservation: %v",
-			err,
-		)
+		t.Fatalf("get reservation: %v", err)
 	}
 
 	if stored.Status != domain.ReservationStatusPending {
-		t.Fatalf(
-			"expected PENDING status, got %s",
-			stored.Status,
-		)
+		t.Fatalf("expected PENDING status, got %s", stored.Status)
 	}
 
 	_, err = service.CreateReservation(
@@ -158,10 +116,7 @@ func TestExpireReservations_DoesNotExpireActiveReservation(t *testing.T) {
 	)
 
 	if !errors.Is(err, domain.ErrSeatUnavailable) {
-		t.Fatalf(
-			"expected ErrSeatUnavailable, got %v",
-			err,
-		)
+		t.Fatalf("expected ErrSeatUnavailable, got %v", err)
 	}
 }
 
@@ -184,21 +139,12 @@ func TestExpireReservations_IsIdempotent(t *testing.T) {
 		},
 	)
 	if err != nil {
-		t.Fatalf(
-			"create reservation: %v",
-			err,
-		)
+		t.Fatalf("create reservation: %v", err)
 	}
 
-	firstCount, err := service.ExpireReservations(
-		context.Background(),
-		reservation.ExpiresAt,
-	)
+	firstCount, err := service.ExpireReservations(context.Background(), reservation.ExpiresAt)
 	if err != nil {
-		t.Fatalf(
-			"first expiration: %v",
-			err,
-		)
+		t.Fatalf("first expiration: %v", err)
 	}
 
 	secondCount, err := service.ExpireReservations(
@@ -206,23 +152,14 @@ func TestExpireReservations_IsIdempotent(t *testing.T) {
 		reservation.ExpiresAt.Add(time.Minute),
 	)
 	if err != nil {
-		t.Fatalf(
-			"second expiration: %v",
-			err,
-		)
+		t.Fatalf("second expiration: %v", err)
 	}
 
 	if firstCount != 1 {
-		t.Fatalf(
-			"expected first expiration count 1, got %d",
-			firstCount,
-		)
+		t.Fatalf("expected first expiration count 1, got %d", firstCount)
 	}
 
 	if secondCount != 0 {
-		t.Fatalf(
-			"expected second expiration count 0, got %d",
-			secondCount,
-		)
+		t.Fatalf("expected second expiration count 0, got %d", secondCount)
 	}
 }

@@ -48,10 +48,7 @@ func (h *Handler) CreateEvent(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(
-		c.Request.Context(),
-		eventContentTimeout,
-	)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), eventContentTimeout)
 	defer cancel()
 
 	response, err := h.eventContentClient.CreateEvent(
@@ -84,10 +81,7 @@ func (h *Handler) CreateEvent(c *gin.Context) {
 func (h *Handler) PublishEvent(c *gin.Context) {
 	eventID := c.Param("id")
 
-	ctx, cancel := context.WithTimeout(
-		c.Request.Context(),
-		eventContentTimeout,
-	)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), eventContentTimeout)
 	defer cancel()
 
 	response, err := h.eventContentClient.PublishEvent(

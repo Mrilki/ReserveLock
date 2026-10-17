@@ -31,10 +31,7 @@ func (h *Handler) CreateHall(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(
-		c.Request.Context(),
-		eventContentTimeout,
-	)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), eventContentTimeout)
 	defer cancel()
 
 	response, err := h.eventContentClient.CreateHall(
@@ -43,8 +40,7 @@ func (h *Handler) CreateHall(c *gin.Context) {
 			VenueId:   request.VenueID,
 			Name:      request.Name,
 			CreatedBy: request.CreatedBy,
-		},
-	)
+		})
 	if err != nil {
 		writeGRPCError(c, err)
 		return

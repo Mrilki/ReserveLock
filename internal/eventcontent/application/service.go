@@ -69,7 +69,12 @@ type CreateSeatInput struct {
 	Number  string
 }
 
-func NewService(venueRepository VenueRepository, hallRepository HallRepository, seatMapRepository SeatMapRepository, eventRepository EventRepository) *Service {
+func NewService(
+	venueRepository VenueRepository,
+	hallRepository HallRepository,
+	seatMapRepository SeatMapRepository,
+	eventRepository EventRepository,
+) *Service {
 	return &Service{
 		venueRepository:   venueRepository,
 		hallRepository:    hallRepository,
@@ -95,7 +100,6 @@ func (s *Service) CreateVenue(ctx context.Context, input CreateVenueInput) (doma
 		return domain.Venue{}, err
 	}
 	return venue, nil
-
 }
 
 func (s *Service) GetVenue(ctx context.Context, venueID string) (domain.Venue, error) {
@@ -104,7 +108,6 @@ func (s *Service) GetVenue(ctx context.Context, venueID string) (domain.Venue, e
 	}
 
 	return s.venueRepository.GetByID(ctx, venueID)
-
 }
 
 func (s *Service) CreateHall(ctx context.Context, input CreateHallInput) (domain.Hall, error) {

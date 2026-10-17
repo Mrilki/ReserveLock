@@ -21,7 +21,6 @@ func LiveHandler(serviceName string) http.HandlerFunc {
 			Status:  "ok",
 			Service: serviceName,
 		})
-
 	}
 }
 

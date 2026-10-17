@@ -65,5 +65,3 @@ DROP TABLE reservation_seats;
 DROP TABLE seat_inventory;
 DROP TABLE reservations;
 DROP TABLE event_inventories;
-
-

@@ -38,35 +38,23 @@ func TestGetAvailability_Postgres(t *testing.T) {
 		t.Fatalf("create reservation: %v", err)
 	}
 
-	seats, err := service.GetAvailability(
-		context.Background(),
-		eventID,
-	)
+	seats, err := service.GetAvailability(context.Background(), eventID)
 	if err != nil {
 		t.Fatalf("get availability: %v", err)
 	}
 
 	if len(seats) != 2 {
-		t.Fatalf(
-			"expected 2 seats, got %d",
-			len(seats),
-		)
+		t.Fatalf("expected 2 seats, got %d", len(seats))
 	}
 
-	inventory := make(
-		map[string]domain.SeatInventory,
-		len(seats),
-	)
+	inventory := make(map[string]domain.SeatInventory, len(seats))
 
 	for _, seat := range seats {
 		inventory[seat.SeatID] = seat
 	}
 
 	if inventory[seat1].Status != domain.SeatInventoryStatusHeld {
-		t.Fatalf(
-			"expected first seat HELD, got %s",
-			inventory[seat1].Status,
-		)
+		t.Fatalf("expected first seat HELD, got %s", inventory[seat1].Status)
 	}
 
 	if inventory[seat1].HeldUntil.IsZero() {
@@ -74,10 +62,7 @@ func TestGetAvailability_Postgres(t *testing.T) {
 	}
 
 	if inventory[seat2].Status != domain.SeatInventoryStatusAvailable {
-		t.Fatalf(
-			"expected second seat AVAILABLE, got %s",
-			inventory[seat2].Status,
-		)
+		t.Fatalf("expected second seat AVAILABLE, got %s", inventory[seat2].Status)
 	}
 
 	if !inventory[seat2].HeldUntil.IsZero() {

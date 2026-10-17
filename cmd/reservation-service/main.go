@@ -38,15 +38,9 @@ const (
 func main() {
 	cfg := reservationconfig.Load()
 
-	logg, err := logger.New(
-		cfg.Base.AppName,
-		cfg.Base.AppEnv,
-	)
+	logg, err := logger.New(cfg.Base.AppName, cfg.Base.AppEnv)
 	if err != nil {
-		log.Fatalf(
-			"failed to initialize logger: %v",
-			err,
-		)
+		log.Fatalf("failed to initialize logger: %v", err)
 	}
 
 	exitCode := 0
@@ -81,11 +75,7 @@ func main() {
 
 	listener, err := net.Listen("tcp", cfg.GRPCAddr)
 	if err != nil {
-		logg.Error(
-			"failed to listen",
-			zap.String("addr", cfg.GRPCAddr),
-			zap.Error(err),
-		)
+		logg.Error("failed to listen", zap.String("addr", cfg.GRPCAddr), zap.Error(err))
 		exitCode = 1
 		return
 	}
@@ -118,10 +108,7 @@ func main() {
 
 	kafkaClient, err := reservationkafka.NewEventPublishedClient(cfg.KafkaBrokers)
 	if err != nil {
-		logg.Error(
-			"failed to create kafka consumer client",
-			zap.Error(err),
-		)
+		logg.Error("failed to create kafka consumer client", zap.Error(err))
 		exitCode = 1
 		return
 	}
@@ -168,7 +155,7 @@ func main() {
 
 	reservationv1.RegisterReservationServiceServer(
 		grpcServer,
-		reservationgrpc.NewServer(reservationService),
+		reservationgrpc.NewServer(reservationService, logg),
 	)
 
 	if cfg.Base.AppEnv == "local" {
@@ -221,10 +208,7 @@ func main() {
 			case now := <-ticker.C:
 				expiredCount, err := reservationService.ExpireReservations(ctx, now.UTC())
 				if err != nil {
-					logg.Error(
-						"failed to expire reservations",
-						zap.Error(err),
-					)
+					logg.Error("failed to expire reservations", zap.Error(err))
 
 					continue
 				}
@@ -241,10 +225,7 @@ func main() {
 	serverErr := make(chan error, 1)
 
 	go func() {
-		logg.Info(
-			"grpc server started",
-			zap.String("addr", cfg.GRPCAddr),
-		)
+		logg.Info("grpc server started", zap.String("addr", cfg.GRPCAddr))
 
 		if err := grpcServer.Serve(listener); err != nil {
 			serverErr <- err
@@ -256,10 +237,7 @@ func main() {
 		logg.Info("shutdown signal received")
 
 	case err := <-serverErr:
-		logg.Error(
-			"grpc server failed",
-			zap.Error(err),
-		)
+		logg.Error("grpc server failed", zap.Error(err))
 		exitCode = 1
 		stop()
 	case err := <-consumerErr:
@@ -316,5 +294,4 @@ func main() {
 	case <-shutdownCtx.Done():
 		logg.Warn("reservation outbox worker shutdown timed out")
 	}
-
 }

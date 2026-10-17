@@ -47,6 +47,7 @@ func NewConsumer(client *kgo.Client, service *application.Service, logger *zap.L
 		logger:  logger,
 	}
 }
+
 func (c *Consumer) Run(ctx context.Context) error {
 	defer c.client.AllowRebalance()
 
@@ -221,7 +222,6 @@ func (c *Consumer) processRecord(ctx context.Context, record *kgo.Record) (bool,
 	default:
 		return false, fmt.Errorf("unsupported reservation event type %q", eventType)
 	}
-
 }
 
 func validateRecord(

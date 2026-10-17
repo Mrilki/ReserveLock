@@ -104,7 +104,7 @@ func main() {
 	healthServer.SetServingStatus("", healthpb.HealthCheckResponse_SERVING)
 	healthpb.RegisterHealthServer(grpcServer, healthServer)
 
-	analyticsv1.RegisterAnalyticsServiceServer(grpcServer, analyticsgrpc.NewServer(service))
+	analyticsv1.RegisterAnalyticsServiceServer(grpcServer, analyticsgrpc.NewServer(service, logg))
 
 	if cfg.Base.AppEnv == "local" {
 		reflection.Register(grpcServer)

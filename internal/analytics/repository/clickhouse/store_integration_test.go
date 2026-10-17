@@ -136,12 +136,20 @@ func TestReservationEvents_ClickHouseReplay(t *testing.T) {
 		AvgExpirationLagSeconds: 2.25,
 		Daily: []domain.EventDailySummary{
 			{
-				Date: "2026-10-10", Created: 3, Confirmed: 2, Expired: 1,
-				CreatedSeats: 7, ConfirmedSeats: 4, ExpiredSeats: 3,
+				Date:           "2026-10-10",
+				Created:        3,
+				Confirmed:      2,
+				Expired:        1,
+				CreatedSeats:   7,
+				ConfirmedSeats: 4,
+				ExpiredSeats:   3,
 			},
 			{
-				Date: "2026-10-11", Created: 1, Confirmed: 1,
-				CreatedSeats: 1, ConfirmedSeats: 1,
+				Date:           "2026-10-11",
+				Created:        1,
+				Confirmed:      1,
+				CreatedSeats:   1,
+				ConfirmedSeats: 1,
 			},
 		},
 	}

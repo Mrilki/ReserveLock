@@ -41,24 +41,15 @@ func TestCreateReservation(t *testing.T) {
 	}
 
 	if reservation.EventID != "event-1" {
-		t.Fatalf(
-			"unexpected event id: %s",
-			reservation.EventID,
-		)
+		t.Fatalf("unexpected event id: %s", reservation.EventID)
 	}
 
 	if reservation.UserID != "user-1" {
-		t.Fatalf(
-			"unexpected user id: %s",
-			reservation.UserID,
-		)
+		t.Fatalf("unexpected user id: %s", reservation.UserID)
 	}
 
 	if reservation.Status != domain.ReservationStatusPending {
-		t.Fatalf(
-			"unexpected reservation status: %s",
-			reservation.Status,
-		)
+		t.Fatalf("unexpected reservation status: %s", reservation.Status)
 	}
 
 	if reservation.CreatedAt.IsZero() {
@@ -73,19 +64,13 @@ func TestCreateReservation(t *testing.T) {
 		t.Fatal("expires at must be after created at")
 	}
 
-	stored, err := service.GetReservation(
-		context.Background(),
-		reservation.ID,
-	)
+	stored, err := service.GetReservation(context.Background(), reservation.ID)
 	if err != nil {
 		t.Fatalf("get reservation: %v", err)
 	}
 
 	if stored.ID != reservation.ID {
-		t.Fatalf(
-			"unexpected stored reservation id: %s",
-			stored.ID,
-		)
+		t.Fatalf("unexpected stored reservation id: %s", stored.ID)
 	}
 }
 
@@ -121,10 +106,7 @@ func TestCreateReservation_SeatUnavailable(t *testing.T) {
 	)
 
 	if !errors.Is(err, domain.ErrSeatUnavailable) {
-		t.Fatalf(
-			"expected ErrSeatUnavailable, got %v",
-			err,
-		)
+		t.Fatalf("expected ErrSeatUnavailable, got %v", err)
 	}
 }
 
@@ -167,10 +149,7 @@ func TestCreateReservation_ConcurrentSameSeat(t *testing.T) {
 			case errors.Is(err, domain.ErrSeatUnavailable):
 				unavailableCount.Add(1)
 			default:
-				t.Errorf(
-					"unexpected create reservation error: %v",
-					err,
-				)
+				t.Errorf("unexpected create reservation error: %v", err)
 			}
 
 		}()
@@ -179,18 +158,11 @@ func TestCreateReservation_ConcurrentSameSeat(t *testing.T) {
 	wg.Wait()
 
 	if got := successCount.Load(); got != 1 {
-		t.Fatalf(
-			"expected exactly 1 successful reservation, got %d",
-			got,
-		)
+		t.Fatalf("expected exactly 1 successful reservation, got %d", got)
 	}
 
 	if got := unavailableCount.Load(); got != goroutines-1 {
-		t.Fatalf(
-			"expected %d unavailable results, got %d",
-			goroutines-1,
-			got,
-		)
+		t.Fatalf("expected %d unavailable results, got %d", goroutines-1, got)
 	}
 }
 
@@ -217,10 +189,7 @@ func TestCreateReservation_DuplicateSeatID(t *testing.T) {
 	)
 
 	if !errors.Is(err, application.ErrDuplicateSeatID) {
-		t.Fatalf(
-			"expected ErrDuplicateSeatID, got %v",
-			err,
-		)
+		t.Fatalf("expected ErrDuplicateSeatID, got %v", err)
 	}
 }
 
@@ -237,9 +206,6 @@ func TestCreateReservation_InventoryNotFound(t *testing.T) {
 	)
 
 	if !errors.Is(err, domain.ErrInventoryNotFound) {
-		t.Fatalf(
-			"expected ErrInventoryNotFound, got %v",
-			err,
-		)
+		t.Fatalf("expected ErrInventoryNotFound, got %v", err)
 	}
 }
