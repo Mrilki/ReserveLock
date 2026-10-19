@@ -58,7 +58,8 @@ func (c *Consumer) processEventPublishedRecord(
 		string(record.Key) != message.GetEventId() {
 		return false, fmt.Errorf(
 			"event published identity mismatch for message %q",
-			message.GetMessageId())
+			message.GetMessageId(),
+		)
 	}
 
 	if err := message.GetPublishedAt().CheckValid(); err != nil {

@@ -76,10 +76,7 @@ func main() {
 	router := gin.New()
 	router.Use(gin.Recovery())
 
-	router.GET(
-		"/health/live",
-		gin.WrapH(httpx.LiveHandler(cfg.Base.AppName)),
-	)
+	router.GET("/health/live", gin.WrapH(httpx.LiveHandler(cfg.Base.AppName)))
 
 	admin := router.Group("/admin")
 	{
@@ -100,11 +97,7 @@ func main() {
 		IdleTimeout:       60 * time.Second,
 	}
 
-	ctx, stop := signal.NotifyContext(
-		context.Background(),
-		os.Interrupt,
-		syscall.SIGTERM,
-	)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
 	serverErr := make(chan error, 1)

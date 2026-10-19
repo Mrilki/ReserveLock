@@ -30,16 +30,20 @@ func (h *Handler) GetAvailability(w http.ResponseWriter, r *http.Request) {
 		ctx,
 		&eventcontentv1.GetEventRequest{
 			EventId: eventID,
-		})
+		},
+	)
 	if err != nil {
 		writeGRPCError(w, err)
 		return
 	}
 
 	event := eventResponse.GetEvent()
+	if event == nil {
+		writeError(w, http.StatusInternalServerError, "internal error")
+		return
+	}
 
-	if event == nil ||
-		event.GetStatus() != eventcontentv1.EventStatus_EVENT_STATUS_PUBLISHED {
+	if event.GetStatus() != eventcontentv1.EventStatus_EVENT_STATUS_PUBLISHED {
 		writeError(w, http.StatusNotFound, "event not found")
 		return
 	}
@@ -48,7 +52,8 @@ func (h *Handler) GetAvailability(w http.ResponseWriter, r *http.Request) {
 		ctx,
 		&reservationv1.GetAvailabilityRequest{
 			EventId: eventID,
-		})
+		},
+	)
 	if err != nil {
 		writeGRPCError(w, err)
 		return

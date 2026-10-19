@@ -21,7 +21,11 @@ type testAnalyticsClient struct {
 	eventID  string
 }
 
-func (c *testAnalyticsClient) GetEventSummary(_ context.Context, request *analyticsv1.GetEventSummaryRequest, _ ...grpc.CallOption) (*analyticsv1.GetEventSummaryResponse, error) {
+func (c *testAnalyticsClient) GetEventSummary(
+	_ context.Context,
+	request *analyticsv1.GetEventSummaryRequest,
+	_ ...grpc.CallOption,
+) (*analyticsv1.GetEventSummaryResponse, error) {
 	c.eventID = request.GetEventId()
 	return c.response, c.err
 }

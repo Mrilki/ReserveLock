@@ -51,9 +51,7 @@ func main() {
 		}
 	}()
 
-	mongoClient, err := mongo.Connect(
-		options.Client().ApplyURI(cfg.MongoURI),
-	)
+	mongoClient, err := mongo.Connect(options.Client().ApplyURI(cfg.MongoURI))
 	if err != nil {
 		logg.Error("failed to create mongo client", zap.Error(err))
 		exitCode = 1
@@ -69,9 +67,7 @@ func main() {
 	}()
 
 	pingCtx, pingCancel := context.WithTimeout(context.Background(), mongoOperationTimeout)
-
 	err = mongoClient.Ping(pingCtx, readpref.Primary())
-
 	pingCancel()
 
 	if err != nil {
@@ -93,7 +89,7 @@ func main() {
 	err = outboxRepository.EnsureIndexes(indexCtx)
 	indexCancel()
 	if err != nil {
-		logg.Error("index outbox create", zap.Error(err))
+		logg.Error("failed to create outbox indexes", zap.Error(err))
 		exitCode = 1
 		return
 	}
@@ -144,7 +140,7 @@ func main() {
 	)
 	if cfg.Base.AppEnv == "local" {
 		reflection.Register(grpcServer)
-		logg.Info("grpc reflection enable")
+		logg.Info("grpc reflection enabled")
 	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)

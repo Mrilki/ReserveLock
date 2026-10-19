@@ -102,6 +102,9 @@ jobs:
       - name: Lint protobuf
         run: buf lint
 
+      - name: Check protobuf formatting
+        run: buf format --diff --exit-code
+
       - name: Build protobuf
         run: buf build
 
@@ -187,9 +190,9 @@ jobs:
           echo "MongoDB replica set did not become primary"
           docker logs reservelock-mongo
           exit 1
-          
+
       - name: Run tests
-        run: go test -count=1 -timeout=5m ./...
+        run: go test -race -count=1 -timeout=5m ./...
 
       - name: Build
         run: go build ./...

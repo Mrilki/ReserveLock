@@ -115,7 +115,7 @@ func (s *Store) CreateReservation(ctx context.Context, reservation domain.Reserv
 			$1,
 			seat_id,
 			position
-		FROM unnest($2::text[]) 
+		FROM unnest($2::text[])
 			WITH ORDINALITY AS seats(seat_id, position)
 	`, reservation.ID, reservation.SeatIDs)
 	if err != nil {
@@ -210,7 +210,7 @@ func (s *Store) GetReservationByID(ctx context.Context, id string) (domain.Reser
 	return reservation, nil
 }
 
-func (s *Store) ListExpiredPendingIDs(ctx context.Context, now time.Time, limit int) ([]string, error) {
+func (s *Store) ListExpiredPendingIDs(ctx context.Context, cutoff time.Time, limit int) ([]string, error) {
 	rows, err := s.pool.Query(ctx, `
 		SELECT id
 		FROM reservations
@@ -218,7 +218,7 @@ func (s *Store) ListExpiredPendingIDs(ctx context.Context, now time.Time, limit 
 		  AND expires_at <= $1
 		ORDER BY expires_at, id
 		LIMIT $2
-	`, now, limit)
+	`, cutoff, limit)
 	if err != nil {
 		return nil, fmt.Errorf("find expired reservations: %w", err)
 	}
@@ -243,7 +243,7 @@ func (s *Store) ListExpiredPendingIDs(ctx context.Context, now time.Time, limit 
 	return ids, nil
 }
 
-func (s *Store) ExpireReservation(ctx context.Context, id string, now time.Time) (bool, error) {
+func (s *Store) ExpireReservation(ctx context.Context, id string, cutoff time.Time) (bool, error) {
 	tx, err := s.pool.Begin(ctx)
 	if err != nil {
 		return false, fmt.Errorf("begin expire reservation transaction: %w", err)
@@ -274,7 +274,7 @@ func (s *Store) ExpireReservation(ctx context.Context, id string, now time.Time)
 		  AND r.status = 'PENDING'
 		  AND r.expires_at <= $2
 		FOR UPDATE OF r
-	`, id, now).Scan(
+	`, id, cutoff).Scan(
 		&reservation.EventID,
 		&reservation.UserID,
 		&reservation.SeatIDs,
@@ -332,8 +332,9 @@ func (s *Store) ExpireReservation(ctx context.Context, id string, now time.Time)
 		return false, fmt.Errorf("mark reservation expired: expected 1 row, updated %d", result.RowsAffected())
 	}
 	reservation.Status = domain.ReservationStatusExpired
+	occurredAt := s.now().UTC().Truncate(time.Microsecond)
 
-	if err := insertReservationOutbox(ctx, tx, reservation, reservationcontract.ReservationExpiredType, now); err != nil {
+	if err := insertReservationOutbox(ctx, tx, reservation, reservationcontract.ReservationExpiredType, occurredAt); err != nil {
 		return false, err
 	}
 

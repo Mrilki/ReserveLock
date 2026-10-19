@@ -16,8 +16,8 @@ type Store interface {
 	ListSeatInventory(ctx context.Context, eventID string) ([]domain.SeatInventory, error)
 	CreateReservation(ctx context.Context, reservation domain.Reservation) error
 	GetReservationByID(ctx context.Context, id string) (domain.Reservation, error)
-	ListExpiredPendingIDs(ctx context.Context, now time.Time, limit int) ([]string, error)
-	ExpireReservation(ctx context.Context, id string, now time.Time) (bool, error)
+	ListExpiredPendingIDs(ctx context.Context, cutoff time.Time, limit int) ([]string, error)
+	ExpireReservation(ctx context.Context, id string, cutoff time.Time) (bool, error)
 	ProcessPaymentSucceeded(ctx context.Context, messageID, reservationID, userID string) (bool, error)
 	ProcessPaymentFailed(ctx context.Context, messageID, reservationID, userID string) (bool, error)
 }

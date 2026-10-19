@@ -47,9 +47,12 @@ func (h *Handler) CreateReservation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	event := eventResponse.GetEvent()
+	if event == nil {
+		writeError(w, http.StatusInternalServerError, "internal error")
+		return
+	}
 
-	if event == nil ||
-		event.GetStatus() != eventcontentv1.EventStatus_EVENT_STATUS_PUBLISHED {
+	if event.GetStatus() != eventcontentv1.EventStatus_EVENT_STATUS_PUBLISHED {
 		writeError(w, http.StatusNotFound, "event not found")
 		return
 	}

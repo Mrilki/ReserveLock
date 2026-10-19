@@ -3,6 +3,7 @@ package postgres_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/Mrilki/ReserveLock/internal/reservation/application"
 	"github.com/Mrilki/ReserveLock/internal/reservation/domain"
@@ -38,7 +39,7 @@ func TestExpireReservations_Postgres(t *testing.T) {
 		t.Fatalf("create reservation: %v", err)
 	}
 
-	store := reservationpostgres.NewStore(pool)
+	store := reservationpostgres.NewStore(pool, time.Now)
 
 	expired, err := store.ExpireReservation(context.Background(), reservation.ID, reservation.ExpiresAt)
 	if err != nil {

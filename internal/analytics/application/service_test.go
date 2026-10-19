@@ -69,9 +69,11 @@ func TestGetEventSummaryRates(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			store := &summaryStore{
 				summary: domain.EventSummary{
-					EventID: "event-1", Created: test.created,
-					Confirmed: test.confirmed, Expired: test.expired,
-					Daily: []domain.EventDailySummary{},
+					EventID:   "event-1",
+					Created:   test.created,
+					Confirmed: test.confirmed,
+					Expired:   test.expired,
+					Daily:     []domain.EventDailySummary{},
 				},
 			}
 			if test.confirmed > 0 {

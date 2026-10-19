@@ -21,7 +21,10 @@ func NewServer(service *application.Service, logger *zap.Logger) analyticsv1.Ana
 	}
 }
 
-func (s *server) GetEventSummary(ctx context.Context, request *analyticsv1.GetEventSummaryRequest) (*analyticsv1.GetEventSummaryResponse, error) {
+func (s *server) GetEventSummary(
+	ctx context.Context,
+	request *analyticsv1.GetEventSummaryRequest,
+) (*analyticsv1.GetEventSummaryResponse, error) {
 	summary, err := s.service.GetEventSummary(ctx, request.GetEventId())
 	if err != nil {
 		return nil, s.rpcError("GetEventSummary", err)

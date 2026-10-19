@@ -81,7 +81,7 @@ func (s *Store) processPaymentResult(ctx context.Context, messageID, reservation
 		return false, domain.ErrReservationUserMismatch
 	}
 
-	now := time.Now().UTC()
+	now := s.now().UTC().Truncate(time.Microsecond)
 
 	if confirm &&
 		reservation.Status == domain.ReservationStatusPending &&

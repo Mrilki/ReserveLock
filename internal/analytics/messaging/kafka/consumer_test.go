@@ -193,17 +193,23 @@ func testReservationRecord(t *testing.T, eventType string) *kgo.Record {
 	case reservationcontract.ReservationCreatedType:
 		reservation.Status = reservationv1.ReservationStatus_RESERVATION_STATUS_PENDING
 		message = &reservationv1.ReservationCreated{
-			MessageId: "message-1", Reservation: reservation, OccurredAt: timestamppb.New(createdAt),
+			MessageId:   "message-1",
+			Reservation: reservation,
+			OccurredAt:  timestamppb.New(createdAt),
 		}
 	case reservationcontract.ReservationConfirmedType:
 		reservation.Status = reservationv1.ReservationStatus_RESERVATION_STATUS_CONFIRMED
 		message = &reservationv1.ReservationConfirmed{
-			MessageId: "message-1", Reservation: reservation, OccurredAt: timestamppb.New(createdAt.Add(time.Minute)),
+			MessageId:   "message-1",
+			Reservation: reservation,
+			OccurredAt:  timestamppb.New(createdAt.Add(time.Minute)),
 		}
 	case reservationcontract.ReservationExpiredType:
 		reservation.Status = reservationv1.ReservationStatus_RESERVATION_STATUS_EXPIRED
 		message = &reservationv1.ReservationExpired{
-			MessageId: "message-1", Reservation: reservation, OccurredAt: reservation.ExpiresAt,
+			MessageId:   "message-1",
+			Reservation: reservation,
+			OccurredAt:  reservation.ExpiresAt,
 		}
 	default:
 		t.Fatalf("unsupported test event type: %s", eventType)

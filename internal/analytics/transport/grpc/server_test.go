@@ -51,8 +51,13 @@ func TestGetEventSummary(t *testing.T) {
 				AvgExpirationLagSeconds: 2.25,
 				Daily: []domain.EventDailySummary{
 					{
-						Date: "2026-10-14", Created: 5, Confirmed: 2, Expired: 1,
-						CreatedSeats: 10, ConfirmedSeats: 4, ExpiredSeats: 2,
+						Date:           "2026-10-14",
+						Created:        5,
+						Confirmed:      2,
+						Expired:        1,
+						CreatedSeats:   10,
+						ConfirmedSeats: 4,
+						ExpiredSeats:   2,
 					},
 				},
 			},
@@ -70,8 +75,13 @@ func TestGetEventSummary(t *testing.T) {
 				AvgExpirationLagSeconds: 2.25,
 				Daily: []*analyticsv1.EventDailySummary{
 					{
-						Date: "2026-10-14", Created: 5, Confirmed: 2, Expired: 1,
-						CreatedSeats: 10, ConfirmedSeats: 4, ExpiredSeats: 2,
+						Date:           "2026-10-14",
+						Created:        5,
+						Confirmed:      2,
+						Expired:        1,
+						CreatedSeats:   10,
+						ConfirmedSeats: 4,
+						ExpiredSeats:   2,
 					},
 				},
 			},

@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/Mrilki/ReserveLock/internal/reservation/application"
 	reservationpostgres "github.com/Mrilki/ReserveLock/internal/reservation/repository/postgres"
@@ -31,7 +32,7 @@ func newPostgresTestService(t *testing.T) (*pgxpool.Pool, *application.Service) 
 
 	t.Cleanup(pool.Close)
 
-	store := reservationpostgres.NewStore(pool)
+	store := reservationpostgres.NewStore(pool, time.Now)
 
 	return pool, application.NewService(store, nil)
 }

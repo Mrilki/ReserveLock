@@ -82,11 +82,23 @@ func TestRecordFromMessageEncodesLifecycleEvents(t *testing.T) {
 			var want proto.Message
 			switch tt.eventType {
 			case reservationcontract.ReservationCreatedType:
-				want = &reservationv1.ReservationCreated{MessageId: message.ID, Reservation: reservation, OccurredAt: occurredAt}
+				want = &reservationv1.ReservationCreated{
+					MessageId:   message.ID,
+					Reservation: reservation,
+					OccurredAt:  occurredAt,
+				}
 			case reservationcontract.ReservationExpiredType:
-				want = &reservationv1.ReservationExpired{MessageId: message.ID, Reservation: reservation, OccurredAt: occurredAt}
+				want = &reservationv1.ReservationExpired{
+					MessageId:   message.ID,
+					Reservation: reservation,
+					OccurredAt:  occurredAt,
+				}
 			case reservationcontract.ReservationConfirmedType:
-				want = &reservationv1.ReservationConfirmed{MessageId: message.ID, Reservation: reservation, OccurredAt: occurredAt}
+				want = &reservationv1.ReservationConfirmed{
+					MessageId:   message.ID,
+					Reservation: reservation,
+					OccurredAt:  occurredAt,
+				}
 			}
 
 			decoded := proto.Clone(want)

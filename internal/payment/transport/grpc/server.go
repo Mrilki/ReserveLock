@@ -21,7 +21,10 @@ func NewServer(service *application.Service, logger *zap.Logger) paymentv1.Payme
 	}
 }
 
-func (s *server) GetPayment(ctx context.Context, request *paymentv1.GetPaymentRequest) (*paymentv1.GetPaymentResponse, error) {
+func (s *server) GetPayment(
+	ctx context.Context,
+	request *paymentv1.GetPaymentRequest,
+) (*paymentv1.GetPaymentResponse, error) {
 	payment, err := s.service.GetPayment(ctx, request.GetReservationId())
 	if err != nil {
 		return nil, s.rpcError("GetPayment", err)
@@ -32,7 +35,10 @@ func (s *server) GetPayment(ctx context.Context, request *paymentv1.GetPaymentRe
 	}, nil
 }
 
-func (s *server) SimulatePayment(ctx context.Context, request *paymentv1.SimulatePaymentRequest) (*paymentv1.SimulatePaymentResponse, error) {
+func (s *server) SimulatePayment(
+	ctx context.Context,
+	request *paymentv1.SimulatePaymentRequest,
+) (*paymentv1.SimulatePaymentResponse, error) {
 	payment, err := s.service.SimulatePayment(ctx, application.SimulatePaymentInput{
 		ReservationID: request.GetReservationId(),
 		Status:        fromProtoPaymentStatus(request.GetStatus()),

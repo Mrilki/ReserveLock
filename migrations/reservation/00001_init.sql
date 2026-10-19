@@ -2,7 +2,7 @@
 
 CREATE TABLE event_inventories
 (
-    event_id TEXT PRIMARY KEY CHECK ( event_id <> '' )
+    event_id TEXT PRIMARY KEY CHECK (event_id <> '')
 );
 
 CREATE TABLE reservations
@@ -26,24 +26,10 @@ CREATE TABLE seat_inventory
     held_until     TIMESTAMPTZ,
     PRIMARY KEY (event_id, seat_id),
     CHECK (
-        (
-            status = 'AVAILABLE'
-                AND reservation_id IS NULL
-                AND held_until IS NULL
-            )
-            OR
-        (
-            status = 'HELD'
-                AND reservation_id IS NOT NULL
-                AND held_until IS NOT NULL
-            )
-            OR
-        (
-            status = 'RESERVED'
-                AND reservation_id IS NOT NULL
-                AND held_until IS NULL
-            )
-        )
+        (status = 'AVAILABLE' AND reservation_id IS NULL AND held_until IS NULL)
+        OR (status = 'HELD' AND reservation_id IS NOT NULL AND held_until IS NOT NULL)
+        OR (status = 'RESERVED' AND reservation_id IS NOT NULL AND held_until IS NULL)
+    )
 );
 
 CREATE TABLE reservation_seats

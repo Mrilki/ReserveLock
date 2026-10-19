@@ -80,7 +80,7 @@ func main() {
 		return
 	}
 
-	reservationStore := reservationpostgres.NewStore(postgresPool)
+	reservationStore := reservationpostgres.NewStore(postgresPool, time.Now)
 
 	redisClient, err := reservationredis.NewClient(cfg.RedisURL)
 	if err != nil {
@@ -163,11 +163,7 @@ func main() {
 		logg.Info("grpc reflection enabled")
 	}
 
-	ctx, stop := signal.NotifyContext(
-		context.Background(),
-		os.Interrupt,
-		syscall.SIGTERM,
-	)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
 	consumerDone := make(chan struct{})
@@ -198,28 +194,10 @@ func main() {
 		outboxWorker.Run(ctx)
 	}()
 
+	expirationDone := make(chan struct{})
 	go func() {
-		ticker := time.NewTicker(expirationScanInterval)
-		defer ticker.Stop()
-		for {
-			select {
-			case <-ctx.Done():
-				return
-			case now := <-ticker.C:
-				expiredCount, err := reservationService.ExpireReservations(ctx, now.UTC())
-				if err != nil {
-					logg.Error("failed to expire reservations", zap.Error(err))
-
-					continue
-				}
-				if expiredCount > 0 {
-					logg.Info(
-						"reservations expired",
-						zap.Int("count", expiredCount),
-					)
-				}
-			}
-		}
+		defer close(expirationDone)
+		runExpirationWorker(ctx, reservationService, logg)
 	}()
 
 	serverErr := make(chan error, 1)
@@ -248,10 +226,7 @@ func main() {
 
 	healthServer.Shutdown()
 
-	shutdownCtx, cancel := context.WithTimeout(
-		context.Background(),
-		shutdownTimeout,
-	)
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancel()
 
 	stopped := make(chan struct{})
@@ -266,9 +241,7 @@ func main() {
 		logg.Info("grpc server stopped")
 
 	case <-shutdownCtx.Done():
-		logg.Warn(
-			"grpc graceful shutdown timed out",
-		)
+		logg.Warn("grpc graceful shutdown timed out")
 		grpcServer.Stop()
 	}
 
@@ -279,12 +252,21 @@ func main() {
 	case <-shutdownCtx.Done():
 		logg.Warn("event published consumer shutdown timed out")
 	}
+
 	select {
 	case <-paymentConsumerDone:
 		logg.Info("payment consumer stopped")
 
 	case <-shutdownCtx.Done():
 		logg.Warn("payment consumer shutdown timed out")
+	}
+
+	select {
+	case <-expirationDone:
+		logg.Info("expiration worker stopped")
+
+	case <-shutdownCtx.Done():
+		logg.Warn("expiration worker shutdown timed out")
 	}
 
 	select {

@@ -66,7 +66,8 @@ func (h *Handler) CreateSeatMap(c *gin.Context) {
 			Name:      request.Name,
 			Seats:     seats,
 			CreatedBy: request.CreatedBy,
-		})
+		},
+	)
 	if err != nil {
 		writeGRPCError(c, err)
 		return

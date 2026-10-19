@@ -74,8 +74,8 @@ func (s *Service) CreateReservation(ctx context.Context, input CreateReservation
 	return reservation, nil
 }
 
-func (s *Service) ExpireReservations(ctx context.Context, now time.Time) (int, error) {
-	ids, err := s.store.ListExpiredPendingIDs(ctx, now, expirationBatchSize)
+func (s *Service) ExpireReservations(ctx context.Context, cutoff time.Time) (int, error) {
+	ids, err := s.store.ListExpiredPendingIDs(ctx, cutoff, expirationBatchSize)
 	if err != nil {
 		return 0, fmt.Errorf("list expired reservations: %w", err)
 	}
@@ -84,7 +84,7 @@ func (s *Service) ExpireReservations(ctx context.Context, now time.Time) (int, e
 	expirationErrors := make([]error, 0)
 
 	for _, id := range ids {
-		expired, err := s.store.ExpireReservation(ctx, id, now)
+		expired, err := s.store.ExpireReservation(ctx, id, cutoff)
 		if err != nil {
 			expirationErrors = append(
 				expirationErrors,

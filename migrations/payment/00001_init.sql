@@ -6,7 +6,7 @@ CREATE TABLE payments
     user_id        TEXT        NOT NULL,
     status         TEXT        NOT NULL CHECK (
         status IN ('PENDING', 'SUCCEEDED', 'FAILED', 'CANCELLED')
-        ),
+    ),
     created_at     TIMESTAMPTZ NOT NULL,
     expires_at     TIMESTAMPTZ NOT NULL,
     CHECK (expires_at > created_at)

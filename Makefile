@@ -1,5 +1,3 @@
-APP_NAME := reservelock
-
 .PHONY: help
 help:
 	@echo "Available commands:"
@@ -42,4 +40,3 @@ proto-generate:
 
 .PHONY: proto
 proto: proto-lint proto-build proto-generate
-

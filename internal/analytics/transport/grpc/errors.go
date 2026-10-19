@@ -22,6 +22,7 @@ func toGRPCError(err error) error {
 		return status.Error(codes.Internal, "internal error")
 	}
 }
+
 func (s *server) rpcError(method string, err error) error {
 	rpcErr := toGRPCError(err)
 

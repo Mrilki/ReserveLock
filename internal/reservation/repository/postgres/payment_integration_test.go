@@ -45,7 +45,7 @@ func TestPaymentSucceeded_Idempotency_Postgres(t *testing.T) {
 	snapshot, _, _ := readReservationOutbox(t, pool, reservation.ID, reservationcontract.ReservationConfirmedType)
 	assertReservationSnapshot(t, snapshot, reservation, domain.ReservationStatusConfirmed)
 
-	expired, err := reservationpostgres.NewStore(pool).ExpireReservation(ctx, reservation.ID, reservation.ExpiresAt)
+	expired, err := reservationpostgres.NewStore(pool, time.Now).ExpireReservation(ctx, reservation.ID, reservation.ExpiresAt)
 	if err != nil || expired {
 		t.Fatalf("confirmed reservation must not expire: expired=%v err=%v", expired, err)
 	}
@@ -89,7 +89,7 @@ func TestPaymentSucceeded_OutboxFailureRollsBack_Postgres(t *testing.T) {
 func TestPaymentSucceeded_ExpiredReservationKeepsNewHold_Postgres(t *testing.T) {
 	ctx := context.Background()
 	pool, service, reservation := newPaymentTestReservation(t, time.Now().UTC())
-	store := reservationpostgres.NewStore(pool)
+	store := reservationpostgres.NewStore(pool, time.Now)
 
 	expired, err := store.ExpireReservation(ctx, reservation.ID, reservation.ExpiresAt)
 	if err != nil || !expired {
@@ -139,7 +139,7 @@ func TestPaymentSucceeded_PastDeadline_Postgres(t *testing.T) {
 	assertPaymentInboxCount(t, pool, messageID, 1)
 	assertReservationOutboxCount(t, pool, reservation.EventID, reservationcontract.ReservationConfirmedType, 0)
 
-	expired, err := reservationpostgres.NewStore(pool).ExpireReservation(ctx, reservation.ID, time.Now().UTC())
+	expired, err := reservationpostgres.NewStore(pool, time.Now).ExpireReservation(ctx, reservation.ID, time.Now().UTC())
 	if err != nil || !expired {
 		t.Fatalf("expire reservation past deadline: expired=%v err=%v", expired, err)
 	}
@@ -167,7 +167,7 @@ func TestPaymentFailed_PreservesHold_Postgres(t *testing.T) {
 	assertPaymentInboxCount(t, pool, messageID, 1)
 	assertReservationOutboxCount(t, pool, reservation.EventID, reservationcontract.ReservationConfirmedType, 0)
 
-	expired, err := reservationpostgres.NewStore(pool).ExpireReservation(ctx, reservation.ID, reservation.ExpiresAt)
+	expired, err := reservationpostgres.NewStore(pool, time.Now).ExpireReservation(ctx, reservation.ID, reservation.ExpiresAt)
 	if err != nil || !expired {
 		t.Fatalf("failed payment must not prevent expiration: expired=%v err=%v", expired, err)
 	}
@@ -191,7 +191,7 @@ func TestPaymentSucceeded_ConcurrentExpiration_Postgres(t *testing.T) {
 
 	go func() {
 		<-start
-		_, err := reservationpostgres.NewStore(pool).ExpireReservation(ctx, reservation.ID, reservation.ExpiresAt)
+		_, err := reservationpostgres.NewStore(pool, time.Now).ExpireReservation(ctx, reservation.ID, reservation.ExpiresAt)
 		results <- err
 	}()
 
@@ -259,7 +259,7 @@ func newPaymentTestReservation(t *testing.T, createdAt time.Time) (*pgxpool.Pool
 		ExpiresAt: createdAt.Add(10 * time.Minute),
 	}
 
-	if err := reservationpostgres.NewStore(pool).CreateReservation(context.Background(), reservation); err != nil {
+	if err := reservationpostgres.NewStore(pool, time.Now).CreateReservation(context.Background(), reservation); err != nil {
 		t.Fatalf("create payment test reservation: %v", err)
 	}
 
@@ -286,7 +286,13 @@ func assertPaymentInboxCount(t *testing.T, pool *pgxpool.Pool, messageID string,
 	}
 }
 
-func assertPaymentReservationState(t *testing.T, pool *pgxpool.Pool, reservation domain.Reservation, reservationStatus domain.ReservationStatus, seatStatus domain.SeatInventoryStatus) {
+func assertPaymentReservationState(
+	t *testing.T,
+	pool *pgxpool.Pool,
+	reservation domain.Reservation,
+	reservationStatus domain.ReservationStatus,
+	seatStatus domain.SeatInventoryStatus,
+) {
 	t.Helper()
 
 	var status string

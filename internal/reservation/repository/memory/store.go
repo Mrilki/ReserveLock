@@ -106,7 +106,7 @@ func (s *Store) GetReservationByID(ctx context.Context, id string) (domain.Reser
 	return reservation, nil
 }
 
-func (s *Store) ListExpiredPendingIDs(ctx context.Context, now time.Time, limit int) ([]string, error) {
+func (s *Store) ListExpiredPendingIDs(ctx context.Context, cutoff time.Time, limit int) ([]string, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -121,7 +121,7 @@ func (s *Store) ListExpiredPendingIDs(ctx context.Context, now time.Time, limit 
 			continue
 		}
 
-		if reservation.ExpiresAt.After(now) {
+		if reservation.ExpiresAt.After(cutoff) {
 			continue
 		}
 
@@ -149,7 +149,7 @@ func (s *Store) ListExpiredPendingIDs(ctx context.Context, now time.Time, limit 
 	return ids, nil
 }
 
-func (s *Store) ExpireReservation(ctx context.Context, id string, now time.Time) (bool, error) {
+func (s *Store) ExpireReservation(ctx context.Context, id string, cutoff time.Time) (bool, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -162,7 +162,7 @@ func (s *Store) ExpireReservation(ctx context.Context, id string, now time.Time)
 		return false, nil
 	}
 
-	if reservation.ExpiresAt.After(now) {
+	if reservation.ExpiresAt.After(cutoff) {
 		return false, nil
 	}
 

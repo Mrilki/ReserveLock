@@ -21,7 +21,10 @@ func NewServer(service *application.Service, logger *zap.Logger) eventcontentv1.
 	}
 }
 
-func (s *server) CreateVenue(ctx context.Context, request *eventcontentv1.CreateVenueRequest) (*eventcontentv1.CreateVenueResponse, error) {
+func (s *server) CreateVenue(
+	ctx context.Context,
+	request *eventcontentv1.CreateVenueRequest,
+) (*eventcontentv1.CreateVenueResponse, error) {
 	venue, err := s.service.CreateVenue(ctx, application.CreateVenueInput{
 		Name:      request.GetName(),
 		City:      request.GetCity(),
@@ -36,7 +39,10 @@ func (s *server) CreateVenue(ctx context.Context, request *eventcontentv1.Create
 	}, nil
 }
 
-func (s *server) GetVenue(ctx context.Context, request *eventcontentv1.GetVenueRequest) (*eventcontentv1.GetVenueResponse, error) {
+func (s *server) GetVenue(
+	ctx context.Context,
+	request *eventcontentv1.GetVenueRequest,
+) (*eventcontentv1.GetVenueResponse, error) {
 	venue, err := s.service.GetVenue(ctx, request.GetVenueId())
 	if err != nil {
 		return nil, s.rpcError("GetVenue", err)
@@ -46,7 +52,10 @@ func (s *server) GetVenue(ctx context.Context, request *eventcontentv1.GetVenueR
 	}, nil
 }
 
-func (s *server) CreateHall(ctx context.Context, request *eventcontentv1.CreateHallRequest) (*eventcontentv1.CreateHallResponse, error) {
+func (s *server) CreateHall(
+	ctx context.Context,
+	request *eventcontentv1.CreateHallRequest,
+) (*eventcontentv1.CreateHallResponse, error) {
 	hall, err := s.service.CreateHall(ctx, application.CreateHallInput{
 		VenueID:   request.GetVenueId(),
 		Name:      request.GetName(),
@@ -60,7 +69,10 @@ func (s *server) CreateHall(ctx context.Context, request *eventcontentv1.CreateH
 	}, nil
 }
 
-func (s *server) GetHall(ctx context.Context, request *eventcontentv1.GetHallRequest) (*eventcontentv1.GetHallResponse, error) {
+func (s *server) GetHall(
+	ctx context.Context,
+	request *eventcontentv1.GetHallRequest,
+) (*eventcontentv1.GetHallResponse, error) {
 	hall, err := s.service.GetHall(ctx, request.GetHallId())
 	if err != nil {
 		return nil, s.rpcError("GetHall", err)
@@ -70,10 +82,13 @@ func (s *server) GetHall(ctx context.Context, request *eventcontentv1.GetHallReq
 	}, nil
 }
 
-func (s *server) CreateSeatMap(ctx context.Context, request *eventcontentv1.CreateSeatMapRequest) (*eventcontentv1.CreateSeatMapResponse, error) {
+func (s *server) CreateSeatMap(
+	ctx context.Context,
+	request *eventcontentv1.CreateSeatMapRequest,
+) (*eventcontentv1.CreateSeatMapResponse, error) {
 	seats := make([]application.CreateSeatInput, 0, len(request.GetSeats()))
 
-	for _, seat := range request.Seats {
+	for _, seat := range request.GetSeats() {
 		seats = append(seats, application.CreateSeatInput{
 			Section: seat.GetSection(),
 			Row:     seat.GetRow(),
@@ -95,7 +110,10 @@ func (s *server) CreateSeatMap(ctx context.Context, request *eventcontentv1.Crea
 	}, nil
 }
 
-func (s *server) GetSeatMap(ctx context.Context, request *eventcontentv1.GetSeatMapRequest) (*eventcontentv1.GetSeatMapResponse, error) {
+func (s *server) GetSeatMap(
+	ctx context.Context,
+	request *eventcontentv1.GetSeatMapRequest,
+) (*eventcontentv1.GetSeatMapResponse, error) {
 	seatMap, err := s.service.GetSeatMap(ctx, request.GetSeatMapId())
 	if err != nil {
 		return nil, s.rpcError("GetSeatMap", err)
@@ -130,7 +148,10 @@ func (s *server) CreateEvent(
 	}, nil
 }
 
-func (s *server) GetEvent(ctx context.Context, request *eventcontentv1.GetEventRequest) (*eventcontentv1.GetEventResponse, error) {
+func (s *server) GetEvent(
+	ctx context.Context,
+	request *eventcontentv1.GetEventRequest,
+) (*eventcontentv1.GetEventResponse, error) {
 	event, err := s.service.GetEvent(ctx, request.GetEventId())
 	if err != nil {
 		return nil, s.rpcError("GetEvent", err)
@@ -140,7 +161,10 @@ func (s *server) GetEvent(ctx context.Context, request *eventcontentv1.GetEventR
 	}, nil
 }
 
-func (s *server) PublishEvent(ctx context.Context, request *eventcontentv1.PublishEventRequest) (*eventcontentv1.PublishEventResponse, error) {
+func (s *server) PublishEvent(
+	ctx context.Context,
+	request *eventcontentv1.PublishEventRequest,
+) (*eventcontentv1.PublishEventResponse, error) {
 	event, err := s.service.PublishEvent(ctx, request.GetEventId())
 	if err != nil {
 		return nil, s.rpcError("PublishEvent", err)
@@ -150,7 +174,10 @@ func (s *server) PublishEvent(ctx context.Context, request *eventcontentv1.Publi
 	}, nil
 }
 
-func (s *server) ListEvents(ctx context.Context, request *eventcontentv1.ListEventsRequest) (*eventcontentv1.ListEventsResponse, error) {
+func (s *server) ListEvents(
+	ctx context.Context,
+	request *eventcontentv1.ListEventsRequest,
+) (*eventcontentv1.ListEventsResponse, error) {
 	events, err := s.service.ListEvents(ctx)
 	if err != nil {
 		return nil, s.rpcError("ListEvents", err)

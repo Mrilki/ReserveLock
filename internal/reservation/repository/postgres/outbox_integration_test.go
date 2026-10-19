@@ -21,7 +21,6 @@ import (
 func TestReservationOutbox_Lifecycle_Postgres(t *testing.T) {
 	ctx := context.Background()
 	pool, service := newPostgresTestService(t)
-	store := reservationpostgres.NewStore(pool)
 	eventID := uuid.NewString()
 	seatIDs := []string{uuid.NewString(), uuid.NewString()}
 	cleanupEvent(t, pool, eventID)
@@ -35,6 +34,12 @@ func TestReservationOutbox_Lifecycle_Postgres(t *testing.T) {
 	if err != nil {
 		t.Fatalf("create reservation: %v", err)
 	}
+
+	occurredAt := reservation.ExpiresAt.Add(2 * time.Second)
+
+	store := reservationpostgres.NewStore(pool, func() time.Time {
+		return occurredAt
+	})
 
 	created, createdAt, createdID := readReservationOutbox(t, pool, reservation.ID, reservationcontract.ReservationCreatedType)
 	assertReservationSnapshot(t, created, reservation, domain.ReservationStatusPending)
@@ -59,7 +64,7 @@ func TestReservationOutbox_Lifecycle_Postgres(t *testing.T) {
 
 	snapshot, expiredAt, expiredID := readReservationOutbox(t, pool, reservation.ID, reservationcontract.ReservationExpiredType)
 	assertReservationSnapshot(t, snapshot, reservation, domain.ReservationStatusExpired)
-	if !expiredAt.Equal(reservation.ExpiresAt.Truncate(time.Microsecond)) {
+	if !expiredAt.Equal(occurredAt.Truncate(time.Microsecond)) {
 		t.Fatalf("unexpected expiration occurrence time: %v", expiredAt)
 	}
 	if createdID == expiredID {
@@ -93,7 +98,7 @@ func TestReservationOutbox_Lifecycle_Postgres(t *testing.T) {
 func TestCreateReservation_OutboxFailureRollsBack_Postgres(t *testing.T) {
 	ctx := context.Background()
 	pool, service := newPostgresTestService(t)
-	store := reservationpostgres.NewStore(pool)
+	store := reservationpostgres.NewStore(pool, time.Now)
 	eventID := uuid.NewString()
 	seatID := uuid.NewString()
 	cleanupEvent(t, pool, eventID)
@@ -145,7 +150,7 @@ func TestCreateReservation_OutboxFailureRollsBack_Postgres(t *testing.T) {
 func TestExpireReservation_OutboxFailureRollsBack_Postgres(t *testing.T) {
 	ctx := context.Background()
 	pool, service := newPostgresTestService(t)
-	store := reservationpostgres.NewStore(pool)
+	store := reservationpostgres.NewStore(pool, time.Now)
 	eventID := uuid.NewString()
 	seatID := uuid.NewString()
 	cleanupEvent(t, pool, eventID)
@@ -188,7 +193,12 @@ func TestExpireReservation_OutboxFailureRollsBack_Postgres(t *testing.T) {
 	assertReservationOutboxCount(t, pool, eventID, reservationcontract.ReservationExpiredType, 1)
 }
 
-func readReservationOutbox(t *testing.T, pool *pgxpool.Pool, reservationID string, eventType string) (reservationoutbox.ReservationSnapshot, time.Time, string) {
+func readReservationOutbox(
+	t *testing.T,
+	pool *pgxpool.Pool,
+	reservationID string,
+	eventType string,
+) (reservationoutbox.ReservationSnapshot, time.Time, string) {
 	t.Helper()
 	var messageID string
 	var payload []byte
@@ -213,7 +223,12 @@ func readReservationOutbox(t *testing.T, pool *pgxpool.Pool, reservationID strin
 	return snapshot, occurredAt, messageID
 }
 
-func assertReservationSnapshot(t *testing.T, snapshot reservationoutbox.ReservationSnapshot, reservation domain.Reservation, status domain.ReservationStatus) {
+func assertReservationSnapshot(
+	t *testing.T,
+	snapshot reservationoutbox.ReservationSnapshot,
+	reservation domain.Reservation,
+	status domain.ReservationStatus,
+) {
 	t.Helper()
 	if snapshot.ReservationID != reservation.ID || snapshot.EventID != reservation.EventID || snapshot.UserID != reservation.UserID {
 		t.Fatalf("unexpected snapshot identity: %+v", snapshot)

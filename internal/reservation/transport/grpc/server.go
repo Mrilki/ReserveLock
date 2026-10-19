@@ -31,7 +31,8 @@ func (s *server) CreateReservation(
 			EventID: request.GetEventId(),
 			UserID:  request.GetUserId(),
 			SeatIDs: request.GetSeatIds(),
-		})
+		},
+	)
 	if err != nil {
 		return nil, s.rpcError("CreateReservation", err)
 	}
@@ -60,7 +61,6 @@ func (s *server) GetAvailability(
 	request *reservationv1.GetAvailabilityRequest,
 ) (*reservationv1.GetAvailabilityResponse, error) {
 	seats, err := s.service.GetAvailability(ctx, request.GetEventId())
-
 	if err != nil {
 		return nil, s.rpcError("GetAvailability", err)
 	}

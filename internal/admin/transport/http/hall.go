@@ -40,7 +40,8 @@ func (h *Handler) CreateHall(c *gin.Context) {
 			VenueId:   request.VenueID,
 			Name:      request.Name,
 			CreatedBy: request.CreatedBy,
-		})
+		},
+	)
 	if err != nil {
 		writeGRPCError(c, err)
 		return

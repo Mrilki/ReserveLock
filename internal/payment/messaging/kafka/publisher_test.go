@@ -75,11 +75,15 @@ func TestRecordFromMessageEncodesPaymentEvents(t *testing.T) {
 			switch test.eventType {
 			case paymentcontract.PaymentSucceededType:
 				want = &paymentv1.PaymentSucceeded{
-					MessageId: message.ID, Payment: payment, OccurredAt: timestamppb.New(message.OccurredAt),
+					MessageId:  message.ID,
+					Payment:    payment,
+					OccurredAt: timestamppb.New(message.OccurredAt),
 				}
 			case paymentcontract.PaymentFailedType:
 				want = &paymentv1.PaymentFailed{
-					MessageId: message.ID, Payment: payment, OccurredAt: timestamppb.New(message.OccurredAt),
+					MessageId:  message.ID,
+					Payment:    payment,
+					OccurredAt: timestamppb.New(message.OccurredAt),
 				}
 			}
 

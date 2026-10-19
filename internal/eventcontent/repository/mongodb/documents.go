@@ -85,7 +85,8 @@ func toSeatMapDocument(seatMap domain.SeatMap) seatMapDocument {
 				Section: seat.Section,
 				Row:     seat.Row,
 				Number:  seat.Number,
-			})
+			},
+		)
 	}
 
 	return seatMapDocument{
@@ -108,7 +109,8 @@ func (d seatMapDocument) toDomain() domain.SeatMap {
 				Section: seat.Section,
 				Row:     seat.Row,
 				Number:  seat.Number,
-			})
+			},
+		)
 	}
 
 	return domain.SeatMap{
