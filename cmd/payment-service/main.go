@@ -13,10 +13,10 @@ import (
 	"github.com/Mrilki/ReserveLock/internal/payment/application"
 	paymentconfig "github.com/Mrilki/ReserveLock/internal/payment/config"
 	paymentkafka "github.com/Mrilki/ReserveLock/internal/payment/messaging/kafka"
-	paymentoutbox "github.com/Mrilki/ReserveLock/internal/payment/outbox"
 	paymentpostgres "github.com/Mrilki/ReserveLock/internal/payment/repository/postgres"
 	paymentgrpc "github.com/Mrilki/ReserveLock/internal/payment/transport/grpc"
 	"github.com/Mrilki/ReserveLock/internal/platform/logger"
+	"github.com/Mrilki/ReserveLock/internal/platform/outbox"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/twmb/franz-go/pkg/kgo"
 	"go.uber.org/zap"
@@ -99,7 +99,7 @@ func main() {
 
 	outboxRepository := paymentpostgres.NewOutboxRepository(pool)
 	outboxPublisher := paymentkafka.NewPublisher(publisherClient)
-	outboxWorker := paymentoutbox.NewWorker(outboxRepository, outboxPublisher, logg)
+	outboxWorker := outbox.NewWorker(outboxRepository, outboxPublisher, logg)
 
 	grpcServer := grpc.NewServer()
 

@@ -27,20 +27,15 @@ func (s *Store) ProcessEventPublished(
 		_ = tx.Rollback(ctx)
 	}()
 
-	result, err := tx.Exec(ctx, `
-		INSERT INTO inbox_messages (message_id)
-		VALUES ($1)
-		ON CONFLICT DO NOTHING
-	`, messageID)
+	inserted, err := insertInboxMessage(ctx, tx, messageID)
 	if err != nil {
-		return false, fmt.Errorf("insert inbox message: %w", err)
+		return false, err
 	}
-
-	if result.RowsAffected() == 0 {
+	if !inserted {
 		return false, nil
 	}
 
-	result, err = tx.Exec(ctx, `
+	result, err := tx.Exec(ctx, `
 		INSERT INTO event_inventories (event_id)
 		VALUES ($1)
 		ON CONFLICT DO NOTHING

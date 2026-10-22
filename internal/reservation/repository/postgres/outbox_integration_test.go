@@ -51,6 +51,13 @@ func TestReservationOutbox_Lifecycle_Postgres(t *testing.T) {
 	if err != nil || expired {
 		t.Fatalf("early expiration: expired=%v err=%v", expired, err)
 	}
+	assertPaymentReservationState(
+		t,
+		pool,
+		reservation,
+		domain.ReservationStatusPending,
+		domain.SeatInventoryStatusHeld,
+	)
 	assertReservationOutboxCount(t, pool, eventID, reservationcontract.ReservationExpiredType, 0)
 
 	expired, err = store.ExpireReservation(ctx, reservation.ID, reservation.ExpiresAt)
@@ -150,7 +157,6 @@ func TestCreateReservation_OutboxFailureRollsBack_Postgres(t *testing.T) {
 func TestExpireReservation_OutboxFailureRollsBack_Postgres(t *testing.T) {
 	ctx := context.Background()
 	pool, service := newPostgresTestService(t)
-	store := reservationpostgres.NewStore(pool, time.Now)
 	eventID := uuid.NewString()
 	seatID := uuid.NewString()
 	cleanupEvent(t, pool, eventID)
@@ -164,6 +170,7 @@ func TestExpireReservation_OutboxFailureRollsBack_Postgres(t *testing.T) {
 	if err != nil {
 		t.Fatalf("create reservation: %v", err)
 	}
+	store := newPostgresTestStoreAt(pool, reservation.ExpiresAt.Add(time.Second))
 	seedOutboxConflict(t, pool, reservation, reservationcontract.ReservationExpiredType)
 
 	expired, err := store.ExpireReservation(ctx, reservation.ID, reservation.ExpiresAt)

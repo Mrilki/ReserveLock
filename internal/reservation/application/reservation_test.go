@@ -3,209 +3,146 @@ package application_test
 import (
 	"context"
 	"errors"
-	"sync"
-	"sync/atomic"
+	"reflect"
+	"slices"
 	"testing"
+	"time"
 
 	"github.com/Mrilki/ReserveLock/internal/reservation/application"
 	"github.com/Mrilki/ReserveLock/internal/reservation/domain"
 )
 
 func TestCreateReservation(t *testing.T) {
-	service := newTestService()
+	var saved domain.Reservation
 
-	initializeInventory(
-		t,
-		service,
-		"event-1",
-		[]string{"seat-1", "seat-2"},
-	)
+	store := &storeStub{
+		t: t,
+		create: func(ctx context.Context, reservation domain.Reservation) error {
+			saved = reservation
+			return nil
+		},
+	}
+	service := application.NewService(store, nil)
+
+	input := application.CreateReservationInput{
+		EventID: "event-1",
+		UserID:  "user-1",
+		SeatIDs: []string{"seat-1", "seat-2"},
+	}
+
+	got, err := service.CreateReservation(context.Background(), input)
+	if err != nil {
+		t.Fatalf("create reservation: %v", err)
+	}
+
+	if got.ID == "" {
+		t.Fatal("reservation ID is empty")
+	}
+	if got.EventID != input.EventID || got.UserID != input.UserID {
+		t.Fatalf("unexpected reservation identity: %+v", got)
+	}
+	if !slices.Equal(got.SeatIDs, input.SeatIDs) {
+		t.Fatalf("unexpected seat IDs: %v", got.SeatIDs)
+	}
+	if got.Status != domain.ReservationStatusPending {
+		t.Fatalf("unexpected status: %s", got.Status)
+	}
+	if got.CreatedAt.IsZero() || got.CreatedAt.Location() != time.UTC {
+		t.Fatalf("unexpected creation time: %v", got.CreatedAt)
+	}
+	if !got.CreatedAt.Equal(got.CreatedAt.Truncate(time.Microsecond)) {
+		t.Fatalf("creation time must have microsecond precision: %v", got.CreatedAt)
+	}
+	if got.ExpiresAt.Sub(got.CreatedAt) != 10*time.Minute {
+		t.Fatalf("unexpected hold duration: %v", got.ExpiresAt.Sub(got.CreatedAt))
+	}
+	if !reflect.DeepEqual(saved, got) {
+		t.Fatalf("saved reservation differs from returned reservation: %+v", saved)
+	}
+
+	input.SeatIDs[0] = "changed"
+
+	if got.SeatIDs[0] != "seat-1" {
+		t.Fatal("reservation must not share the input seat IDs slice")
+	}
+}
+
+func TestCreateReservation_InvalidInput(t *testing.T) {
+	tests := []struct {
+		name    string
+		input   application.CreateReservationInput
+		wantErr error
+	}{
+		{
+			name:    "missing event",
+			input:   application.CreateReservationInput{UserID: "user-1", SeatIDs: []string{"seat-1"}},
+			wantErr: application.ErrInvalidEventID,
+		},
+		{
+			name:    "missing user",
+			input:   application.CreateReservationInput{EventID: "event-1", SeatIDs: []string{"seat-1"}},
+			wantErr: application.ErrInvalidUserID,
+		},
+		{
+			name:    "missing seats",
+			input:   application.CreateReservationInput{EventID: "event-1", UserID: "user-1"},
+			wantErr: application.ErrSeatIDsRequired,
+		},
+		{
+			name: "empty seat",
+			input: application.CreateReservationInput{
+				EventID: "event-1",
+				UserID:  "user-1",
+				SeatIDs: []string{""},
+			},
+			wantErr: application.ErrInvalidSeatID,
+		},
+		{
+			name: "duplicate seat",
+			input: application.CreateReservationInput{
+				EventID: "event-1",
+				UserID:  "user-1",
+				SeatIDs: []string{"seat-1", "seat-1"},
+			},
+			wantErr: application.ErrDuplicateSeatID,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			service := application.NewService(&storeStub{t: t}, nil)
+
+			_, err := service.CreateReservation(context.Background(), test.input)
+			if !errors.Is(err, test.wantErr) {
+				t.Fatalf("expected %v, got %v", test.wantErr, err)
+			}
+		})
+	}
+}
+
+func TestCreateReservation_StoreError(t *testing.T) {
+	failure := errors.New("store unavailable")
+
+	store := &storeStub{
+		t: t,
+		create: func(ctx context.Context, reservation domain.Reservation) error {
+			return failure
+		},
+	}
+	service := application.NewService(store, nil)
 
 	reservation, err := service.CreateReservation(
 		context.Background(),
 		application.CreateReservationInput{
 			EventID: "event-1",
 			UserID:  "user-1",
-			SeatIDs: []string{
-				"seat-1",
-				"seat-2",
-			},
-		},
-	)
-	if err != nil {
-		t.Fatalf("create reservation: %v", err)
-	}
-
-	if reservation.ID == "" {
-		t.Fatal("reservation id is empty")
-	}
-
-	if reservation.EventID != "event-1" {
-		t.Fatalf("unexpected event id: %s", reservation.EventID)
-	}
-
-	if reservation.UserID != "user-1" {
-		t.Fatalf("unexpected user id: %s", reservation.UserID)
-	}
-
-	if reservation.Status != domain.ReservationStatusPending {
-		t.Fatalf("unexpected reservation status: %s", reservation.Status)
-	}
-
-	if reservation.CreatedAt.IsZero() {
-		t.Fatal("created at is zero")
-	}
-
-	if reservation.ExpiresAt.IsZero() {
-		t.Fatal("expires at is zero")
-	}
-
-	if !reservation.ExpiresAt.After(reservation.CreatedAt) {
-		t.Fatal("expires at must be after created at")
-	}
-
-	stored, err := service.GetReservation(context.Background(), reservation.ID)
-	if err != nil {
-		t.Fatalf("get reservation: %v", err)
-	}
-
-	if stored.ID != reservation.ID {
-		t.Fatalf("unexpected stored reservation id: %s", stored.ID)
-	}
-}
-
-func TestCreateReservation_SeatUnavailable(t *testing.T) {
-	service := newTestService()
-
-	initializeInventory(
-		t,
-		service,
-		"event-1",
-		[]string{"seat-1"},
-	)
-
-	_, err := service.CreateReservation(
-		context.Background(),
-		application.CreateReservationInput{
-			EventID: "event-1",
-			UserID:  "user-1",
 			SeatIDs: []string{"seat-1"},
 		},
 	)
-	if err != nil {
-		t.Fatalf("first reservation: %v", err)
+	if !errors.Is(err, failure) {
+		t.Fatalf("expected store error, got %v", err)
 	}
-
-	_, err = service.CreateReservation(
-		context.Background(),
-		application.CreateReservationInput{
-			EventID: "event-1",
-			UserID:  "user-2",
-			SeatIDs: []string{"seat-1"},
-		},
-	)
-
-	if !errors.Is(err, domain.ErrSeatUnavailable) {
-		t.Fatalf("expected ErrSeatUnavailable, got %v", err)
-	}
-}
-
-func TestCreateReservation_ConcurrentSameSeat(t *testing.T) {
-	service := newTestService()
-
-	initializeInventory(
-		t,
-		service,
-		"event-1",
-		[]string{"seat-1"},
-	)
-
-	const goroutines = 20
-
-	var (
-		successCount     atomic.Int32
-		unavailableCount atomic.Int32
-		wg               sync.WaitGroup
-	)
-
-	wg.Add(goroutines)
-
-	for i := 0; i < goroutines; i++ {
-		go func() {
-			defer wg.Done()
-
-			_, err := service.CreateReservation(
-				context.Background(),
-				application.CreateReservationInput{
-					EventID: "event-1",
-					UserID:  "user",
-					SeatIDs: []string{"seat-1"},
-				},
-			)
-
-			switch {
-			case err == nil:
-				successCount.Add(1)
-			case errors.Is(err, domain.ErrSeatUnavailable):
-				unavailableCount.Add(1)
-			default:
-				t.Errorf("unexpected create reservation error: %v", err)
-			}
-
-		}()
-	}
-
-	wg.Wait()
-
-	if got := successCount.Load(); got != 1 {
-		t.Fatalf("expected exactly 1 successful reservation, got %d", got)
-	}
-
-	if got := unavailableCount.Load(); got != goroutines-1 {
-		t.Fatalf("expected %d unavailable results, got %d", goroutines-1, got)
-	}
-}
-
-func TestCreateReservation_DuplicateSeatID(t *testing.T) {
-	service := newTestService()
-
-	initializeInventory(
-		t,
-		service,
-		"event-1",
-		[]string{"seat-1"},
-	)
-
-	_, err := service.CreateReservation(
-		context.Background(),
-		application.CreateReservationInput{
-			EventID: "event-1",
-			UserID:  "user-1",
-			SeatIDs: []string{
-				"seat-1",
-				"seat-1",
-			},
-		},
-	)
-
-	if !errors.Is(err, application.ErrDuplicateSeatID) {
-		t.Fatalf("expected ErrDuplicateSeatID, got %v", err)
-	}
-}
-
-func TestCreateReservation_InventoryNotFound(t *testing.T) {
-	service := newTestService()
-
-	_, err := service.CreateReservation(
-		context.Background(),
-		application.CreateReservationInput{
-			EventID: "event-without-inventory",
-			UserID:  "user-1",
-			SeatIDs: []string{"seat-1"},
-		},
-	)
-
-	if !errors.Is(err, domain.ErrInventoryNotFound) {
-		t.Fatalf("expected ErrInventoryNotFound, got %v", err)
+	if reservation.ID != "" {
+		t.Fatal("failed creation must not return a successful reservation")
 	}
 }

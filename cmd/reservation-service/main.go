@@ -12,10 +12,10 @@ import (
 
 	reservationv1 "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/reservation/v1"
 	"github.com/Mrilki/ReserveLock/internal/platform/logger"
+	"github.com/Mrilki/ReserveLock/internal/platform/outbox"
 	"github.com/Mrilki/ReserveLock/internal/reservation/application"
 	reservationconfig "github.com/Mrilki/ReserveLock/internal/reservation/config"
 	reservationkafka "github.com/Mrilki/ReserveLock/internal/reservation/messaging/kafka"
-	reservationoutbox "github.com/Mrilki/ReserveLock/internal/reservation/outbox"
 	reservationpostgres "github.com/Mrilki/ReserveLock/internal/reservation/repository/postgres"
 	reservationredis "github.com/Mrilki/ReserveLock/internal/reservation/repository/redis"
 	reservationgrpc "github.com/Mrilki/ReserveLock/internal/reservation/transport/grpc"
@@ -146,7 +146,7 @@ func main() {
 
 	outboxRepository := reservationpostgres.NewOutboxRepository(postgresPool)
 	outboxPublisher := reservationkafka.NewPublisher(publisherClient)
-	outboxWorker := reservationoutbox.NewWorker(outboxRepository, outboxPublisher, logg)
+	outboxWorker := outbox.NewWorker(outboxRepository, outboxPublisher, logg)
 	grpcServer := grpc.NewServer()
 
 	healthServer := health.NewServer()

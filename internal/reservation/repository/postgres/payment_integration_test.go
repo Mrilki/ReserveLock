@@ -45,7 +45,8 @@ func TestPaymentSucceeded_Idempotency_Postgres(t *testing.T) {
 	snapshot, _, _ := readReservationOutbox(t, pool, reservation.ID, reservationcontract.ReservationConfirmedType)
 	assertReservationSnapshot(t, snapshot, reservation, domain.ReservationStatusConfirmed)
 
-	expired, err := reservationpostgres.NewStore(pool, time.Now).ExpireReservation(ctx, reservation.ID, reservation.ExpiresAt)
+	expired, err := newPostgresTestStoreAt(pool, reservation.ExpiresAt).
+		ExpireReservation(ctx, reservation.ID, reservation.ExpiresAt)
 	if err != nil || expired {
 		t.Fatalf("confirmed reservation must not expire: expired=%v err=%v", expired, err)
 	}
@@ -88,7 +89,7 @@ func TestPaymentSucceeded_OutboxFailureRollsBack_Postgres(t *testing.T) {
 
 func TestPaymentSucceeded_ExpiredReservationKeepsNewHold_Postgres(t *testing.T) {
 	ctx := context.Background()
-	pool, service, reservation := newPaymentTestReservation(t, time.Now().UTC())
+	pool, service, reservation := newPaymentTestReservation(t, time.Now().UTC().Add(-11*time.Minute))
 	store := reservationpostgres.NewStore(pool, time.Now)
 
 	expired, err := store.ExpireReservation(ctx, reservation.ID, reservation.ExpiresAt)
@@ -167,80 +168,144 @@ func TestPaymentFailed_PreservesHold_Postgres(t *testing.T) {
 	assertPaymentInboxCount(t, pool, messageID, 1)
 	assertReservationOutboxCount(t, pool, reservation.EventID, reservationcontract.ReservationConfirmedType, 0)
 
-	expired, err := reservationpostgres.NewStore(pool, time.Now).ExpireReservation(ctx, reservation.ID, reservation.ExpiresAt)
+	expired, err := newPostgresTestStoreAt(pool, reservation.ExpiresAt).
+		ExpireReservation(ctx, reservation.ID, reservation.ExpiresAt)
 	if err != nil || !expired {
 		t.Fatalf("failed payment must not prevent expiration: expired=%v err=%v", expired, err)
 	}
 }
 
 func TestPaymentSucceeded_ConcurrentExpiration_Postgres(t *testing.T) {
-	ctx := context.Background()
-	pool, service, reservation := newPaymentTestReservation(t, time.Now().UTC())
-
-	messageID := uuid.NewString()
-	cleanupInboxMessages(t, pool, messageID)
-
-	start := make(chan struct{})
-	results := make(chan error, 2)
-
-	go func() {
-		<-start
-		_, err := service.HandlePaymentSucceeded(ctx, paymentResultInput(reservation, messageID))
-		results <- err
-	}()
-
-	go func() {
-		<-start
-		_, err := reservationpostgres.NewStore(pool, time.Now).ExpireReservation(ctx, reservation.ID, reservation.ExpiresAt)
-		results <- err
-	}()
-
-	close(start)
-
-	for i := 0; i < 2; i++ {
-		if err := <-results; err != nil {
-			t.Fatalf("concurrent transition: %v", err)
-		}
+	tests := []struct {
+		name       string
+		offset     time.Duration
+		wantStatus domain.ReservationStatus
+	}{
+		{
+			name:       "before deadline",
+			offset:     -time.Microsecond,
+			wantStatus: domain.ReservationStatusConfirmed,
+		},
+		{
+			name:       "at deadline",
+			offset:     0,
+			wantStatus: domain.ReservationStatusExpired,
+		},
 	}
 
-	stored, err := service.GetReservation(ctx, reservation.ID)
-	if err != nil {
-		t.Fatalf("get final reservation: %v", err)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ctx := context.Background()
+			pool, _, reservation := newPaymentTestReservation(t, time.Now().UTC())
+
+			cutoff := reservation.ExpiresAt.Add(test.offset)
+			store := newPostgresTestStoreAt(pool, cutoff)
+			service := application.NewService(store, nil)
+
+			messageID := uuid.NewString()
+			cleanupInboxMessages(t, pool, messageID)
+
+			start := make(chan struct{})
+			results := make(chan error, 2)
+
+			go func() {
+				<-start
+
+				_, err := service.HandlePaymentSucceeded(
+					ctx,
+					paymentResultInput(reservation, messageID),
+				)
+				results <- err
+			}()
+
+			go func() {
+				<-start
+
+				_, err := store.ExpireReservation(
+					ctx,
+					reservation.ID,
+					cutoff,
+				)
+				results <- err
+			}()
+
+			close(start)
+
+			for i := 0; i < 2; i++ {
+				if err := <-results; err != nil {
+					t.Errorf("concurrent transition: %v", err)
+				}
+			}
+			if t.Failed() {
+				t.FailNow()
+			}
+
+			stored, err := service.GetReservation(ctx, reservation.ID)
+			if err != nil {
+				t.Fatalf("get reservation: %v", err)
+			}
+			if stored.Status != test.wantStatus {
+				t.Fatalf(
+					"expected reservation status %s, got %s",
+					test.wantStatus,
+					stored.Status,
+				)
+			}
+
+			var confirmedCount, expiredCount int
+
+			if test.wantStatus == domain.ReservationStatusConfirmed {
+				confirmedCount = 1
+
+				assertPaymentReservationState(
+					t,
+					pool,
+					reservation,
+					domain.ReservationStatusConfirmed,
+					domain.SeatInventoryStatusReserved,
+				)
+			} else {
+				expiredCount = 1
+
+				seats, err := service.GetAvailability(ctx, reservation.EventID)
+				if err != nil {
+					t.Fatalf("get availability: %v", err)
+				}
+				if len(seats) != len(reservation.SeatIDs) {
+					t.Fatalf("unexpected seat count: %d", len(seats))
+				}
+
+				for _, seat := range seats {
+					if seat.Status != domain.SeatInventoryStatusAvailable ||
+						seat.ReservationID != "" ||
+						!seat.HeldUntil.IsZero() {
+						t.Fatalf("seat was not released: %+v", seat)
+					}
+				}
+			}
+
+			assertReservationOutboxCount(
+				t,
+				pool,
+				reservation.EventID,
+				reservationcontract.ReservationConfirmedType,
+				confirmedCount,
+			)
+			assertReservationOutboxCount(
+				t,
+				pool,
+				reservation.EventID,
+				reservationcontract.ReservationExpiredType,
+				expiredCount,
+			)
+			assertPaymentInboxCount(t, pool, messageID, 1)
+		})
 	}
-
-	switch stored.Status {
-	case domain.ReservationStatusConfirmed:
-		assertPaymentReservationState(t, pool, reservation, domain.ReservationStatusConfirmed, domain.SeatInventoryStatusReserved)
-		assertReservationOutboxCount(t, pool, reservation.EventID, reservationcontract.ReservationConfirmedType, 1)
-		assertReservationOutboxCount(t, pool, reservation.EventID, reservationcontract.ReservationExpiredType, 0)
-
-	case domain.ReservationStatusExpired:
-		assertReservationOutboxCount(t, pool, reservation.EventID, reservationcontract.ReservationConfirmedType, 0)
-		assertReservationOutboxCount(t, pool, reservation.EventID, reservationcontract.ReservationExpiredType, 1)
-
-		var released int
-		err := pool.QueryRow(ctx, `
-			SELECT count(*)
-			FROM seat_inventory
-			WHERE event_id = $1
-			  AND seat_id = ANY($2::text[])
-			  AND status = 'AVAILABLE'
-			  AND reservation_id IS NULL
-			  AND held_until IS NULL
-		`, reservation.EventID, reservation.SeatIDs).Scan(&released)
-		if err != nil || released != len(reservation.SeatIDs) {
-			t.Fatalf("expired seats must be released: count=%d err=%v", released, err)
-		}
-
-	default:
-		t.Fatalf("unexpected final status: %s", stored.Status)
-	}
-
-	assertPaymentInboxCount(t, pool, messageID, 1)
 }
 
 func newPaymentTestReservation(t *testing.T, createdAt time.Time) (*pgxpool.Pool, *application.Service, domain.Reservation) {
 	t.Helper()
+	createdAt = createdAt.UTC().Truncate(time.Microsecond)
 
 	pool, service := newPostgresTestService(t)
 	eventID := uuid.NewString()

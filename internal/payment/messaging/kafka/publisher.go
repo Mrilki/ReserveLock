@@ -9,6 +9,7 @@ import (
 	paymentcontract "github.com/Mrilki/ReserveLock/internal/integration/payment"
 	"github.com/Mrilki/ReserveLock/internal/payment/domain"
 	paymentoutbox "github.com/Mrilki/ReserveLock/internal/payment/outbox"
+	"github.com/Mrilki/ReserveLock/internal/platform/outbox"
 	"github.com/twmb/franz-go/pkg/kgo"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -22,7 +23,7 @@ func NewPublisher(client *kgo.Client) *Publisher {
 	return &Publisher{client: client}
 }
 
-func (p *Publisher) Publish(ctx context.Context, message paymentoutbox.Message) error {
+func (p *Publisher) Publish(ctx context.Context, message outbox.Message) error {
 	record, err := recordFromMessage(message)
 	if err != nil {
 		return err
@@ -35,7 +36,7 @@ func (p *Publisher) Publish(ctx context.Context, message paymentoutbox.Message) 
 	return nil
 }
 
-func recordFromMessage(message paymentoutbox.Message) (*kgo.Record, error) {
+func recordFromMessage(message outbox.Message) (*kgo.Record, error) {
 	var snapshot paymentoutbox.PaymentSnapshot
 
 	if err := json.Unmarshal(message.Payload, &snapshot); err != nil {

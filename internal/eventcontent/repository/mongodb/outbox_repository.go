@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	eventoutbox "github.com/Mrilki/ReserveLock/internal/eventcontent/outbox"
+	"github.com/Mrilki/ReserveLock/internal/platform/outbox"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
@@ -21,7 +21,7 @@ func NewOutboxRepository(database *mongo.Database) *OutboxRepository {
 	}
 }
 
-func (r *OutboxRepository) ListPending(ctx context.Context, limit int) ([]eventoutbox.Message, error) {
+func (r *OutboxRepository) ListPending(ctx context.Context, limit int) ([]outbox.Message, error) {
 	cursor, err := r.collection.Find(
 		ctx,
 		bson.M{
@@ -47,9 +47,9 @@ func (r *OutboxRepository) ListPending(ctx context.Context, limit int) ([]evento
 		return nil, fmt.Errorf("decode pending outbox messages: %w", err)
 	}
 
-	messages := make([]eventoutbox.Message, 0, len(documents))
+	messages := make([]outbox.Message, 0, len(documents))
 	for _, document := range documents {
-		messages = append(messages, eventoutbox.Message{
+		messages = append(messages, outbox.Message{
 			ID:         document.ID,
 			EventType:  document.EventType,
 			Key:        document.Key,

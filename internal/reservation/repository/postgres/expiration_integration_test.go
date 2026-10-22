@@ -11,7 +11,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func TestExpireReservations_Postgres(t *testing.T) {
+func TestExpireReservation_ReleasesSeats_Postgres(t *testing.T) {
 	pool, service := newPostgresTestService(t)
 
 	eventID := uuid.NewString()
@@ -27,19 +27,25 @@ func TestExpireReservations_Postgres(t *testing.T) {
 		[]string{seatID},
 	)
 
-	reservation, err := service.CreateReservation(
-		context.Background(),
-		application.CreateReservationInput{
-			EventID: eventID,
-			UserID:  "user-1",
-			SeatIDs: []string{seatID},
-		},
-	)
-	if err != nil {
-		t.Fatalf("create reservation: %v", err)
+	createdAt := time.Now().UTC().
+		Add(-11 * time.Minute).
+		Truncate(time.Microsecond)
+
+	reservation := domain.Reservation{
+		ID:        uuid.NewString(),
+		EventID:   eventID,
+		UserID:    "user-1",
+		SeatIDs:   []string{seatID},
+		Status:    domain.ReservationStatusPending,
+		CreatedAt: createdAt,
+		ExpiresAt: createdAt.Add(10 * time.Minute),
 	}
 
 	store := reservationpostgres.NewStore(pool, time.Now)
+
+	if err := store.CreateReservation(context.Background(), reservation); err != nil {
+		t.Fatalf("create reservation: %v", err)
+	}
 
 	expired, err := store.ExpireReservation(context.Background(), reservation.ID, reservation.ExpiresAt)
 	if err != nil {

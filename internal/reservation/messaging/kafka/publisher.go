@@ -7,6 +7,7 @@ import (
 
 	reservationv1 "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/reservation/v1"
 	reservationcontract "github.com/Mrilki/ReserveLock/internal/integration/reservation"
+	"github.com/Mrilki/ReserveLock/internal/platform/outbox"
 	"github.com/Mrilki/ReserveLock/internal/reservation/domain"
 	reservationoutbox "github.com/Mrilki/ReserveLock/internal/reservation/outbox"
 	"github.com/twmb/franz-go/pkg/kgo"
@@ -22,7 +23,7 @@ func NewPublisher(client *kgo.Client) *Publisher {
 	return &Publisher{client: client}
 }
 
-func (p *Publisher) Publish(ctx context.Context, message reservationoutbox.Message) error {
+func (p *Publisher) Publish(ctx context.Context, message outbox.Message) error {
 	record, err := recordFromMessage(message)
 	if err != nil {
 		return err
@@ -35,7 +36,7 @@ func (p *Publisher) Publish(ctx context.Context, message reservationoutbox.Messa
 	return nil
 }
 
-func recordFromMessage(message reservationoutbox.Message) (*kgo.Record, error) {
+func recordFromMessage(message outbox.Message) (*kgo.Record, error) {
 	var snapshot reservationoutbox.ReservationSnapshot
 
 	if err := json.Unmarshal(message.Payload, &snapshot); err != nil {

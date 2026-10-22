@@ -18,14 +18,20 @@ const (
 	consumerRebalanceTimeout = time.Minute
 )
 
+type reservationService interface {
+	HandleEventPublished(ctx context.Context, input application.EventPublishedInput) (bool, error)
+	HandlePaymentSucceeded(ctx context.Context, input application.PaymentResultInput) (bool, error)
+	HandlePaymentFailed(ctx context.Context, input application.PaymentResultInput) (bool, error)
+}
+
 type Consumer struct {
 	client       *kgo.Client
-	service      *application.Service
+	service      reservationService
 	logger       *zap.Logger
 	handleRecord func(context.Context, *kgo.Record) (bool, error)
 }
 
-func newConsumer(client *kgo.Client, service *application.Service, logger *zap.Logger) *Consumer {
+func newConsumer(client *kgo.Client, service reservationService, logger *zap.Logger) *Consumer {
 	return &Consumer{
 		client:  client,
 		service: service,

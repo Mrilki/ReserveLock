@@ -108,3 +108,50 @@ func TestWorkerRetriesWithSameMessageID(t *testing.T) {
 		t.Fatal("expected one successful mark")
 	}
 }
+
+func TestWorkerProcessBatchPublishesAllMessages(t *testing.T) {
+	repository := &repositoryStub{
+		messages: []Message{
+			{ID: "message-1"},
+			{ID: "message-2"},
+		},
+	}
+	publisher := &publisherStub{}
+	worker := NewWorker(repository, publisher, zap.NewNop())
+
+	if err := worker.processBatch(context.Background()); err != nil {
+		t.Fatalf("process batch: %v", err)
+	}
+
+	if len(publisher.messages) != 2 || len(repository.marked) != 2 {
+		t.Fatalf(
+			"unexpected delivery counts: published=%d marked=%d",
+			len(publisher.messages),
+			len(repository.marked),
+		)
+	}
+
+	for i, wantID := range []string{"message-1", "message-2"} {
+		if publisher.messages[i].ID != wantID || repository.marked[i] != wantID {
+			t.Fatalf("unexpected delivery order at position %d", i)
+		}
+	}
+}
+
+func TestWorkerProcessBatchCanceled(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	repository := &repositoryStub{
+		messages: []Message{{ID: "message-1"}},
+	}
+	publisher := &publisherStub{}
+	worker := NewWorker(repository, publisher, zap.NewNop())
+
+	if err := worker.processBatch(ctx); !errors.Is(err, context.Canceled) {
+		t.Fatalf("expected cancellation, got %v", err)
+	}
+	if len(publisher.messages) != 0 || repository.markCalls != 0 {
+		t.Fatal("canceled batch must not publish or mark messages")
+	}
+}

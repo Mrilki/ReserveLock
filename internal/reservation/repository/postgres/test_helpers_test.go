@@ -123,3 +123,9 @@ func cleanupInboxMessages(t *testing.T, pool *pgxpool.Pool, messageIDs ...string
 		}
 	})
 }
+
+func newPostgresTestStoreAt(pool *pgxpool.Pool, now time.Time) *reservationpostgres.Store {
+	return reservationpostgres.NewStore(pool, func() time.Time {
+		return now
+	})
+}

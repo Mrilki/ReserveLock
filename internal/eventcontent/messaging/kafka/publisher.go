@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	eventoutbox "github.com/Mrilki/ReserveLock/internal/eventcontent/outbox"
 	eventcontentcontract "github.com/Mrilki/ReserveLock/internal/integration/eventcontent"
+	"github.com/Mrilki/ReserveLock/internal/platform/outbox"
 	"github.com/twmb/franz-go/pkg/kgo"
 )
 
@@ -19,7 +19,7 @@ func NewPublisher(client *kgo.Client) *Publisher {
 	}
 }
 
-func (p *Publisher) Publish(ctx context.Context, message eventoutbox.Message) error {
+func (p *Publisher) Publish(ctx context.Context, message outbox.Message) error {
 	topic, err := topicForEventType(message.EventType)
 	if err != nil {
 		return err

@@ -25,7 +25,7 @@ func NewEventPublishedClient(brokers []string) (*kgo.Client, error) {
 	)
 }
 
-func NewEventPublishedConsumer(client *kgo.Client, service *application.Service, logger *zap.Logger) *Consumer {
+func NewEventPublishedConsumer(client *kgo.Client, service reservationService, logger *zap.Logger) *Consumer {
 	consumer := newConsumer(client, service, logger)
 	consumer.handleRecord = consumer.processEventPublishedRecord
 

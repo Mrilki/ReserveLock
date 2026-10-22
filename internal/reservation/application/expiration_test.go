@@ -3,163 +3,109 @@ package application_test
 import (
 	"context"
 	"errors"
+	"slices"
 	"testing"
 	"time"
 
 	"github.com/Mrilki/ReserveLock/internal/reservation/application"
-	"github.com/Mrilki/ReserveLock/internal/reservation/domain"
 )
 
-func TestExpireReservations(t *testing.T) {
-	service := newTestService()
+func TestExpireReservations_PartialFailure(t *testing.T) {
+	cutoff := time.Date(2026, 1, 1, 12, 0, 0, 0, time.UTC)
+	firstFailure := errors.New("first failure")
+	secondFailure := errors.New("second failure")
+	ids := []string{"failed-1", "expired", "already-processed", "failed-2"}
 
-	initializeInventory(
-		t,
-		service,
-		"event-1",
-		[]string{"seat-1"},
-	)
+	var calls []string
 
-	reservation, err := service.CreateReservation(
-		context.Background(),
-		application.CreateReservationInput{
-			EventID: "event-1",
-			UserID:  "user-1",
-			SeatIDs: []string{"seat-1"},
+	store := &storeStub{
+		t: t,
+		listExpired: func(ctx context.Context, gotCutoff time.Time, limit int) ([]string, error) {
+			if !gotCutoff.Equal(cutoff) {
+				t.Fatalf("unexpected selection cutoff: %v", gotCutoff)
+			}
+			if limit != 100 {
+				t.Fatalf("unexpected batch limit: %d", limit)
+			}
+			return ids, nil
 		},
-	)
-	if err != nil {
-		t.Fatalf("create reservation: %v", err)
-	}
+		expire: func(ctx context.Context, id string, gotCutoff time.Time) (bool, error) {
+			if !gotCutoff.Equal(cutoff) {
+				t.Fatalf("unexpected expiration cutoff: %v", gotCutoff)
+			}
 
-	expiredCount, err := service.ExpireReservations(context.Background(), reservation.ExpiresAt)
-	if err != nil {
-		t.Fatalf("expire reservations: %v", err)
-	}
+			calls = append(calls, id)
 
-	if expiredCount != 1 {
-		t.Fatalf("expected 1 expired reservation, got %d", expiredCount)
-	}
-
-	stored, err := service.GetReservation(context.Background(), reservation.ID)
-	if err != nil {
-		t.Fatalf("get reservation: %v", err)
-	}
-
-	if stored.Status != domain.ReservationStatusExpired {
-		t.Fatalf("expected EXPIRED status, got %s", stored.Status)
-	}
-
-	_, err = service.CreateReservation(
-		context.Background(),
-		application.CreateReservationInput{
-			EventID: "event-1",
-			UserID:  "user-2",
-			SeatIDs: []string{"seat-1"},
+			switch id {
+			case "failed-1":
+				return false, firstFailure
+			case "expired":
+				return true, nil
+			case "already-processed":
+				return false, nil
+			case "failed-2":
+				return false, secondFailure
+			default:
+				t.Fatalf("unexpected reservation ID: %s", id)
+				return false, nil
+			}
 		},
-	)
-	if err != nil {
-		t.Fatalf("seat should be available after expiration: %v", err)
+	}
+	service := application.NewService(store, nil)
+
+	count, err := service.ExpireReservations(context.Background(), cutoff)
+	if count != 1 {
+		t.Fatalf("expected one expiration, got %d", count)
+	}
+	if !errors.Is(err, firstFailure) || !errors.Is(err, secondFailure) {
+		t.Fatalf("expected both failures, got %v", err)
+	}
+	if !slices.Equal(calls, ids) {
+		t.Fatalf("unexpected processing order: %v", calls)
 	}
 }
 
-func TestExpireReservations_DoesNotExpireActiveReservation(t *testing.T) {
-	service := newTestService()
+func TestExpireReservations_ListFailure(t *testing.T) {
+	failure := errors.New("list unavailable")
 
-	initializeInventory(
-		t,
-		service,
-		"event-1",
-		[]string{"seat-1"},
-	)
-
-	reservation, err := service.CreateReservation(
-		context.Background(),
-		application.CreateReservationInput{
-			EventID: "event-1",
-			UserID:  "user-1",
-			SeatIDs: []string{"seat-1"},
+	store := &storeStub{
+		t: t,
+		listExpired: func(ctx context.Context, cutoff time.Time, limit int) ([]string, error) {
+			return nil, failure
 		},
-	)
-	if err != nil {
-		t.Fatalf("create reservation: %v", err)
 	}
+	service := application.NewService(store, nil)
 
-	expiredCount, err := service.ExpireReservations(
-		context.Background(),
-		reservation.ExpiresAt.Add(-time.Second),
-	)
-	if err != nil {
-		t.Fatalf("expire reservations: %v", err)
-	}
-
-	if expiredCount != 0 {
-		t.Fatalf("expected 0 expired reservations, got %d", expiredCount)
-	}
-
-	stored, err := service.GetReservation(context.Background(), reservation.ID)
-	if err != nil {
-		t.Fatalf("get reservation: %v", err)
-	}
-
-	if stored.Status != domain.ReservationStatusPending {
-		t.Fatalf("expected PENDING status, got %s", stored.Status)
-	}
-
-	_, err = service.CreateReservation(
-		context.Background(),
-		application.CreateReservationInput{
-			EventID: "event-1",
-			UserID:  "user-2",
-			SeatIDs: []string{"seat-1"},
-		},
-	)
-
-	if !errors.Is(err, domain.ErrSeatUnavailable) {
-		t.Fatalf("expected ErrSeatUnavailable, got %v", err)
+	count, err := service.ExpireReservations(context.Background(), time.Now())
+	if count != 0 || !errors.Is(err, failure) {
+		t.Fatalf("unexpected result: count=%d err=%v", count, err)
 	}
 }
 
-func TestExpireReservations_IsIdempotent(t *testing.T) {
-	service := newTestService()
+func TestExpireReservations_StopsAfterCancellation(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-	initializeInventory(
-		t,
-		service,
-		"event-1",
-		[]string{"seat-1"},
-	)
+	calls := 0
 
-	reservation, err := service.CreateReservation(
-		context.Background(),
-		application.CreateReservationInput{
-			EventID: "event-1",
-			UserID:  "user-1",
-			SeatIDs: []string{"seat-1"},
+	store := &storeStub{
+		t: t,
+		listExpired: func(ctx context.Context, cutoff time.Time, limit int) ([]string, error) {
+			return []string{"first", "second"}, nil
 		},
-	)
-	if err != nil {
-		t.Fatalf("create reservation: %v", err)
+		expire: func(ctx context.Context, id string, cutoff time.Time) (bool, error) {
+			calls++
+			cancel()
+			return true, nil
+		},
 	}
+	service := application.NewService(store, nil)
 
-	firstCount, err := service.ExpireReservations(context.Background(), reservation.ExpiresAt)
-	if err != nil {
-		t.Fatalf("first expiration: %v", err)
+	count, err := service.ExpireReservations(ctx, time.Now())
+	if count != 1 || !errors.Is(err, context.Canceled) {
+		t.Fatalf("unexpected result: count=%d err=%v", count, err)
 	}
-
-	secondCount, err := service.ExpireReservations(
-		context.Background(),
-		reservation.ExpiresAt.Add(time.Minute),
-	)
-	if err != nil {
-		t.Fatalf("second expiration: %v", err)
-	}
-
-	if firstCount != 1 {
-		t.Fatalf("expected first expiration count 1, got %d", firstCount)
-	}
-
-	if secondCount != 0 {
-		t.Fatalf("expected second expiration count 0, got %d", secondCount)
+	if calls != 1 {
+		t.Fatalf("expected one expiration attempt, got %d", calls)
 	}
 }

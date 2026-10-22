@@ -8,6 +8,7 @@ import (
 	paymentv1 "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/payment/v1"
 	paymentcontract "github.com/Mrilki/ReserveLock/internal/integration/payment"
 	paymentoutbox "github.com/Mrilki/ReserveLock/internal/payment/outbox"
+	"github.com/Mrilki/ReserveLock/internal/platform/outbox"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -40,7 +41,7 @@ func TestRecordFromMessageEncodesPaymentEvents(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			message := paymentoutbox.Message{
+			message := outbox.Message{
 				ID:         "message-1",
 				EventType:  test.eventType,
 				Key:        snapshot.ReservationID,

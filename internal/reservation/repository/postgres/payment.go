@@ -28,15 +28,11 @@ func (s *Store) processPaymentResult(ctx context.Context, messageID, reservation
 		_ = tx.Rollback(ctx)
 	}()
 
-	result, err := tx.Exec(ctx, `
-		INSERT INTO inbox_messages (message_id)
-		VALUES ($1)
-		ON CONFLICT DO NOTHING
-	`, messageID)
+	inserted, err := insertInboxMessage(ctx, tx, messageID)
 	if err != nil {
-		return false, fmt.Errorf("insert payment inbox message: %w", err)
+		return false, err
 	}
-	if result.RowsAffected() == 0 {
+	if !inserted {
 		return false, nil
 	}
 
@@ -91,7 +87,7 @@ func (s *Store) processPaymentResult(ctx context.Context, messageID, reservation
 			return false, fmt.Errorf("reservation %s has no reservation seats", reservationID)
 		}
 
-		result, err = tx.Exec(ctx, `
+		result, err := tx.Exec(ctx, `
 			UPDATE seat_inventory AS inventory
 			SET
 				status = 'RESERVED',

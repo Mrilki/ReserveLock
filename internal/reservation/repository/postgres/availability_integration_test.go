@@ -47,6 +47,12 @@ func TestGetAvailability_Postgres(t *testing.T) {
 		t.Fatalf("expected 2 seats, got %d", len(seats))
 	}
 
+	for i := 1; i < len(seats); i++ {
+		if seats[i-1].SeatID > seats[i].SeatID {
+			t.Fatalf("inventory must be sorted by seat ID: %+v", seats)
+		}
+	}
+
 	inventory := make(map[string]domain.SeatInventory, len(seats))
 
 	for _, seat := range seats {

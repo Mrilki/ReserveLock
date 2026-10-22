@@ -33,7 +33,7 @@ func (w *Worker) Run(ctx context.Context) {
 
 	for {
 		if err := w.processBatch(ctx); err != nil && ctx.Err() == nil {
-			w.logger.Error("failed to process payment outbox batch", zap.Error(err))
+			w.logger.Error("failed to process outbox batch", zap.Error(err))
 		}
 
 		select {
@@ -45,6 +45,10 @@ func (w *Worker) Run(ctx context.Context) {
 }
 
 func (w *Worker) processBatch(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	messages, err := w.repository.ListPending(ctx, defaultBatchSize)
 	if err != nil {
 		return fmt.Errorf("list pending outbox messages: %w", err)
@@ -59,12 +63,20 @@ func (w *Worker) processBatch(ctx context.Context) error {
 			return fmt.Errorf("publish outbox message %q: %w", message.ID, err)
 		}
 
-		marked, err := w.repository.MarkPublished(ctx, message.ID, time.Now().UTC())
+		marked, err := w.repository.MarkPublished(
+			ctx,
+			message.ID,
+			time.Now().UTC(),
+		)
 		if err != nil {
 			return fmt.Errorf("mark outbox message %q published: %w", message.ID, err)
 		}
+
 		if !marked {
-			w.logger.Warn("outbox message was already marked published", zap.String("message_id", message.ID))
+			w.logger.Warn(
+				"outbox message was already marked published",
+				zap.String("message_id", message.ID),
+			)
 		}
 	}
 

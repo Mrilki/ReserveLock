@@ -8,6 +8,7 @@ import (
 
 	"github.com/Mrilki/ReserveLock/internal/payment/domain"
 	paymentoutbox "github.com/Mrilki/ReserveLock/internal/payment/outbox"
+	"github.com/Mrilki/ReserveLock/internal/platform/outbox"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -55,7 +56,7 @@ func NewOutboxRepository(pool *pgxpool.Pool) *OutboxRepository {
 	return &OutboxRepository{pool: pool}
 }
 
-func (r *OutboxRepository) ListPending(ctx context.Context, limit int) ([]paymentoutbox.Message, error) {
+func (r *OutboxRepository) ListPending(ctx context.Context, limit int) ([]outbox.Message, error) {
 	rows, err := r.pool.Query(ctx, `
 		SELECT message_id, event_type, key, payload, occurred_at
 		FROM outbox_messages
@@ -68,9 +69,9 @@ func (r *OutboxRepository) ListPending(ctx context.Context, limit int) ([]paymen
 	}
 	defer rows.Close()
 
-	messages := make([]paymentoutbox.Message, 0)
+	messages := make([]outbox.Message, 0)
 	for rows.Next() {
-		var message paymentoutbox.Message
+		var message outbox.Message
 		if err := rows.Scan(
 			&message.ID,
 			&message.EventType,

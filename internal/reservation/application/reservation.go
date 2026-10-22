@@ -81,9 +81,13 @@ func (s *Service) ExpireReservations(ctx context.Context, cutoff time.Time) (int
 	}
 
 	expiredCount := 0
-	expirationErrors := make([]error, 0)
+	var expirationErrors []error
 
 	for _, id := range ids {
+		if err := ctx.Err(); err != nil {
+			expirationErrors = append(expirationErrors, err)
+			break
+		}
 		expired, err := s.store.ExpireReservation(ctx, id, cutoff)
 		if err != nil {
 			expirationErrors = append(

@@ -7,6 +7,7 @@ import (
 
 	reservationv1 "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/reservation/v1"
 	reservationcontract "github.com/Mrilki/ReserveLock/internal/integration/reservation"
+	"github.com/Mrilki/ReserveLock/internal/platform/outbox"
 	reservationoutbox "github.com/Mrilki/ReserveLock/internal/reservation/outbox"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -43,7 +44,7 @@ func TestRecordFromMessageEncodesLifecycleEvents(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			message := reservationoutbox.Message{
+			message := outbox.Message{
 				ID:         "message-1",
 				EventType:  tt.eventType,
 				Key:        snapshot.ReservationID,
@@ -129,7 +130,7 @@ func TestRecordFromMessageRejectsStatusMismatch(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err = recordFromMessage(reservationoutbox.Message{
+	_, err = recordFromMessage(outbox.Message{
 		ID:         "message-1",
 		EventType:  reservationcontract.ReservationExpiredType,
 		Key:        "reservation-1",

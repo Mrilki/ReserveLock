@@ -2,13 +2,13 @@ package kafka
 
 import (
 	"context"
+	"errors"
 	"testing"
+	"time"
 
 	paymentv1 "github.com/Mrilki/ReserveLock/internal/gen/proto/reservelock/payment/v1"
 	paymentcontract "github.com/Mrilki/ReserveLock/internal/integration/payment"
 	"github.com/Mrilki/ReserveLock/internal/reservation/application"
-	"github.com/Mrilki/ReserveLock/internal/reservation/domain"
-	"github.com/Mrilki/ReserveLock/internal/reservation/repository/memory"
 	"github.com/twmb/franz-go/pkg/kgo"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
@@ -17,134 +17,148 @@ import (
 
 func TestPaymentConsumerProcessRecord(t *testing.T) {
 	tests := []struct {
-		name              string
-		eventType         string
-		paymentStatus     paymentv1.PaymentStatus
-		reservationStatus domain.ReservationStatus
-		seatStatus        domain.SeatInventoryStatus
+		name      string
+		eventType string
+		otherType string
+		status    paymentv1.PaymentStatus
 	}{
 		{
-			name:              "succeeded",
-			eventType:         paymentcontract.PaymentSucceededType,
-			paymentStatus:     paymentv1.PaymentStatus_PAYMENT_STATUS_SUCCEEDED,
-			reservationStatus: domain.ReservationStatusConfirmed,
-			seatStatus:        domain.SeatInventoryStatusReserved,
+			name:      "succeeded",
+			eventType: paymentcontract.PaymentSucceededType,
+			otherType: paymentcontract.PaymentFailedType,
+			status:    paymentv1.PaymentStatus_PAYMENT_STATUS_SUCCEEDED,
 		},
 		{
-			name:              "failed",
-			eventType:         paymentcontract.PaymentFailedType,
-			paymentStatus:     paymentv1.PaymentStatus_PAYMENT_STATUS_FAILED,
-			reservationStatus: domain.ReservationStatusPending,
-			seatStatus:        domain.SeatInventoryStatusHeld,
+			name:      "failed",
+			eventType: paymentcontract.PaymentFailedType,
+			otherType: paymentcontract.PaymentSucceededType,
+			status:    paymentv1.PaymentStatus_PAYMENT_STATUS_FAILED,
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			ctx := context.Background()
-			store := memory.NewStore()
-			service := application.NewService(store, nil)
-
-			_, err := service.HandleEventPublished(ctx, application.EventPublishedInput{
-				MessageID: "inventory-message",
-				EventID:   "event-1",
-				SeatIDs:   []string{"seat-1"},
-			})
-			if err != nil {
-				t.Fatal(err)
+			want := application.PaymentResultInput{
+				MessageID:     "payment-message",
+				ReservationID: "reservation-1",
+				UserID:        "user-1",
 			}
 
-			reservation, err := service.CreateReservation(ctx, application.CreateReservationInput{
-				EventID: "event-1",
-				UserID:  "user-1",
-				SeatIDs: []string{"seat-1"},
-			})
-			if err != nil {
-				t.Fatal(err)
+			calls := 0
+			nextProcessed := true
+			var nextErr error
+
+			handle := func(
+				kind string,
+				input application.PaymentResultInput,
+			) (bool, error) {
+				calls++
+
+				if kind != test.name {
+					t.Fatalf("expected %s handler, got %s", test.name, kind)
+				}
+				if input != want {
+					t.Fatalf("unexpected application input: %+v", input)
+				}
+				return nextProcessed, nextErr
 			}
 
+			service := &serviceStub{
+				t: t,
+				paymentSucceeded: func(
+					ctx context.Context,
+					input application.PaymentResultInput,
+				) (bool, error) {
+					return handle("succeeded", input)
+				},
+				paymentFailed: func(
+					ctx context.Context,
+					input application.PaymentResultInput,
+				) (bool, error) {
+					return handle("failed", input)
+				},
+			}
+
+			createdAt := time.Date(2026, 1, 1, 12, 0, 0, 0, time.UTC)
 			payment := &paymentv1.Payment{
 				Id:            "payment-1",
-				ReservationId: reservation.ID,
-				UserId:        reservation.UserID,
-				Status:        test.paymentStatus,
-				CreatedAt:     timestamppb.New(reservation.CreatedAt),
-				ExpiresAt:     timestamppb.New(reservation.ExpiresAt),
+				ReservationId: want.ReservationID,
+				UserId:        want.UserID,
+				Status:        test.status,
+				CreatedAt:     timestamppb.New(createdAt),
+				ExpiresAt:     timestamppb.New(createdAt.Add(10 * time.Minute)),
 			}
 
 			var message proto.Message
-			switch test.eventType {
-			case paymentcontract.PaymentSucceededType:
+
+			if test.eventType == paymentcontract.PaymentSucceededType {
 				message = &paymentv1.PaymentSucceeded{
-					MessageId:  "payment-message",
+					MessageId:  want.MessageID,
 					Payment:    payment,
-					OccurredAt: timestamppb.Now(),
+					OccurredAt: timestamppb.New(createdAt.Add(time.Second)),
 				}
-			case paymentcontract.PaymentFailedType:
+			} else {
 				message = &paymentv1.PaymentFailed{
-					MessageId:  "payment-message",
+					MessageId:  want.MessageID,
 					Payment:    payment,
-					OccurredAt: timestamppb.Now(),
+					OccurredAt: timestamppb.New(createdAt.Add(time.Second)),
 				}
 			}
 
 			payload, err := proto.Marshal(message)
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("marshal payment: %v", err)
 			}
 
 			record := &kgo.Record{
 				Topic: paymentcontract.PaymentLifecycleTopic,
-				Key:   []byte(reservation.ID),
+				Key:   []byte(want.ReservationID),
 				Value: payload,
 				Headers: []kgo.RecordHeader{
-					{Key: "message_id", Value: []byte("payment-message")},
+					{Key: "message_id", Value: []byte(want.MessageID)},
 					{Key: "event-type", Value: []byte(test.eventType)},
 				},
 			}
-
 			consumer := NewPaymentConsumer(nil, service, zap.NewNop())
 
 			processed, err := consumer.handleRecord(ctx, record)
-			if err != nil || !processed {
-				t.Fatalf("first processing: processed=%v err=%v", processed, err)
+			if err != nil || !processed || calls != 1 {
+				t.Fatalf("unexpected result: processed=%v calls=%d err=%v", processed, calls, err)
 			}
+
+			nextProcessed = false
 
 			processed, err = consumer.handleRecord(ctx, record)
-			if err != nil || processed {
-				t.Fatalf("duplicate processing: processed=%v err=%v", processed, err)
-			}
-
-			stored, err := service.GetReservation(ctx, reservation.ID)
-			if err != nil || stored.Status != test.reservationStatus {
-				t.Fatalf("unexpected reservation: reservation=%+v err=%v", stored, err)
-			}
-
-			seats, err := store.ListSeatInventory(ctx, reservation.EventID)
-			if err != nil || len(seats) != 1 {
-				t.Fatalf("unexpected inventory: seats=%+v err=%v", seats, err)
-			}
-			if seats[0].Status != test.seatStatus {
-				t.Fatalf("expected seat status %s, got %s", test.seatStatus, seats[0].Status)
-			}
-			if seats[0].HeldUntil.IsZero() != (test.seatStatus == domain.SeatInventoryStatusReserved) {
-				t.Fatalf("unexpected heldUntil: %v", seats[0].HeldUntil)
+			if err != nil || processed || calls != 2 {
+				t.Fatalf("unexpected ignored result: processed=%v calls=%d err=%v", processed, calls, err)
 			}
 
 			record.Key = []byte("another-reservation")
+
 			if _, err := consumer.handleRecord(ctx, record); err == nil {
 				t.Fatal("mismatched record key must be rejected")
 			}
-
-			record.Key = []byte(reservation.ID)
-			if test.eventType == paymentcontract.PaymentSucceededType {
-				record.Headers[1].Value = []byte(paymentcontract.PaymentFailedType)
-			} else {
-				record.Headers[1].Value = []byte(paymentcontract.PaymentSucceededType)
+			if calls != 2 {
+				t.Fatal("invalid identity must not reach application")
 			}
+
+			record.Key = []byte(want.ReservationID)
+			record.Headers[1].Value = []byte(test.otherType)
 
 			if _, err := consumer.handleRecord(ctx, record); err == nil {
 				t.Fatal("event type and payment status mismatch must be rejected")
+			}
+			if calls != 2 {
+				t.Fatal("invalid status must not reach application")
+			}
+
+			record.Headers[1].Value = []byte(test.eventType)
+			nextErr = errors.New("application unavailable")
+
+			processed, err = consumer.handleRecord(ctx, record)
+			if processed || !errors.Is(err, nextErr) {
+				t.Fatalf("expected application failure, got processed=%v err=%v", processed, err)
 			}
 		})
 	}
