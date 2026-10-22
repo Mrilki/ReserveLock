@@ -78,15 +78,12 @@ func toSeatMapDocument(seatMap domain.SeatMap) seatMapDocument {
 	seats := make([]seatDocument, 0, len(seatMap.Seats))
 
 	for _, seat := range seatMap.Seats {
-		seats = append(
-			seats,
-			seatDocument{
-				ID:      seat.ID,
-				Section: seat.Section,
-				Row:     seat.Row,
-				Number:  seat.Number,
-			},
-		)
+		seats = append(seats, seatDocument{
+			ID:      seat.ID,
+			Section: seat.Section,
+			Row:     seat.Row,
+			Number:  seat.Number,
+		})
 	}
 
 	return seatMapDocument{
@@ -102,15 +99,12 @@ func (d seatMapDocument) toDomain() domain.SeatMap {
 	seats := make([]domain.Seat, 0, len(d.Seats))
 
 	for _, seat := range d.Seats {
-		seats = append(
-			seats,
-			domain.Seat{
-				ID:      seat.ID,
-				Section: seat.Section,
-				Row:     seat.Row,
-				Number:  seat.Number,
-			},
-		)
+		seats = append(seats, domain.Seat{
+			ID:      seat.ID,
+			Section: seat.Section,
+			Row:     seat.Row,
+			Number:  seat.Number,
+		})
 	}
 
 	return domain.SeatMap{

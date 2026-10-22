@@ -9,8 +9,9 @@ import (
 )
 
 const (
-	defaultBatchSize = 100
-	defaultInterval  = time.Second
+	defaultBatchSize    = 100
+	defaultInterval     = time.Second
+	defaultBatchTimeout = 30 * time.Second
 )
 
 type Worker struct {
@@ -32,7 +33,11 @@ func (w *Worker) Run(ctx context.Context) {
 	defer ticker.Stop()
 
 	for {
-		if err := w.processBatch(ctx); err != nil && ctx.Err() == nil {
+		batchCtx, cancel := context.WithTimeout(ctx, defaultBatchTimeout)
+		err := w.processBatch(batchCtx)
+		cancel()
+
+		if err != nil && ctx.Err() == nil {
 			w.logger.Error("failed to process outbox batch", zap.Error(err))
 		}
 
